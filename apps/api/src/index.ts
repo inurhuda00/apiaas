@@ -5,6 +5,10 @@ import type { Env } from '../types'
 
 const app = new Hono<{ Bindings: Env }>()
 
+app.get('/up', (c) => {
+  return c.json({ status: 'ok' })
+})
+
 app.get('/', async (c) => {
   const db = database(c.env.HYPERDRIVE.connectionString)
 
