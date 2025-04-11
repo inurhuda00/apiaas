@@ -1,0 +1,8 @@
+{
+  "name": "@hanssn/db",
+  "version": "0.0.1",
+  "exports": {
+    ".": "./index.ts",
+    "./schema": "./schema.ts"
+  }
+}
