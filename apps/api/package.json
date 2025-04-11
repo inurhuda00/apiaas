@@ -10,10 +10,14 @@
     "db:seed": "tsx ./src/seed.ts"
   },
   "dependencies": {
-    "@hanssn/db": "workspace:*",
+    "@apiaas/db": "workspace:*",
     "@hono-rate-limiter/cloudflare": "^0.2.2",
+    "@hono/zod-validator": "^0.4.3",
     "drizzle-kit": "^0.30.6",
-    "hono": "^4.7.6"
+    "hono": "^4.7.6",
+    "hono-rate-limiter": "^0.4.2",
+    "resend": "^4.2.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250410.0",

@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "hanssn-api",
+  "name": "apiaas",
   "main": "src/index.ts",
   "compatibility_date": "2025-04-10",
   "compatibility_flags": [
