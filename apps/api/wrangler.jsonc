@@ -41,7 +41,7 @@
 	"migrations": [
 		{
 			"tag": "v1",
-			"new_sqlite_classes": ["RateLimiter"]
+			"new_sqlite_classes": ["DurableObjectRateLimiter"]
 		}
 	],
 	"unsafe": {

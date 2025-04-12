@@ -41,7 +41,12 @@ app.use("/v1/*", (c, next) => {
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	})(c as any, next);
 });
+
 app.route("waitlist", waitlistRoute);
+
+app.get("/up", (c) => {
+	return c.json({ status: "ok" });
+});
 
 app.onError((err, c) => {
 	console.error(err);
