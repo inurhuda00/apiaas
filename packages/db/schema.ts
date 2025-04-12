@@ -127,7 +127,7 @@ export const waitlist = pgTable("waitlist", {
 	createdAt: timestamp("created_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),
-	});
+});
 
 export const productsRelations = relations(products, ({ one, many }) => ({
 	category: one(categories, {

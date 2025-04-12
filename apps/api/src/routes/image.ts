@@ -6,22 +6,12 @@ import { z } from "zod";
 
 const imageRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Middleware autentikasi hanya untuk admin
 imageRoute.use("/*", AuthRoleMiddleware(["admin"]));
 
-// Schema untuk form upload
 const uploadSchema = z.object({
 	file: z.instanceof(File, { message: "File is required" }),
-	title: z.string().min(1, "Title is required").max(100, "Title is too long"),
-	description: z.string().optional(),
 });
 
-// Schema untuk delete
-const deleteSchema = z.object({
-	filename: z.string().min(1, { message: "Filename is required" }),
-});
-
-// Generate unique filename
 const generateUniqueFilename = (originalName: string) => {
 	const timestamp = Date.now();
 	const randomString = Math.random().toString(36).substring(2, 10);
@@ -29,7 +19,6 @@ const generateUniqueFilename = (originalName: string) => {
 	return `${timestamp}-${randomString}.${ext}`;
 };
 
-// Validate mime type
 const validateMimeType = (file: File) => {
 	const allowedMimeTypes = [
 		"image/jpeg",
@@ -46,7 +35,6 @@ const validateMimeType = (file: File) => {
 	}
 };
 
-// Route untuk upload image
 imageRoute.post(
 	"/upload",
 	zValidator("form", uploadSchema, (result, c) => {
@@ -62,13 +50,9 @@ imageRoute.post(
 	}),
 	async (c) => {
 		try {
-			// Get form data
 			const data = await c.req.valid("form");
 			const file = data.file;
-			const title = data.title;
-			const description = data.description || "";
 
-			// Validate mime type
 			try {
 				validateMimeType(file);
 			} catch (err) {
@@ -81,36 +65,28 @@ imageRoute.post(
 				);
 			}
 
-			// Generate unique filename
 			const uniqueFilename = generateUniqueFilename(file.name);
 
-			// Get user from context
 			const user = c.get("user");
 
-			// Upload to R2
 			await c.env.BUCKET.put(uniqueFilename, file, {
 				httpMetadata: {
 					contentType: file.type,
 				},
 				customMetadata: {
 					userId: user.id.toString(),
-					title,
-					description,
 					originalName: file.name,
 					uploadedAt: new Date().toISOString(),
 				},
 			});
 
-			// Generate public URL
-			const publicUrl = `https://cdn.mondive.xyz/${uniqueFilename}`;
+			const publicUrl = `https://assets.mondive.xyz/${uniqueFilename}`;
 
 			return c.json({
 				success: true,
 				data: {
 					url: publicUrl,
 					filename: uniqueFilename,
-					title,
-					description,
 					size: file.size,
 					type: file.type,
 				},
@@ -129,17 +105,13 @@ imageRoute.post(
 	},
 );
 
-// Route untuk mendapatkan daftar image
 imageRoute.get("/", async (c) => {
 	const user = c.get("user");
 
-	// List objects from R2 bucket
 	const objects = await c.env.BUCKET.list();
 
-	// Filter dan format objek untuk response
 	const images = objects.objects.map((obj) => {
 		return {
-			url: `https://cdn.mondive.xyz/${obj.key}`,
 			filename: obj.key,
 			size: obj.size,
 			uploadedAt: obj.uploaded,
@@ -153,7 +125,6 @@ imageRoute.get("/", async (c) => {
 	});
 });
 
-// Route untuk mendapatkan detail image
 imageRoute.get("/:filename", async (c) => {
 	try {
 		const filename = c.req.param("filename");
@@ -168,7 +139,6 @@ imageRoute.get("/:filename", async (c) => {
 			);
 		}
 
-		// Get object and its metadata
 		const object = await c.env.BUCKET.head(filename);
 
 		if (!object) {
@@ -181,8 +151,7 @@ imageRoute.get("/:filename", async (c) => {
 			);
 		}
 
-		// Generate public URL
-		const publicUrl = `https://cdn.mondive.xyz/${filename}`;
+		const publicUrl = `https://assets.mondive.xyz/${filename}`;
 
 		return c.json({
 			success: true,
@@ -208,7 +177,6 @@ imageRoute.get("/:filename", async (c) => {
 	}
 });
 
-// Route untuk menghapus image
 imageRoute.delete("/:filename", async (c) => {
 	try {
 		const filename = c.req.param("filename");
@@ -223,7 +191,6 @@ imageRoute.delete("/:filename", async (c) => {
 			);
 		}
 
-		// Check if file exists
 		const object = await c.env.BUCKET.head(filename);
 
 		if (!object) {
@@ -236,7 +203,6 @@ imageRoute.delete("/:filename", async (c) => {
 			);
 		}
 
-		// Delete from R2
 		await c.env.BUCKET.delete(filename);
 
 		return c.json({

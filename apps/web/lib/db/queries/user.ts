@@ -4,9 +4,8 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { db } from "..";
 import { membership, users } from "@apiaas/db/schema";
-import bcrypt from "bcryptjs";
 import { activateLicenseKey } from "@/lib/payments/polar";
-import { verifyToken } from "@apiaas/auth";
+import { hashPassword, verifyToken } from "@apiaas/auth";
 import { env } from "@/env";
 
 export async function getUser() {
@@ -75,7 +74,7 @@ export async function createUser({
 	licenseKey: string;
 }) {
 	return await db.transaction(async (tx) => {
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await hashPassword(password);
 
 		const [userData] = await tx
 			.insert(users)

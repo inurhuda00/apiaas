@@ -89,15 +89,19 @@ export async function middleware(request: NextRequest) {
 			const parsed = await verifyToken(sessionCookie.value, env.AUTH_SECRET);
 			const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-			if (!parsed) return NextResponse.redirect(new URL("/sign-in", request.url));
+			if (!parsed)
+				return NextResponse.redirect(new URL("/sign-in", request.url));
 
 			const response = NextResponse.next();
 			response.cookies.set({
 				name: "session",
-				value: await signToken({
-					...parsed,
-					expires: expiresInOneDay.toISOString(),
-				}, env.AUTH_SECRET),
+				value: await signToken(
+					{
+						...parsed,
+						expires: expiresInOneDay.toISOString(),
+					},
+					env.AUTH_SECRET,
+				),
 				httpOnly: true,
 				secure: true,
 				sameSite: "lax",

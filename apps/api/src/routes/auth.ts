@@ -15,6 +15,12 @@ const loginSchema = z.object({
 	password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+authRoute.get("/", (c) => {
+	return c.json({
+		success: "true"
+	})
+})
+
 authRoute.post(
 	"/",
 	zValidator("json", loginSchema, (result, c) => {

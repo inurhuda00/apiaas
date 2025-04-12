@@ -15,7 +15,7 @@ const COOKIE_NAME = "session";
 const AUTH_SECRET = env.AUTH_SECRET;
 
 export type { SessionData };
-export { hashPassword, comparePasswords }
+export { hashPassword, comparePasswords };
 
 export async function getSession() {
 	const session = (await cookies()).get(COOKIE_NAME)?.value;

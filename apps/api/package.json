@@ -3,7 +3,6 @@
 	"scripts": {
 		"deploy": "wrangler deploy --minify",
 		"dev": "wrangler dev",
-		"format": "biome format --write .",
 		"generate-env": "sed 's/ = \"/=/' .dev.vars | sed 's/\"$//' > .env"
 	},
 	"dependencies": {
@@ -18,7 +17,6 @@
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
 		"@cloudflare/workers-types": "^4.20250410.0",
 		"@types/node": "^22.14.0",
 		"typescript": "5.8.3",

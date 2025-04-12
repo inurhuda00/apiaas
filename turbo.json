@@ -1,16 +1,16 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "ui": "stream",
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*", ".dev.vars"],
-      "outputs": [".next/**", "dist/**"],
-      "cache": true
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
-  }
+	"$schema": "https://turbo.build/schema.json",
+	"ui": "stream",
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*", ".dev.vars"],
+			"outputs": [".next/**", "dist/**"],
+			"cache": true
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		}
+	}
 }
