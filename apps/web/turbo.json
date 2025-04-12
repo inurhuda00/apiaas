@@ -2,6 +2,7 @@
 	"extends": ["//"],
 	"tasks": {
 		"build": {
+			"dependsOn": ["^build"],
 			"env": [
 				"APP_URL",
 				"DATABASE_URL",
@@ -10,7 +11,8 @@
 				"POLAR_WORKSPACE_ID",
 				"PRODUCT_ID",
 				"AUTH_SECRET"
-			]
+			],
+			"outputs": [".next/**", "!.next/cache/**"]
 		}
 	}
 }
