@@ -1,29 +1,31 @@
 {
-  "name": "api",
-  "scripts": {
-    "dev": "wrangler dev",
-    "build": "tsc --noEmit",
-    "deploy": "wrangler deploy --minify",
-    "generate-env": "sed 's/ = \"/=/' .dev.vars | sed 's/\"$//' > .env",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx ./src/seed.ts"
-  },
-  "dependencies": {
-    "@apiaas/db": "workspace:*",
-    "@hono-rate-limiter/cloudflare": "^0.2.2",
-    "@hono/zod-validator": "^0.4.3",
-    "drizzle-kit": "^0.30.6",
-    "hono": "^4.7.6",
-    "hono-rate-limiter": "^0.4.2",
-    "resend": "^4.2.0",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250410.0",
-    "@types/node": "^22.14.0",
-    "tsx": "^4.19.3",
-    "typescript": "5.8.3",
-    "wrangler": "^4.10.0"
-  }
+	"name": "api",
+	"scripts": {
+		"build": "tsc --noEmit",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:seed": "tsx ./src/seed.ts",
+		"deploy": "wrangler deploy --minify",
+		"dev": "wrangler dev",
+		"format": "biome format --write .",
+		"generate-env": "sed 's/ = \"/=/' .dev.vars | sed 's/\"$//' > .env"
+	},
+	"dependencies": {
+		"@apiaas/db": "workspace:*",
+		"@hono-rate-limiter/cloudflare": "^0.2.2",
+		"@hono/zod-validator": "^0.4.3",
+		"drizzle-kit": "^0.30.6",
+		"hono": "^4.7.6",
+		"hono-rate-limiter": "^0.4.2",
+		"resend": "^4.2.0",
+		"zod": "^3.24.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@cloudflare/workers-types": "^4.20250410.0",
+		"@types/node": "^22.14.0",
+		"tsx": "^4.19.3",
+		"typescript": "5.8.3",
+		"wrangler": "^4.10.0"
+	}
 }

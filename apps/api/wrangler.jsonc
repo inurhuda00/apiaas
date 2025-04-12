@@ -1,59 +1,60 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "apiaas",
-  "main": "src/index.ts",
-  "compatibility_date": "2025-04-10",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-  "hyperdrive": [
-    {
-      "binding": "HYPERDRIVE",
-      "id": "97162318f7f0432eab5ce16d342e690a",
-      "localConnectionString": "postgresql://postgres:postgres@localhost:5432/apiaas"
-    }
-  ],
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "RATE_LIMITER",
-        "class_name": "DurableObjectRateLimiter"
-      }
-    ]
-  },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_sqlite_classes": [
-        "RateLimiter"
-      ]
-    }
-  ]
-  
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
-  // "ai": {
-  //   "binding": "AI"
-  // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "apiaas",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-04-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": "./public",
+		"binding": "PUBLIC"
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"ai": {
+		"binding": "AI"
+	},
+	"r2_buckets": [
+		{
+			"bucket_name": "mondive",
+			"binding": "BUCKET"
+		}
+	],
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "97162318f7f0432eab5ce16d342e690a",
+			"localConnectionString": "postgresql://postgres:postgres@localhost:5432/apiaas"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "RATE_LIMITER",
+				"class_name": "DurableObjectRateLimiter"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": ["RateLimiter"]
+		}
+	],
+	"unsafe": {
+		"bindings": [
+			{
+				"name": "EMAIL_LIMITER",
+				"type": "ratelimit",
+				"namespace_id": "1001",
+				"simple": {
+					"limit": 1,
+					"period": 60
+				}
+			}
+		]
+	}
 }

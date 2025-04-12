@@ -16,3 +16,10 @@ export const users = pgTable("users", {
 	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 	deletedAt: timestamp("deleted_at"),
 });
+
+export const waitlist = pgTable("waitlist", {
+email: varchar("email", { length: 512 }).primaryKey(),
+createdAt: timestamp("created_at", { withTimezone: true })
+	.notNull()
+	.defaultNow(),
+});

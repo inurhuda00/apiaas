@@ -1,12 +1,16 @@
 import type { DurableObjectRateLimiter } from "@hono-rate-limiter/cloudflare";
 
 export type Env = {
-  DATABASE_URL: string;
-  HYPERDRIVE: Hyperdrive;
-  EMAIL_LIMITER: {
-    limit: (params: { key: string }) => Promise<{ success: boolean }>;
-  };
-  ENCRYPTED_TOKENS: KVNamespace;
-  RATE_LIMITER: DurableObjectNamespace<DurableObjectRateLimiter>;
-  AI: Ai
+	DATABASE_URL: string;
+	TURNSTILE_SITE_KEY: string;
+	TURNSTILE_SECRET_KEY: string;
+	RESEND_API_KEY: string;
+
+	HYPERDRIVE: Hyperdrive;
+	AI: Ai;
+	EMAIL_LIMITER: {
+		limit: (params: { key: string }) => Promise<{ success: boolean }>;
+	};
+	BUCKET: R2Bucket;
+	RATE_LIMITER: DurableObjectNamespace<DurableObjectRateLimiter>;
 };
