@@ -87,7 +87,7 @@ async function getPostgresURL(): Promise<string> {
 		await setupLocalPostgres();
 		return "postgres://postgres:postgres@localhost:54322/postgres";
 	}
-	
+
 	console.log(
 		"You can find Postgres databases at: https://vercel.com/marketplace?category=databases",
 	);

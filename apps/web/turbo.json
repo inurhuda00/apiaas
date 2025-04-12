@@ -1,0 +1,16 @@
+{
+	"extends": ["//"],
+	"pipeline": {
+		"build": {
+			"env": [
+				"APP_URL",
+				"DATABASE_URL",
+				"POLAR_ACCESS_TOKEN",
+				"POLAR_WEBHOOK_SECRET",
+				"POLAR_WORKSPACE_ID",
+				"PRODUCT_ID",
+				"AUTH_SECRET"
+			]
+		}
+	}
+}
