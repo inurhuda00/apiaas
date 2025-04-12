@@ -12,6 +12,10 @@ const uploadSchema = z.object({
 	file: z.instanceof(File, { message: "File is required" }),
 });
 
+const deleteSchema = z.object({
+	filename: z.string().min(1, { message: "Filename is required" }),
+});
+
 const generateUniqueFilename = (originalName: string) => {
 	const timestamp = Date.now();
 	const randomString = Math.random().toString(36).substring(2, 10);

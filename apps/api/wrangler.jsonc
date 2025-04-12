@@ -20,7 +20,8 @@
 	"r2_buckets": [
 		{
 			"bucket_name": "mondive",
-			"binding": "BUCKET"
+			"binding": "BUCKET", 
+			"preview_bucket_name": "preview-mondive"
 		}
 	],
 	"hyperdrive": [

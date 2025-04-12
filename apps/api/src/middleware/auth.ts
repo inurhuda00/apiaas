@@ -2,15 +2,23 @@ import { verifyToken } from "@apiaas/auth";
 import type { Context, Next } from "hono";
 import type { Env, Variables } from "@/types";
 
-// Middleware autentikasi umum tanpa pemeriksaan role
+const extractBearerToken = (c: Context): string | null => {
+	const authHeader = c.req.header("Authorization");
+	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		return null;
+	}
+	return authHeader.replace("Bearer ", "");
+};
+
 export function AuthMiddleware() {
 	return async (
 		c: Context<{ Bindings: Env; Variables: Variables }>,
 		next: Next,
 	) => {
-		const authHeader = c.req.header("Authorization");
-
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		// Extract token
+		const token = extractBearerToken(c);
+		
+		if (!token) {
 			return c.json(
 				{
 					success: false,
@@ -21,7 +29,6 @@ export function AuthMiddleware() {
 		}
 
 		try {
-			const token = authHeader.replace("Bearer ", "");
 			const session = await verifyToken(token, c.env.AUTH_SECRET);
 
 			// Check if session is null (invalid token)
@@ -50,15 +57,14 @@ export function AuthMiddleware() {
 	};
 }
 
-// Middleware dengan pemeriksaan role
 export function AuthRoleMiddleware(allowedRoles: string[]) {
 	return async (
 		c: Context<{ Bindings: Env; Variables: Variables }>,
 		next: Next,
 	) => {
-		const authHeader = c.req.header("Authorization");
-
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		const token = extractBearerToken(c);
+		
+		if (!token) {
 			return c.json(
 				{
 					success: false,
@@ -69,11 +75,9 @@ export function AuthRoleMiddleware(allowedRoles: string[]) {
 		}
 
 		try {
-			const token = authHeader.replace("Bearer ", "");
 			const session = await verifyToken(token, c.env.AUTH_SECRET);
 
-			// Check if session is null (invalid token)
-			if (!session) {
+      if (!session) {
 				return c.json(
 					{
 						success: false,
@@ -83,7 +87,6 @@ export function AuthRoleMiddleware(allowedRoles: string[]) {
 				);
 			}
 
-			// Check if user has one of the allowed roles
 			if (!allowedRoles.includes(session.user.role)) {
 				return c.json(
 					{
@@ -94,7 +97,6 @@ export function AuthRoleMiddleware(allowedRoles: string[]) {
 				);
 			}
 
-			// Add user data to context for use in route handlers
 			c.set("user", session.user);
 			await next();
 		} catch (error) {
