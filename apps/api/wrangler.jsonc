@@ -10,9 +10,26 @@
     {
       "binding": "HYPERDRIVE",
       "id": "97162318f7f0432eab5ce16d342e690a",
-      "localConnectionString": "postgresql://postgres:postgres@localhost:5433/apiaas"
+      "localConnectionString": "postgresql://postgres:postgres@localhost:5432/apiaas"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "RATE_LIMITER",
+        "class_name": "DurableObjectRateLimiter"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "RateLimiter"
+      ]
     }
   ]
+  
   // "kv_namespaces": [
   //   {
   //     "binding": "MY_KV_NAMESPACE",

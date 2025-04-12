@@ -1,15 +1,46 @@
-import { database } from '@hanssn/db'
-import { users } from '@hanssn/db/schema'
-import { Hono } from 'hono'
-import type { Env } from '../types'
+import { Hono } from "hono";
+import { logger } from "hono/logger";
+import { timing } from "hono/timing";
+import { cors } from "hono/cors";
+import { rateLimiter } from "hono-rate-limiter";
+import type { Env } from "../types";
+import { users } from "@apiaas/db/schema";
+import { database } from "@apiaas/db";
+import { DurableObjectRateLimiter, DurableObjectStore } from "@hono-rate-limiter/cloudflare";
 
-const app = new Hono<{ Bindings: Env }>()
+const app = new Hono<{ Bindings: Env }>();
 
-app.get('/up', (c) => {
-  return c.json({ status: 'ok' })
-})
+// Add all middleware and routes
+app.use("*", timing());
+app.use("*", logger());
+app.use(
+  "*",
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://apiaas.ai",
+      "https://*.apiaas.ai",
+      "https://*.apiaas.com",
+      "https://apiaas.com",
+    ],
+    allowHeaders: ["*"],
+    allowMethods: ["*"],
+    credentials: true,
+    exposeHeaders: ["*"],
+  })
+);
 
-app.get('/', async (c) => {
+// Add rate limiting middleware
+app.use("/v1/*", (c, next) => {
+  return rateLimiter({
+    windowMs: 60000, // 1 minute
+    limit: 60,// 60 requests per minute
+    keyGenerator: (c) => c.req.header("x-forwarded-for") || "",
+    store: new DurableObjectStore({ namespace: c.env.RATE_LIMITER }),
+  })(c as any, next)
+});
+
+app.get('/v1', async (c) => {
   const db = database(c.env.HYPERDRIVE.connectionString)
 
   const users = await db.query.users.findMany({
@@ -25,7 +56,7 @@ app.get('/', async (c) => {
   })
 })
 
-app.get('/seed', async (c) => {
+app.get('/v1/seed', async (c) => {
   console.log("Starting seed process...");
 
   const db = database(c.env.HYPERDRIVE.connectionString);
@@ -60,4 +91,14 @@ app.get('/seed', async (c) => {
   }, 201)
 })
 
-export default app
+app.onError((err, c) => {
+  console.error(err);
+  return c.json({ error: "Internal server error" }, 500);
+});
+
+export default {
+  fetch: app.fetch,
+};
+export { DurableObjectRateLimiter };
+
+export type AppType = typeof app;
