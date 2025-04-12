@@ -1,0 +1,15 @@
+{
+  "name": "@apiaas/auth",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+} 

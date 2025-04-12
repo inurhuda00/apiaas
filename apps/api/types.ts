@@ -5,6 +5,7 @@ export type Env = {
 	TURNSTILE_SITE_KEY: string;
 	TURNSTILE_SECRET_KEY: string;
 	RESEND_API_KEY: string;
+	AUTH_SECRET: string;
 
 	HYPERDRIVE: Hyperdrive;
 	AI: Ai;
@@ -13,4 +14,8 @@ export type Env = {
 	};
 	BUCKET: R2Bucket;
 	RATE_LIMITER: DurableObjectNamespace<DurableObjectRateLimiter>;
+};
+
+export type Variables = {
+	user: { id: number; role: string };
 };

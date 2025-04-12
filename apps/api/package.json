@@ -7,6 +7,7 @@
 		"generate-env": "sed 's/ = \"/=/' .dev.vars | sed 's/\"$//' > .env"
 	},
 	"dependencies": {
+		"@apiaas/auth": "workspace:*",
 		"@apiaas/db": "workspace:*",
 		"@hono-rate-limiter/cloudflare": "^0.2.2",
 		"@hono/zod-validator": "^0.4.3",

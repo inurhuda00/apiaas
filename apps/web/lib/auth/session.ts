@@ -1,49 +1,26 @@
 "use server";
 
-import { compare, hash } from "bcryptjs";
-import { SignJWT, jwtVerify } from "jose";
+import {
+	comparePasswords,
+	hashPassword,
+	type SessionData,
+	signToken,
+	verifyToken,
+} from "@apiaas/auth";
 import { cookies } from "next/headers";
-import type { NewUser } from "@apiaas/db/schema";
 import { env } from "@/env";
 
-const key = new TextEncoder().encode(env.AUTH_SECRET);
-const SALT_ROUNDS = 10;
+// Define cookie name
+const COOKIE_NAME = "session";
+const AUTH_SECRET = env.AUTH_SECRET;
 
-export async function hashPassword(password: string) {
-	return hash(password, SALT_ROUNDS);
-}
-
-export async function comparePasswords(
-	plainTextPassword: string,
-	hashedPassword: string,
-) {
-	return compare(plainTextPassword, hashedPassword);
-}
-
-type SessionData = {
-	user: { id: number; role: string };
-	expires: string;
-};
-
-export async function signToken(payload: SessionData) {
-	return await new SignJWT(payload)
-		.setProtectedHeader({ alg: "HS256" })
-		.setIssuedAt()
-		.setExpirationTime("1 day from now")
-		.sign(key);
-}
-
-export async function verifyToken(input: string) {
-	const { payload } = await jwtVerify(input, key, {
-		algorithms: ["HS256"],
-	});
-	return payload as SessionData;
-}
+export type { SessionData };
+export { hashPassword, comparePasswords }
 
 export async function getSession() {
-	const session = (await cookies()).get("session")?.value;
+	const session = (await cookies()).get(COOKIE_NAME)?.value;
 	if (!session) return null;
-	return await verifyToken(session);
+	return await verifyToken(session, AUTH_SECRET);
 }
 
 export async function setSession(user: { id: number; role: string }) {
@@ -55,8 +32,8 @@ export async function setSession(user: { id: number; role: string }) {
 		},
 		expires: expiresInOneDay.toISOString(),
 	};
-	const encryptedSession = await signToken(session);
-	(await cookies()).set("session", encryptedSession, {
+	const encryptedSession = await signToken(session, AUTH_SECRET);
+	(await cookies()).set(COOKIE_NAME, encryptedSession, {
 		expires: expiresInOneDay,
 		httpOnly: true,
 		secure: true,

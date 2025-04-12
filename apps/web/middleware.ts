@@ -1,6 +1,7 @@
+import { signToken, verifyToken } from "@apiaas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { signToken, verifyToken } from "@/lib/auth/session";
+import { env } from "./env";
 
 const protectedRoutes = new Set([
 	"/overview",
@@ -85,8 +86,10 @@ export async function middleware(request: NextRequest) {
 		}
 
 		try {
-			const parsed = await verifyToken(sessionCookie.value);
+			const parsed = await verifyToken(sessionCookie.value, env.AUTH_SECRET);
 			const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+			if (!parsed) return NextResponse.redirect(new URL("/sign-in", request.url));
 
 			const response = NextResponse.next();
 			response.cookies.set({
@@ -94,7 +97,7 @@ export async function middleware(request: NextRequest) {
 				value: await signToken({
 					...parsed,
 					expires: expiresInOneDay.toISOString(),
-				}),
+				}, env.AUTH_SECRET),
 				httpOnly: true,
 				secure: true,
 				sameSite: "lax",

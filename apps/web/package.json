@@ -9,10 +9,11 @@
 		"db:setup": "tsx lib/db/setup.ts",
 		"db:studio": "drizzle-kit studio",
 		"dev": "next dev --turbopack",
-		"format": "bunx biome format --write .",
+		"format": "biome format --write .",
 		"start": "next start"
 	},
 	"dependencies": {
+		"@apiaas/auth": "workspace:*",
 		"@apiaas/db": "workspace:*",
 		"@aws-sdk/client-s3": "^3.782.0",
 		"@aws-sdk/s3-request-presigner": "^3.782.0",

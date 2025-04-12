@@ -2,13 +2,15 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { timing } from "hono/timing";
 import { cors } from "hono/cors";
-import { rateLimiter } from "hono-rate-limiter";
-import type { Env } from "../types";
 import {
 	DurableObjectRateLimiter,
 	DurableObjectStore,
 } from "@hono-rate-limiter/cloudflare";
+import type { Env } from "../types";
 import waitlistRoute from "./routes/waitlist";
+import imageRoute from "./routes/image";
+import authRoute from "./routes/auth";
+import { rateLimiter } from "hono-rate-limiter";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -43,6 +45,8 @@ app.use("/v1/*", (c, next) => {
 });
 
 app.route("waitlist", waitlistRoute);
+app.route("v1/image", imageRoute);
+app.route("v1/auth", authRoute);
 
 app.get("/up", (c) => {
 	return c.json({ status: "ok" });

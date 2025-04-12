@@ -2,11 +2,12 @@
 
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth/session";
 import { db } from "..";
 import { membership, users } from "@apiaas/db/schema";
 import bcrypt from "bcryptjs";
 import { activateLicenseKey } from "@/lib/payments/polar";
+import { verifyToken } from "@apiaas/auth";
+import { env } from "@/env";
 
 export async function getUser() {
 	const sessionCookie = (await cookies()).get("session");
@@ -14,7 +15,7 @@ export async function getUser() {
 		return null;
 	}
 
-	const sessionData = await verifyToken(sessionCookie.value);
+	const sessionData = await verifyToken(sessionCookie.value, env.AUTH_SECRET);
 	if (
 		!sessionData ||
 		!sessionData.user ||
