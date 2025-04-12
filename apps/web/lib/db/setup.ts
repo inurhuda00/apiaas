@@ -86,12 +86,13 @@ async function getPostgresURL(): Promise<string> {
 		console.log("Setting up local Postgres instance with Docker...");
 		await setupLocalPostgres();
 		return "postgres://postgres:postgres@localhost:54322/postgres";
-	} else {
-		console.log(
-			"You can find Postgres databases at: https://vercel.com/marketplace?category=databases",
-		);
-		return await question("Enter your POSTGRES_URL: ");
 	}
+	
+	console.log(
+		"You can find Postgres databases at: https://vercel.com/marketplace?category=databases",
+	);
+
+	return await question("Enter your DATABASE_URL: ");
 }
 
 async function setupLocalPostgres() {
@@ -164,12 +165,12 @@ async function writeEnvFile(envVars: Record<string, string>) {
 async function main() {
 	await checkStripeCLI();
 
-	const POSTGRES_URL = await getPostgresURL();
+	const DATABASE_URL = await getPostgresURL();
 	const BASE_URL = "http://localhost:3000";
 	const AUTH_SECRET = generateAuthSecret();
 
 	await writeEnvFile({
-		POSTGRES_URL,
+		DATABASE_URL,
 		BASE_URL,
 		AUTH_SECRET,
 	});
