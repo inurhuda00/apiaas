@@ -12,7 +12,9 @@ export const env = createEnv({
 		PRODUCT_ID: z.string(),
 		AUTH_SECRET: z.string(),
 	},
-	client: {},
+	client: {
+		NEXT_PUBLIC_API_URL: z.string(),
+	},
 	runtimeEnv: {
 		APP_URL: process.env.APP_URL,
 		DATABASE_URL: process.env.DATABASE_URL,
@@ -21,6 +23,7 @@ export const env = createEnv({
 		POLAR_WORKSPACE_ID: process.env.POLAR_WORKSPACE_ID,
 		PRODUCT_ID: process.env.PRODUCT_ID,
 		AUTH_SECRET: process.env.AUTH_SECRET,
+		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
 	},
 	skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

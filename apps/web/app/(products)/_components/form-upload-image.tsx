@@ -22,8 +22,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
+import { env } from "@/env";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
+const API_BASE_URL = env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
 
 interface ProductData {
 	id: string;
