@@ -1,4 +1,4 @@
-import { signToken, verifyToken } from "@apiaas/auth";
+import { signAccessToken, verifyToken } from "@apiaas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { env } from "./env";
@@ -89,10 +89,14 @@ export async function middleware(request: NextRequest) {
 			const parsed = await verifyToken(sessionCookie.value, env.AUTH_SECRET);
 			const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+			if (!parsed?.user) {
+				return NextResponse.redirect(new URL("/sign-in", request.url));
+			}
+
 			const response = NextResponse.next();
 			response.cookies.set({
 				name: "session",
-				value: await signToken(
+				value: await signAccessToken(
 					{
 						...parsed,
 						expires: expiresInOneDay.toISOString(),

@@ -4,7 +4,7 @@ import {
 	comparePasswords,
 	hashPassword,
 	type SessionData,
-	signToken,
+	signAccessToken,
 	verifyToken,
 } from "@apiaas/auth";
 import { cookies } from "next/headers";
@@ -38,7 +38,7 @@ export async function setSession(user: { id: number; role: string }) {
 		},
 		expires: expiresInOneDay.toISOString(),
 	};
-	const encryptedSession = await signToken(session, AUTH_SECRET);
+	const encryptedSession = await signAccessToken(session, AUTH_SECRET);
 	(await cookies()).set(COOKIE_NAME, encryptedSession, {
 		expires: expiresInOneDay,
 		httpOnly: true,
