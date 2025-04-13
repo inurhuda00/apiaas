@@ -6,6 +6,7 @@ export type Env = {
 	TURNSTILE_SECRET_KEY: string;
 	RESEND_API_KEY: string;
 	AUTH_SECRET: string;
+	NODE_ENV?: "development" | "production";
 
 	HYPERDRIVE: Hyperdrive;
 	AI: Ai;

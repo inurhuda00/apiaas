@@ -122,6 +122,16 @@ export const membership = pgTable("membership", {
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const refreshTokens = pgTable("refresh_tokens", {
+	id: serial("id").primaryKey(),
+	token: text("token").notNull().unique(),
+	userId: integer("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	expiresAt: timestamp("expires_at").notNull(),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const waitlist = pgTable("waitlist", {
 	email: varchar("email", { length: 512 }).primaryKey(),
 	createdAt: timestamp("created_at", { withTimezone: true })
@@ -179,11 +189,19 @@ export const productTagsRelations = relations(productTags, ({ one }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
 	membership: many(membership),
 	products: many(products),
+	refreshTokens: many(refreshTokens),
 }));
 
 export const membershipRelations = relations(membership, ({ one }) => ({
 	user: one(users, {
 		fields: [membership.userId],
+		references: [users.id],
+	}),
+}));
+
+export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
+	user: one(users, {
+		fields: [refreshTokens.userId],
 		references: [users.id],
 	}),
 }));
@@ -208,3 +226,6 @@ export type NewFile = typeof files.$inferInsert;
 
 export type Membership = typeof membership.$inferSelect;
 export type NewMembership = typeof membership.$inferInsert;
+
+export type RefreshToken = typeof refreshTokens.$inferSelect;
+export type NewRefreshToken = typeof refreshTokens.$inferInsert;
