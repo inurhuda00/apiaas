@@ -55,10 +55,12 @@ export function UserInfo({ user }: UserInfoProps) {
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
-						<Button variant="ghost" onClick={signOut} className="w-full">
-							<Icons.ExitToApp className="mr-2 size-4" />
-							Logout
-						</Button>
+						<Link href="/sign-out">
+							<Button variant="ghost" className="w-full">
+								<Icons.ExitToApp className="mr-2 size-4" />
+								Logout
+							</Button>
+						</Link>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
