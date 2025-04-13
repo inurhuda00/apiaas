@@ -36,7 +36,7 @@ export default async function FilesPage() {
 	const isImage = (fileType: string) => fileType.startsWith("image/");
 
 	return (
-		<MaxWidthWrapper>
+		<main>
 			<div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
 				<div>
 					<h1 className="text-3xl font-bold">My Files</h1>
@@ -130,6 +130,6 @@ export default async function FilesPage() {
 					))}
 				</div>
 			)}
-		</MaxWidthWrapper>
+		</main>
 	);
 }

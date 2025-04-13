@@ -3,8 +3,10 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { User } from "@apiaas/db/schema";
 
+// Define the UserContext types
 type UserContextType = {
 	userPromise: Promise<Pick<User, "id" | "name" | "email" | "role"> | null>;
+	sessionPromise: Promise<string | null>; // Raw token value
 };
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -20,11 +22,12 @@ export function useUser(): UserContextType {
 export function UserProvider({
 	children,
 	userPromise,
+	sessionPromise,
 }: {
 	children: ReactNode;
 } & UserContextType) {
 	return (
-		<UserContext.Provider value={{ userPromise }}>
+		<UserContext.Provider value={{ userPromise, sessionPromise }}>
 			{children}
 		</UserContext.Provider>
 	);

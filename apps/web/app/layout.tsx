@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import { UserProvider } from "@/lib/auth";
 import { getUser } from "@/lib/db/queries/user";
+import { getCookieValue } from "@/lib/auth/session";
 import { ThemeProvider } from "@/lib/utils/theme";
 import { Toaster } from "@/components/ui/toaster";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -26,6 +27,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	const userPromise = getUser();
+	const sessionPromise = getCookieValue();
 
 	return (
 		<html lang="en" className={`${manrope.className}`} suppressHydrationWarning>
@@ -48,7 +50,7 @@ export default function RootLayout({
 						showSpinner={false}
 					/>
 					<Toaster />
-					<UserProvider userPromise={userPromise}>{children}</UserProvider>
+					<UserProvider userPromise={userPromise} sessionPromise={sessionPromise}>{children}</UserProvider>
 				</ThemeProvider>
 				<SpeedInsights />
 				<Analytics />

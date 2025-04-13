@@ -10,6 +10,7 @@ import type { Env } from "../types";
 import waitlistRoute from "./routes/waitlist";
 import imageRoute from "./routes/image";
 import authRoute from "./routes/auth";
+import productRoute from "./routes/product";
 import { rateLimiter } from "hono-rate-limiter";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -21,32 +22,33 @@ app.use(
 	"*",
 	cors({
 		origin: [
-			"http://localhost:8787",
+			"http://localhost:3000",
 			"https://mondive.xyz",
 			"https://*.mondive.xyz",
 			"https://*.mondive.xyz",
 		],
-		allowHeaders: ["*"],
-		allowMethods: ["*"],
+		allowHeaders: ["content-type", "authorization", "x-requested-with", "x-forwarded-for"],
+		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		credentials: true,
-		exposeHeaders: ["*"],
+		exposeHeaders: ["content-length", "content-type"],
 	}),
 );
 
-// Add rate limiting middleware
-app.use("/v1/*", (c, next) => {
-	return rateLimiter({
-		windowMs: 60000, // 1 minute
-		limit: 60, // 60 requests per minute
-		keyGenerator: (c) => c.req.header("x-forwarded-for") || "",
-		store: new DurableObjectStore({ namespace: c.env.RATE_LIMITER }),
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	})(c as any, next);
-});
+// // Add rate limiting middleware
+// app.use("/v1/*", (c, next) => {
+// 	return rateLimiter({
+// 		windowMs: 60000, // 1 minute
+// 		limit: 60, // 60 requests per minute
+// 		keyGenerator: (c) => c.req.header("x-forwarded-for") || "",
+// 		store: new DurableObjectStore({ namespace: c.env.RATE_LIMITER }),
+// 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// 	})(c as any, next);
+// });
 
 app.route("waitlist", waitlistRoute);
 app.route("v1/image", imageRoute);
 app.route("v1/auth", authRoute);
+app.route("v1/product", productRoute);
 
 app.get("/up", (c) => {
 	return c.json({ status: "ok" });

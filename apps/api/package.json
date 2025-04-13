@@ -3,7 +3,8 @@
 	"scripts": {
 		"deploy": "wrangler deploy --minify",
 		"dev": "wrangler dev",
-		"generate-env": "sed 's/ = \"/=/' .dev.vars | sed 's/\"$//' > .env"
+		"generate-env": "sed 's/ = \"/=/' .dev.vars | sed 's/\"$//' > .env",
+		"lint": "biome check ."
 	},
 	"dependencies": {
 		"@apiaas/auth": "workspace:*",

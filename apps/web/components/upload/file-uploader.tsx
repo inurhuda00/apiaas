@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type React from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import Dropzone, {
 	type DropzoneOptions as DropzoneProps,
 	type FileRejection,
@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils/cn";
 import { useControllableState } from "@/lib/utils/use-controllable-state";
-import { toast } from "../ui/use-toast";
+import { toast, useToast } from "../ui/use-toast";
 import formatBytes from "@/lib/utils/format-bytes";
 import { Icons } from "../ui/icons";
 
@@ -123,6 +123,9 @@ export function FileUploader(props: FileUploaderProps) {
 		onChange: onValueChange,
 	});
 
+	// Ref to keep track of files that have been sent for upload
+	const pendingUploadRef = useRef<Set<string>>(new Set());
+
 	const onDrop = useCallback(
 		(acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
 			if (!multiple && maxFiles === 1 && acceptedFiles.length > 1) {
@@ -143,51 +146,29 @@ export function FileUploader(props: FileUploaderProps) {
 
 			const updatedFiles = files ? [...files, ...newFiles] : newFiles;
 
+			// Update files state immediately so they appear in the UI
 			setFiles(updatedFiles);
 
 			if (rejectedFiles.length > 0) {
-				// biome-ignore lint/complexity/noForEach: <explanation>
-				rejectedFiles.forEach(({ file }) => {
-					toast({ title: `File ${file.name} was rejected` });
-				});
+				for (const rejected of rejectedFiles) {
+					toast({ 
+						title: `File ${rejected.file.name} was rejected`,
+						variant: "error",
+						duration: 3000,
+					});
+				}
 			}
 
-			if (
-				onUpload &&
-				updatedFiles.length > 0 &&
-				updatedFiles.length <= maxFiles
-			) {
-				const target =
-					updatedFiles.length > 1 ? `${updatedFiles.length} files` : "file";
-
-				toast({
-					title: `Uploading ${target}...`,
-					description: "Please wait while we process your upload.",
-					variant: "progress",
-					// Execute the upload and handle the promise separately
-					onOpenChange: (open) => {
-						if (open) {
-							onUpload(updatedFiles)
-								.then(() => {
-									setFiles([]);
-									return {
-										title: "Success",
-										description: `${target} uploaded successfully`,
-										variant: "success",
-									};
-								})
-								.catch(() => ({
-									title: "Error",
-									description: `Failed to upload ${target}`,
-									variant: "error",
-								}));
-						}
-					},
-				});
+			// IMPORTANT: Filter out files that have already been sent for upload
+			// This is the key to preventing duplicate uploads
+			const filesToUpload = newFiles.filter(file => !pendingUploadRef.current.has(file.name));
+			
+			if (filesToUpload.length === 0) {
+				// All files already sent for upload, nothing to do
+				return;
 			}
 		},
-
-		[files, maxFiles, multiple, onUpload, setFiles],
+		[files, maxFiles, multiple, setFiles],
 	);
 
 	function onRemove(index: number) {
@@ -202,6 +183,9 @@ export function FileUploader(props: FileUploaderProps) {
 
 		if (removedFile && isFileWithPreview(removedFile)) {
 			URL.revokeObjectURL(removedFile.preview);
+			
+			// Remove from pending uploads if it was previously sent for upload
+			pendingUploadRef.current.delete(removedFile.name);
 		}
 	}
 
