@@ -18,7 +18,6 @@ export const env = createEnv({
 	},
 	runtimeEnv: {
 		NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
-		
 		APP_URL: process.env.APP_URL,
 		DATABASE_URL: process.env.DATABASE_URL,
 		POLAR_ACCESS_TOKEN: process.env.POLAR_ACCESS_TOKEN,
