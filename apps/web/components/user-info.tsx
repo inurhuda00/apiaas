@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/actions/auth";
 import { Icons } from "@/components/ui/icons";
+import { LogoutForm } from "./form-logout";
 
 interface UserInfoProps {
 	user: Pick<User, "id" | "name" | "email" | "role">;
@@ -55,12 +56,7 @@ export function UserInfo({ user }: UserInfoProps) {
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
-						<Link href="/sign-out">
-							<Button variant="ghost" className="w-full">
-								<Icons.ExitToApp className="mr-2 size-4" />
-								Logout
-							</Button>
-						</Link>
+						<LogoutForm />
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

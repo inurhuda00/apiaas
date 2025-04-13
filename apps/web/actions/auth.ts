@@ -9,6 +9,7 @@ import {
 	updateAccountSchema,
 	signUpSchema,
 	forgotPasswordSchema,
+	signOutSchema,
 } from "./auth.validation";
 import { validatedAction, validatedActionWithUser } from "./middleware";
 import { cookies } from "next/headers";
@@ -105,10 +106,10 @@ export const forgotPassword = validatedAction(
 	},
 );
 
-export async function signOut() {
+export const signOut = validatedActionWithUser(signOutSchema, async () => {
 	(await cookies()).delete("session");
 	redirect("/");
-}
+});
 
 export const updatePassword = validatedActionWithUser(
 	updatePasswordSchema,

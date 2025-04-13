@@ -7,7 +7,10 @@ const REFRESH_TOKEN_EXPIRY = "7d"; // e.g., 7 days
 /**
  * Sign an Access Token (JWT) with the provided payload and secret
  */
-export async function signAccessToken(payload: SessionData, authSecret: string) {
+export async function signAccessToken(
+	payload: SessionData,
+	authSecret: string,
+) {
 	const key = new TextEncoder().encode(authSecret);
 	return await new SignJWT({ ...payload })
 		.setProtectedHeader({ alg: "HS256" })
@@ -19,7 +22,10 @@ export async function signAccessToken(payload: SessionData, authSecret: string) 
 /**
  * Sign a Refresh Token (JWT) with the provided payload and secret
  */
-export async function signRefreshToken(payload: SessionData, authSecret: string) {
+export async function signRefreshToken(
+	payload: SessionData,
+	authSecret: string,
+) {
 	const key = new TextEncoder().encode(authSecret);
 	// Refresh token payload might be simpler, e.g., just { userId: payload.userId }
 	// but using the full SessionData is also acceptable.

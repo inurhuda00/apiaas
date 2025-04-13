@@ -24,7 +24,7 @@ import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { env } from "@/env";
 
-const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8787";
+const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
 interface ProductData {
 	id: string;
@@ -188,7 +188,7 @@ export function UploadImageForm() {
 		uploadedFileItems: [],
 		pendingUploads: new Set(),
 	});
-	
+
 	const productIdRef = useRef<string>("");
 	const isTemporaryProductRef = useRef<boolean>(false);
 
@@ -236,16 +236,13 @@ export function UploadImageForm() {
 		[],
 	);
 
-	const updateProgress = useCallback(
-		(fileName: string, progress: number) => {
-			uploadStateRef.current.progresses[fileName] = progress;
-			setProgresses(prev => ({
-				...prev,
-				[fileName]: progress
-			}));
-		},
-		[],
-	);
+	const updateProgress = useCallback((fileName: string, progress: number) => {
+		uploadStateRef.current.progresses[fileName] = progress;
+		setProgresses((prev) => ({
+			...prev,
+			[fileName]: progress,
+		}));
+	}, []);
 
 	const createTemporaryProduct = async (): Promise<string> => {
 		if (productIdRef.current) {
@@ -285,16 +282,16 @@ export function UploadImageForm() {
 		if (isMediaFileAlreadyUploaded(file)) {
 			return;
 		}
-		
+
 		try {
 			uploadStateRef.current.pendingUploads.add(file.name);
-			
+
 			const productId = await createTemporaryProduct();
-			
+
 			uploadStateRef.current.progresses[file.name] = 0;
-			
+
 			const isPrimary = uploadStateRef.current.uploadedMediaItems.length === 0;
-			
+
 			const mediaItem = await productService.uploadMedia(
 				productId,
 				file,
@@ -302,13 +299,13 @@ export function UploadImageForm() {
 				isPrimary,
 				sessionToken,
 			);
-			
+
 			uploadStateRef.current.uploadedMediaItems.push(mediaItem);
-			
+
 			uploadStateRef.current.pendingUploads.delete(file.name);
 		} catch (error) {
 			uploadStateRef.current.pendingUploads.delete(file.name);
-			
+
 			toast({
 				title: "Upload Error",
 				description: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -316,7 +313,7 @@ export function UploadImageForm() {
 			});
 		}
 	}
-	
+
 	async function handleFileUpload(file: File): Promise<void> {
 		if (uploadStateRef.current.pendingUploads.has(file.name)) {
 			return;
@@ -325,22 +322,22 @@ export function UploadImageForm() {
 		if (isFileAlreadyUploaded(file)) {
 			return;
 		}
-		
+
 		try {
 			uploadStateRef.current.pendingUploads.add(file.name);
 			const productId = await createTemporaryProduct();
-			
+
 			uploadStateRef.current.progresses[file.name] = 0;
-			
+
 			const fileItem = await productService.uploadFile(
 				productId,
 				file,
 				(progress) => updateProgress(file.name, progress),
 				sessionToken,
 			);
-			
+
 			uploadStateRef.current.uploadedFileItems.push(fileItem);
-			
+
 			uploadStateRef.current.pendingUploads.delete(file.name);
 		} catch (error) {
 			uploadStateRef.current.pendingUploads.delete(file.name);
@@ -354,14 +351,14 @@ export function UploadImageForm() {
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		
+
 		setFormState((prev) => ({
 			...prev,
 			pending: true,
 			error: "",
 			success: "",
 		}));
-		
+
 		try {
 			if (!formState.name) {
 				throw new Error("Product name is required");
@@ -372,17 +369,17 @@ export function UploadImageForm() {
 			if (!formState.category) {
 				throw new Error("Category is required");
 			}
-			
+
 			let productId = productIdRef.current;
-			
+
 			if (isTemporaryProductRef.current) {
 				toast({
 					title: "Updating product",
 					description: "Finalizing product details...",
 				});
-				
+
 				isTemporaryProductRef.current = false;
-				
+
 				setFormState((prev) => ({
 					...prev,
 					success: "Product updated successfully!",
@@ -397,27 +394,27 @@ export function UploadImageForm() {
 					},
 					sessionToken,
 				);
-				
+
 				productId = productData.id;
 				productIdRef.current = productId;
-				
+
 				setFormState((prev) => ({
 					...prev,
 					success: "Product created successfully!",
 				}));
-				
+
 				toast({
 					title: "Product created",
 					description: "Product created successfully!",
 				});
 			}
-			
+
 			setFormState((prev) => ({
 				...prev,
 				pending: false,
 				success: "Product and all files uploaded successfully!",
 			}));
-			
+
 			toast({
 				title: "Success!",
 				description: "Product and all files uploaded successfully!",
@@ -426,13 +423,13 @@ export function UploadImageForm() {
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : "Failed to upload product";
-			
+
 			setFormState((prev) => ({
 				...prev,
 				pending: false,
 				error: errorMessage,
 			}));
-			
+
 			toast({
 				title: "Error",
 				description: errorMessage,
@@ -478,7 +475,7 @@ export function UploadImageForm() {
 									Give your product a short and clear name
 								</p>
 							</div>
-							
+
 							<div>
 								<div className="flex justify-between mb-1">
 									<Label htmlFor="description" className="font-medium">
@@ -506,7 +503,7 @@ export function UploadImageForm() {
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>
-			
+
 			<Accordion
 				type="single"
 				collapsible
@@ -527,18 +524,20 @@ export function UploadImageForm() {
 							progresses={progresses}
 							onValueChange={(newFiles) => {
 								const files = newFiles as File[];
-								
+
 								const addedFiles = identifyNewFiles(
 									files,
-									uploadStateRef.current.mediaFiles
+									uploadStateRef.current.mediaFiles,
 								);
-								
+
 								uploadStateRef.current.mediaFiles = files;
-								
+
 								const filesToUpload = addedFiles.filter(
-									(file) => !isMediaFileAlreadyUploaded(file) && !uploadStateRef.current.pendingUploads.has(file.name),
+									(file) =>
+										!isMediaFileAlreadyUploaded(file) &&
+										!uploadStateRef.current.pendingUploads.has(file.name),
 								);
-								
+
 								if (filesToUpload.length > 0) {
 									for (const file of filesToUpload) {
 										handleImageUpload(file);
@@ -553,7 +552,7 @@ export function UploadImageForm() {
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>
-			
+
 			<Accordion
 				type="single"
 				collapsible
@@ -586,7 +585,7 @@ export function UploadImageForm() {
 									/>
 								</div>
 							</div>
-							
+
 							<div>
 								<Label htmlFor="category" className="font-medium">
 									Category <span className="text-red-500">*</span>
@@ -615,7 +614,7 @@ export function UploadImageForm() {
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>
-			
+
 			<Accordion
 				type="single"
 				collapsible
@@ -635,18 +634,20 @@ export function UploadImageForm() {
 							progresses={progresses}
 							onValueChange={(newFiles) => {
 								const files = newFiles as File[];
-								
+
 								const addedFiles = identifyNewFiles(
 									files,
-									uploadStateRef.current.files
+									uploadStateRef.current.files,
 								);
-								
+
 								uploadStateRef.current.files = files;
-								
+
 								const filesToUpload = addedFiles.filter(
-									(file) => !isFileAlreadyUploaded(file) && !uploadStateRef.current.pendingUploads.has(file.name),
+									(file) =>
+										!isFileAlreadyUploaded(file) &&
+										!uploadStateRef.current.pendingUploads.has(file.name),
 								);
-								
+
 								if (filesToUpload.length > 0) {
 									for (const file of filesToUpload) {
 										handleFileUpload(file);
@@ -663,7 +664,7 @@ export function UploadImageForm() {
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>
-			
+
 			<div className="flex justify-end">
 				<SubmitButton pending={formState.pending}>
 					{formState.pending
@@ -673,7 +674,7 @@ export function UploadImageForm() {
 							: "Create Product"}
 				</SubmitButton>
 			</div>
-			
+
 			<div className="mt-4">
 				{formState.error && (
 					<div className="text-red-500 text-sm">{formState.error}</div>

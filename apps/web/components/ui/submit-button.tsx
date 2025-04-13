@@ -5,10 +5,12 @@ import { Icons } from "./icons";
 export function SubmitButton({
 	children,
 	pending,
+	icon,
 	...props
 }: {
 	children: React.ReactNode;
 	pending: boolean;
+	icon?: React.ReactNode;
 } & ButtonProps) {
 	return (
 		<Button
@@ -17,6 +19,9 @@ export function SubmitButton({
 			{...props}
 			className={cn(props.className, "relative")}
 		>
+			{icon && (
+				<span className={cn("mr-2", { "opacity-0": pending })}>{icon}</span>
+			)}
 			<span className={cn({ "opacity-0": pending })}>{children}</span>
 
 			{pending && (

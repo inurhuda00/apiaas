@@ -27,7 +27,12 @@ app.use(
 			"https://*.mondive.xyz",
 			"https://*.mondive.xyz",
 		],
-		allowHeaders: ["content-type", "authorization", "x-requested-with", "x-forwarded-for"],
+		allowHeaders: [
+			"content-type",
+			"authorization",
+			"x-requested-with",
+			"x-forwarded-for",
+		],
 		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		credentials: true,
 		exposeHeaders: ["content-length", "content-type"],

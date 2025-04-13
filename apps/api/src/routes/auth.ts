@@ -8,7 +8,7 @@ import { database } from "@apiaas/db";
 import { users, refreshTokens, type NewRefreshToken } from "@apiaas/db/schema";
 import type { Env, Variables } from "@/types";
 import { AuthMiddleware } from "../middleware/auth";
-import { setCookie, getCookie, deleteCookie } from 'hono/cookie';
+import { setCookie, getCookie, deleteCookie } from "hono/cookie";
 
 const authRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -63,10 +63,18 @@ authRoute.post(
 				},
 			};
 
-			const accessToken = await signAccessToken(sessionPayload, c.env.AUTH_SECRET);
+			const accessToken = await signAccessToken(
+				sessionPayload,
+				c.env.AUTH_SECRET,
+			);
 
-			const refreshToken = await signRefreshToken(sessionPayload, c.env.AUTH_SECRET);
-			const refreshTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+			const refreshToken = await signRefreshToken(
+				sessionPayload,
+				c.env.AUTH_SECRET,
+			);
+			const refreshTokenExpires = new Date(
+				Date.now() + 7 * 24 * 60 * 60 * 1000,
+			);
 
 			const newRefreshToken: NewRefreshToken = {
 				token: refreshToken,
@@ -75,12 +83,12 @@ authRoute.post(
 			};
 			await db.insert(refreshTokens).values(newRefreshToken);
 
-			setCookie(c, 'refreshToken', refreshToken, {
+			setCookie(c, "refreshToken", refreshToken, {
 				httpOnly: true,
 				expires: refreshTokenExpires,
-				path: '/api/auth',
-				sameSite: 'Lax',
-				secure: c.env.NODE_ENV === 'production',
+				path: "/api/auth",
+				sameSite: "Lax",
+				secure: c.env.NODE_ENV === "production",
 			});
 
 			return c.json({
@@ -110,15 +118,18 @@ authRoute.post(
 
 authRoute.post("/refresh", async (c) => {
 	try {
-		const currentRefreshToken = getCookie(c, 'refreshToken');
+		const currentRefreshToken = getCookie(c, "refreshToken");
 
 		if (!currentRefreshToken) {
 			return c.json({ success: false, error: "Refresh token not found" }, 401);
 		}
 
-		const decodedPayload = await verifyToken(currentRefreshToken, c.env.AUTH_SECRET);
+		const decodedPayload = await verifyToken(
+			currentRefreshToken,
+			c.env.AUTH_SECRET,
+		);
 		if (!decodedPayload || !decodedPayload.user?.id) {
-			deleteCookie(c, 'refreshToken', { path: '/api/auth' });
+			deleteCookie(c, "refreshToken", { path: "/api/auth" });
 			return c.json({ success: false, error: "Invalid refresh token" }, 401);
 		}
 
@@ -127,20 +138,30 @@ authRoute.post("/refresh", async (c) => {
 			where: and(
 				eq(refreshTokens.token, currentRefreshToken),
 				eq(refreshTokens.userId, decodedPayload.user.id),
-				gt(refreshTokens.expiresAt, new Date())
-			)
+				gt(refreshTokens.expiresAt, new Date()),
+			),
 		});
 
 		if (!storedToken) {
-			deleteCookie(c, 'refreshToken', { path: '/api/auth' });
-			return c.json({ success: false, error: "Invalid or expired refresh token" }, 401);
+			deleteCookie(c, "refreshToken", { path: "/api/auth" });
+			return c.json(
+				{ success: false, error: "Invalid or expired refresh token" },
+				401,
+			);
 		}
 
 		await db.delete(refreshTokens).where(eq(refreshTokens.id, storedToken.id));
 
-		const newSessionPayload = { user: { id: decodedPayload.user.id, role: decodedPayload.user.role } };
-		const newRefreshTokenValue = await signRefreshToken(newSessionPayload, c.env.AUTH_SECRET);
-		const newRefreshTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+		const newSessionPayload = {
+			user: { id: decodedPayload.user.id, role: decodedPayload.user.role },
+		};
+		const newRefreshTokenValue = await signRefreshToken(
+			newSessionPayload,
+			c.env.AUTH_SECRET,
+		);
+		const newRefreshTokenExpires = new Date(
+			Date.now() + 7 * 24 * 60 * 60 * 1000,
+		);
 
 		await db.insert(refreshTokens).values({
 			token: newRefreshTokenValue,
@@ -148,25 +169,28 @@ authRoute.post("/refresh", async (c) => {
 			expiresAt: newRefreshTokenExpires,
 		});
 
-		setCookie(c, 'refreshToken', newRefreshTokenValue, {
+		setCookie(c, "refreshToken", newRefreshTokenValue, {
 			httpOnly: true,
 			expires: newRefreshTokenExpires,
-			path: '/api/auth',
-			sameSite: 'Lax',
-			secure: c.env.NODE_ENV === 'production',
+			path: "/api/auth",
+			sameSite: "Lax",
+			secure: c.env.NODE_ENV === "production",
 		});
 
-		const newAccessToken = await signAccessToken(newSessionPayload, c.env.AUTH_SECRET);
+		const newAccessToken = await signAccessToken(
+			newSessionPayload,
+			c.env.AUTH_SECRET,
+		);
 
 		return c.json({ success: true, data: { accessToken: newAccessToken } });
-
 	} catch (error) {
 		console.error("Refresh token error:", error);
-		deleteCookie(c, 'refreshToken', { path: '/api/auth' });
+		deleteCookie(c, "refreshToken", { path: "/api/auth" });
 		return c.json(
 			{
 				success: false,
-				error: error instanceof Error ? error.message : "Failed to refresh token",
+				error:
+					error instanceof Error ? error.message : "Failed to refresh token",
 			},
 			500,
 		);
@@ -175,24 +199,26 @@ authRoute.post("/refresh", async (c) => {
 
 authRoute.post("/logout", async (c) => {
 	try {
-		const currentRefreshToken = getCookie(c, 'refreshToken');
+		const currentRefreshToken = getCookie(c, "refreshToken");
 
 		if (currentRefreshToken) {
 			const db = database(c.env.DATABASE_URL);
-			await db.delete(refreshTokens).where(eq(refreshTokens.token, currentRefreshToken));
+			await db
+				.delete(refreshTokens)
+				.where(eq(refreshTokens.token, currentRefreshToken));
 		}
 
-		deleteCookie(c, 'refreshToken', {
+		deleteCookie(c, "refreshToken", {
 			httpOnly: true,
-			path: '/api/auth',
-			sameSite: 'Lax',
-			secure: c.env.NODE_ENV === 'production',
+			path: "/api/auth",
+			sameSite: "Lax",
+			secure: c.env.NODE_ENV === "production",
 		});
 
 		return c.json({ success: true, message: "Logged out successfully" });
 	} catch (error) {
 		console.error("Logout error:", error);
-		deleteCookie(c, 'refreshToken', { path: '/api/auth' });
+		deleteCookie(c, "refreshToken", { path: "/api/auth" });
 		return c.json(
 			{
 				success: false,

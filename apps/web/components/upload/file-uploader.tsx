@@ -151,7 +151,7 @@ export function FileUploader(props: FileUploaderProps) {
 
 			if (rejectedFiles.length > 0) {
 				for (const rejected of rejectedFiles) {
-					toast({ 
+					toast({
 						title: `File ${rejected.file.name} was rejected`,
 						variant: "error",
 						duration: 3000,
@@ -161,8 +161,10 @@ export function FileUploader(props: FileUploaderProps) {
 
 			// IMPORTANT: Filter out files that have already been sent for upload
 			// This is the key to preventing duplicate uploads
-			const filesToUpload = newFiles.filter(file => !pendingUploadRef.current.has(file.name));
-			
+			const filesToUpload = newFiles.filter(
+				(file) => !pendingUploadRef.current.has(file.name),
+			);
+
 			if (filesToUpload.length === 0) {
 				// All files already sent for upload, nothing to do
 				return;
@@ -183,7 +185,7 @@ export function FileUploader(props: FileUploaderProps) {
 
 		if (removedFile && isFileWithPreview(removedFile)) {
 			URL.revokeObjectURL(removedFile.preview);
-			
+
 			// Remove from pending uploads if it was previously sent for upload
 			pendingUploadRef.current.delete(removedFile.name);
 		}

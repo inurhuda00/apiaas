@@ -50,7 +50,12 @@ export default function RootLayout({
 						showSpinner={false}
 					/>
 					<Toaster />
-					<UserProvider userPromise={userPromise} sessionPromise={sessionPromise}>{children}</UserProvider>
+					<UserProvider
+						userPromise={userPromise}
+						sessionPromise={sessionPromise}
+					>
+						{children}
+					</UserProvider>
 				</ThemeProvider>
 				<SpeedInsights />
 				<Analytics />

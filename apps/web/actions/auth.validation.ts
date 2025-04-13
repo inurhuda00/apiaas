@@ -27,6 +27,8 @@ export const signUpSchema = z.object({
 		.min(1, "License key cannot be empty"),
 });
 
+export const signOutSchema = z.object({});
+
 export const forgotPasswordSchema = z.object({
 	email: z
 		.string()
