@@ -1,5 +1,6 @@
 # Next.js SaaS Starter
 
+[] token store
 [] Api Upload Product
     - tagging
     - embeding vector

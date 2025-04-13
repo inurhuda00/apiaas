@@ -17,7 +17,7 @@ export function AuthMiddleware() {
 	) => {
 		// Extract token
 		const token = extractBearerToken(c);
-		
+
 		if (!token) {
 			return c.json(
 				{
@@ -63,7 +63,7 @@ export function AuthRoleMiddleware(allowedRoles: string[]) {
 		next: Next,
 	) => {
 		const token = extractBearerToken(c);
-		
+
 		if (!token) {
 			return c.json(
 				{
@@ -77,7 +77,7 @@ export function AuthRoleMiddleware(allowedRoles: string[]) {
 		try {
 			const session = await verifyToken(token, c.env.AUTH_SECRET);
 
-      if (!session) {
+			if (!session) {
 				return c.json(
 					{
 						success: false,

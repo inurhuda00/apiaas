@@ -18,12 +18,8 @@ export async function signToken(payload: SessionData, authSecret: string) {
  */
 export async function verifyToken(input: string, authSecret: string) {
 	const key = new TextEncoder().encode(authSecret);
-	try {
-		const { payload } = await jwtVerify(input, key, {
-			algorithms: ["HS256"],
-		});
-		return payload as SessionData;
-	} catch (error) {
-		return null;
-	}
+	const { payload } = await jwtVerify(input, key, {
+		algorithms: ["HS256"],
+	});
+	return payload as SessionData;
 }

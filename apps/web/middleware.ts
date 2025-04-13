@@ -89,9 +89,6 @@ export async function middleware(request: NextRequest) {
 			const parsed = await verifyToken(sessionCookie.value, env.AUTH_SECRET);
 			const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-			if (!parsed)
-				return NextResponse.redirect(new URL("/sign-in", request.url));
-
 			const response = NextResponse.next();
 			response.cookies.set({
 				name: "session",
@@ -116,14 +113,14 @@ export async function middleware(request: NextRequest) {
 		}
 	}
 
-	const cacheHeaders = getCachingHeaders(pathname, request.method);
-	if (cacheHeaders) {
-		const response = NextResponse.next();
-		cacheHeaders.forEach((value, key) => {
-			response.headers.set(key, value);
-		});
-		return response;
-	}
+	// const cacheHeaders = getCachingHeaders(pathname, request.method);
+	// if (cacheHeaders) {
+	// 	const response = NextResponse.next();
+	// 	cacheHeaders.forEach((value, key) => {
+	// 		response.headers.set(key, value);
+	// 	});
+	// 	return response;
+	// }
 
 	return NextResponse.next();
 }

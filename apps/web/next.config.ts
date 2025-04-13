@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
 	experimental: {
 		ppr: true,
 		useCache: true,
+		serverActions: {
+			bodySizeLimit: "5mb",
+		},
 	},
 	images: {
 		loader: "custom",

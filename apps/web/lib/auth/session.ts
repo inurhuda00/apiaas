@@ -17,8 +17,14 @@ const AUTH_SECRET = env.AUTH_SECRET;
 export type { SessionData };
 export { hashPassword, comparePasswords };
 
-export async function getSession() {
+export async function getCookieValue() {
 	const session = (await cookies()).get(COOKIE_NAME)?.value;
+	if (!session) return null;
+	return session;
+}
+
+export async function getSession() {
+	const session = await getCookieValue();
 	if (!session) return null;
 	return await verifyToken(session, AUTH_SECRET);
 }

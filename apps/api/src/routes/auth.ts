@@ -107,7 +107,7 @@ authRoute.post(
 authRoute.get("/me", AuthMiddleware(), async (c) => {
 	try {
 		const user = c.get("user");
-		
+
 		const db = database(c.env.DATABASE_URL);
 		const userDetails = await db.query.users.findFirst({
 			columns: {
@@ -115,28 +115,35 @@ authRoute.get("/me", AuthMiddleware(), async (c) => {
 				name: true,
 				email: true,
 				role: true,
-				createdAt: true
+				createdAt: true,
 			},
 			where: eq(users.id, user.id),
 		});
-		
+
 		if (!userDetails) {
-			return c.json({ 
-				success: false, 
-				error: "User not found" 
-			}, 404);
+			return c.json(
+				{
+					success: false,
+					error: "User not found",
+				},
+				404,
+			);
 		}
-		
+
 		return c.json({
 			success: true,
-			data: userDetails
+			data: userDetails,
 		});
 	} catch (error) {
 		console.error("Get user error:", error);
-		return c.json({ 
-			success: false, 
-			error: error instanceof Error ? error.message : "Failed to get user data" 
-		}, 500);
+		return c.json(
+			{
+				success: false,
+				error:
+					error instanceof Error ? error.message : "Failed to get user data",
+			},
+			500,
+		);
 	}
 });
 
