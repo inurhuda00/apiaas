@@ -7,7 +7,7 @@ import {
 	verifyToken,
 	signAccessToken,
 	signRefreshToken,
-	ACCESS_TOKEN_EXPIRY,
+	ACCESS_TOKEN_EXPIRY, // 15 minutes (15 * 60 * 1000)
 	REFRESH_TOKEN_EXPIRY,
 } from "@apiaas/auth";
 import { cookies } from "next/headers";
@@ -57,7 +57,7 @@ export async function getUser() {
 
 		const accessToken = await signAccessToken(session, AUTH_SECRET);
 		cookieStore.set(ACCESS_TOKEN_NAME, accessToken, {
-			expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY),
+			expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY), // Set to expire in 15 minutes
 			httpOnly: true,
 			secure: true,
 			sameSite: "lax",
@@ -65,6 +65,7 @@ export async function getUser() {
 
 		return await getUserById(refreshData.user.id);
 	} catch (error) {
+		await deleteSession();
 		return null;
 	}
 }
@@ -108,17 +109,10 @@ export async function setSession(user: { id: number; role: string }) {
 	const accessToken = await signAccessToken(session, AUTH_SECRET);
 	const refreshToken = await signRefreshToken(session, AUTH_SECRET);
 
-	console.log("setting session", accessToken, refreshToken);
-
-	const refreshTokenDb = await createRefreshToken(refreshToken, user.id);
-
-	console.log("refreshTokenDb", refreshTokenDb);
-
-	console.log("ACCESS_TOKEN_NAME", ACCESS_TOKEN_NAME);
-	console.log("REFRESH_TOKEN_NAME", REFRESH_TOKEN_NAME);
+	await createRefreshToken(refreshToken, user.id);
 
 	(await cookies()).set(ACCESS_TOKEN_NAME, accessToken, {
-		expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY),
+		expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY), // Set to expire in 15 minutes
 		httpOnly: true,
 		secure: true,
 		sameSite: "lax",

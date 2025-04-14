@@ -2,7 +2,7 @@ import { signAccessToken, verifyToken } from "@apiaas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { env } from "./env";
-import { getAccessToken, getUser } from "./lib/auth/session";
+import { deleteSession, getAccessToken, getUser } from "./lib/auth/session";
 
 const protectedRoutes = new Set([
 	"/overview",
@@ -85,6 +85,7 @@ export async function middleware(request: NextRequest) {
 
 	if (protectedRoutes.has(pathname)) {
 		if (!loggedInUser) {
+			await deleteSession();
 			return NextResponse.redirect(new URL("/sign-in", request.url));
 		}
 	}
