@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken } from "@apiaas/auth";
-import { getUserById } from "./lib/db/queries/user";
 import { deleteRefreshToken, getRefreshToken } from "./lib/db/queries/token";
 import { env } from "./env";
-import { deleteSession } from "./lib/auth/session";
-import { eq } from "drizzle-orm";
-import { cookies } from "next/headers";
-import { refreshTokens } from "@apiaas/db/schema";
-import { db } from "./lib/db";
 const ACCESS_TOKEN_NAME = "session";
 const REFRESH_TOKEN_NAME = "refresh";
 const AUTH_SECRET = env.AUTH_SECRET;
@@ -23,27 +17,6 @@ const protectedRoutes = new Set([
 ]);
 
 const signInRoutes = new Set(["/sign-in"]);
-
-function getCachingHeaders(pathname: string, method: string): Map<string, string> | null {
-	if (method !== "GET") return null;
-	
-	const cachablePaths = [
-		"/",
-		"/about",
-		"/pricing",
-		"/blog",
-	];
-	
-	const shouldCache = cachablePaths.some(path => pathname === path || pathname.startsWith(`${path}/`));
-	
-	if (shouldCache) {
-		const headers = new Map<string, string>();
-		headers.set("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=300");
-		return headers;
-	}
-	
-	return null;
-}
 
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
@@ -70,18 +43,6 @@ export async function middleware(request: NextRequest) {
 			return NextResponse.redirect(new URL("/sign-in", request.url));
 		}
 		console.info(`Access granted to ${pathname}`);
-	}
-	
-	// Apply caching headers if applicable
-	const cacheHeaders = getCachingHeaders(pathname, request.method);
-	if (cacheHeaders) {
-		console.info(`Applying cache headers for ${pathname}`);
-		const response = NextResponse.next();
-		cacheHeaders.forEach((value, key) => {
-			response.headers.set(key, value);
-			console.debug(`Set cache header: ${key}=${value}`);
-		});
-		return response;
 	}
 	
 	console.info(`Middleware completed for ${pathname}`);
