@@ -51,9 +51,7 @@ export default function RootLayout({
 					/>
 					<Toaster />
 					<SessionProvider sessionPromise={sessionPromise}>
-						<UserProvider userPromise={userPromise}>
-							{children}
-						</UserProvider>
+						<UserProvider userPromise={userPromise}>{children}</UserProvider>
 					</SessionProvider>
 				</ThemeProvider>
 				<SpeedInsights />

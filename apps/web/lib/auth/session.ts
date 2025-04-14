@@ -12,7 +12,11 @@ import {
 } from "@apiaas/auth";
 import { cookies } from "next/headers";
 import { env } from "@/env";
-import { createRefreshToken, deleteRefreshToken, getRefreshToken as getRefreshTokenFromDb } from "@/lib/db/queries/token";
+import {
+	createRefreshToken,
+	deleteRefreshToken,
+	getRefreshToken as getRefreshTokenFromDb,
+} from "@/lib/db/queries/token";
 import { getUserById } from "@/lib/db/queries/user";
 
 const ACCESS_TOKEN_NAME = "session";
@@ -27,7 +31,7 @@ export async function getAuthenticatedUser() {
 	const cookieStore = await cookies();
 	const sessionCookie = cookieStore.get(ACCESS_TOKEN_NAME);
 	console.info(`Session cookie present: ${!!sessionCookie?.value}`);
-	
+
 	if (sessionCookie?.value) {
 		try {
 			console.info("Verifying access token...");
@@ -48,14 +52,14 @@ export async function getAuthenticatedUser() {
 			// Continue to refresh token flow
 		}
 	}
-	
+
 	console.info("No valid session, checking refresh token...");
 	const refreshCookie = cookieStore.get(REFRESH_TOKEN_NAME);
 	if (!refreshCookie?.value) {
 		console.info("No refresh token present");
 		return null;
 	}
-	
+
 	try {
 		console.info("Verifying refresh token...");
 		const refreshData = await verifyToken(refreshCookie.value, AUTH_SECRET);
@@ -63,27 +67,29 @@ export async function getAuthenticatedUser() {
 			console.warn("Refresh token expired");
 			return null;
 		}
-		
+
 		if (!refreshData?.user?.id || typeof refreshData.user.id !== "number") {
 			console.warn("Invalid user data in refresh token");
 			return null;
 		}
-		
+
 		console.info(`Refresh token valid for user ID: ${refreshData.user.id}`);
-		
+
 		// Verify token exists in database
 		const storedToken = await getRefreshTokenFromDb(refreshCookie.value);
 		if (!storedToken) {
 			console.warn("Refresh token not found in database");
 			return null;
 		}
-		
+
 		console.info("Refresh token found in database");
-		
+
 		const user = await getUserById(refreshData.user.id);
 		if (!user) return null;
-		
-		console.info(`User authenticated via refresh token: ${refreshData.user.id}`);
+
+		console.info(
+			`User authenticated via refresh token: ${refreshData.user.id}`,
+		);
 
 		const session: SessionData = {
 			user: {

@@ -1,13 +1,12 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+"use cache";
+
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { Icons } from "@/components/ui/icons";
 import Link from "next/link";
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import Image from "next/image";
 import { env } from "@/env";
-
-export const dynamic = "force-static";
-export const revalidate = false;
 
 const features = [
 	{

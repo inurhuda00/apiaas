@@ -21,18 +21,20 @@ const signInRoutes = new Set(["/sign-in"]);
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	console.info(`Middleware processing request for: ${pathname}`);
-	
+
 	const cookieStore = request.cookies;
-	
+
 	// Get user from session or refresh token
 	const loggedInUser = await getAuthenticatedUser(cookieStore);
-	
+
 	// Redirect authenticated users away from sign-in pages
 	if (loggedInUser && signInRoutes.has(pathname)) {
-		console.info(`Redirecting authenticated user from ${pathname} to /overview`);
+		console.info(
+			`Redirecting authenticated user from ${pathname} to /overview`,
+		);
 		return NextResponse.redirect(new URL("/overview", request.url));
 	}
-	
+
 	// Handle protected routes
 	if (protectedRoutes.has(pathname)) {
 		console.info(`Checking access to protected route: ${pathname}`);
@@ -44,16 +46,16 @@ export async function middleware(request: NextRequest) {
 		}
 		console.info(`Access granted to ${pathname}`);
 	}
-	
+
 	console.info(`Middleware completed for ${pathname}`);
 	return NextResponse.next();
 }
 
-async function getAuthenticatedUser(cookieStore: NextRequest['cookies']) {
+async function getAuthenticatedUser(cookieStore: NextRequest["cookies"]) {
 	// Try access token first
 	const sessionCookie = cookieStore.get(ACCESS_TOKEN_NAME);
 	console.info(`Session cookie present: ${!!sessionCookie?.value}`);
-	
+
 	if (sessionCookie?.value) {
 		try {
 			console.info("Verifying access token...");
@@ -68,7 +70,7 @@ async function getAuthenticatedUser(cookieStore: NextRequest['cookies']) {
 			console.error("Error verifying access token:", error);
 		}
 	}
-	
+
 	// Fall back to refresh token
 	console.info("No valid session, checking refresh token...");
 	const refreshCookie = cookieStore.get(REFRESH_TOKEN_NAME);
@@ -76,7 +78,7 @@ async function getAuthenticatedUser(cookieStore: NextRequest['cookies']) {
 		console.info("No refresh token present");
 		return null;
 	}
-	
+
 	try {
 		console.info("Verifying refresh token...");
 		const refreshData = await verifyToken(refreshCookie.value, AUTH_SECRET);
@@ -84,23 +86,25 @@ async function getAuthenticatedUser(cookieStore: NextRequest['cookies']) {
 			console.warn("Refresh token expired");
 			return null;
 		}
-		
+
 		if (!refreshData?.user?.id || typeof refreshData.user.id !== "number") {
 			console.warn("Invalid user data in refresh token");
 			return null;
 		}
-		
+
 		console.info(`Refresh token valid for user ID: ${refreshData.user.id}`);
-		
+
 		// Verify token exists in database
 		const storedToken = await getRefreshToken(refreshCookie.value);
 		if (!storedToken) {
 			console.warn("Refresh token not found in database");
 			return null;
 		}
-		
+
 		console.info("Refresh token found in database");
-		console.info(`User authenticated via refresh token: ${refreshData.user.id}`);
+		console.info(
+			`User authenticated via refresh token: ${refreshData.user.id}`,
+		);
 		return refreshData.user;
 	} catch (error) {
 		console.error("Error verifying refresh token:", error);
@@ -108,12 +112,12 @@ async function getAuthenticatedUser(cookieStore: NextRequest['cookies']) {
 	}
 }
 
-async function clearAuthTokens(cookieStore: NextRequest['cookies']) {
+async function clearAuthTokens(cookieStore: NextRequest["cookies"]) {
 	const refreshCookie = cookieStore.get(REFRESH_TOKEN_NAME);
 	if (refreshCookie?.value) {
 		await deleteRefreshToken(refreshCookie.value);
 	}
-	
+
 	cookieStore.delete(ACCESS_TOKEN_NAME);
 	cookieStore.delete(REFRESH_TOKEN_NAME);
 }

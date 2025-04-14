@@ -1,8 +1,7 @@
+"use cache";
+
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import Link from "next/link";
-
-export const dynamic = "force-static";
-export const revalidate = false;
 
 export default function LicensePage() {
 	return (

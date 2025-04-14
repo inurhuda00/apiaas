@@ -8,7 +8,9 @@ export async function deleteRefreshToken(token: string) {
 }
 
 export async function createRefreshToken(token: string, userId: number) {
-	return db.insert(refreshTokens).values({
+	return db
+		.insert(refreshTokens)
+		.values({
 			token,
 			userId,
 			expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),

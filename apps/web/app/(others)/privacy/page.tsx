@@ -1,7 +1,6 @@
-import { MaxWidthWrapper } from "@/components/max-width-wrapper";
+"use cache";
 
-export const dynamic = "force-static";
-export const revalidate = false;
+import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 
 export default function PrivacyPage() {
 	return (
