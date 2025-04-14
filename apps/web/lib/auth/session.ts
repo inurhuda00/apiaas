@@ -7,7 +7,7 @@ import {
 	verifyToken,
 	signAccessToken,
 	signRefreshToken,
-	ACCESS_TOKEN_EXPIRY, // 15 minutes (15 * 60 * 1000)
+	ACCESS_TOKEN_EXPIRY,
 	REFRESH_TOKEN_EXPIRY,
 } from "@apiaas/auth";
 import { cookies } from "next/headers";
