@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { User } from "@apiaas/db/schema";
-import { getUser } from "@/lib/db/queries/user";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 
 export type ActionState = {
 	error?: string;
@@ -38,7 +38,7 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
 	action: ValidatedActionWithUserFunction<S, T>,
 ) {
 	return async (_prevState: ActionState, formData: FormData): Promise<T> => {
-		const user = await getUser();
+		const user = await getAuthenticatedUser();
 		if (!user) {
 			throw new Error("User is not authenticated");
 		}

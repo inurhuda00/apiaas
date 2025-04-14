@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { files } from "@apiaas/db/schema";
-import { getUser } from "@/lib/db/queries/user";
 import { desc, eq } from "drizzle-orm";
 import { formatDistanceToNow } from "date-fns";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
 import Link from "next/link";
-import { MaxWidthWrapper } from "@/components/max-width-wrapper";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 
 export const metadata = {
 	title: "My Files",
@@ -22,7 +21,7 @@ export const metadata = {
 };
 
 export default async function FilesPage() {
-	const user = await getUser();
+	const user = await getAuthenticatedUser();
 
 	if (!user) {
 		redirect("/sign-in");

@@ -2,13 +2,12 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import { UserProvider } from "@/components/providers/auth";
-import { getUser } from "@/lib/db/queries/user";
 import { ThemeProvider } from "@/lib/utils/theme";
 import { Toaster } from "@/components/ui/toaster";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import NextTopLoader from "nextjs-toploader";
-import { getAccessToken } from "@/lib/auth/session";
+import { getAccessToken, getAuthenticatedUser } from "@/lib/auth/session";
 import { SessionProvider } from "@/components/providers/session";
 
 export const metadata: Metadata = {
@@ -27,7 +26,7 @@ export default function RootLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const userPromise = getUser();
+	const userPromise = getAuthenticatedUser();
 	const sessionPromise = getAccessToken();
 
 	return (

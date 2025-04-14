@@ -17,54 +17,92 @@ import { getUserById } from "@/lib/db/queries/user";
 
 const ACCESS_TOKEN_NAME = "session";
 const REFRESH_TOKEN_NAME = "refresh";
+
 const AUTH_SECRET = env.AUTH_SECRET;
 
 export type { SessionData };
 export { hashPassword, comparePasswords };
 
-export async function getUser() {
+export async function getAuthenticatedUser() {
 	const cookieStore = await cookies();
 	const sessionCookie = cookieStore.get(ACCESS_TOKEN_NAME);
-
-	if (sessionCookie) {
+	console.info(`Session cookie present: ${!!sessionCookie?.value}`);
+	
+	if (sessionCookie?.value) {
 		try {
+			console.info("Verifying access token...");
 			const sessionData = await verifyToken(sessionCookie.value, AUTH_SECRET);
+			if (sessionData?.expires && new Date(sessionData.expires) < new Date()) {
+				console.warn("Access token expired");
+				await deleteSession();
+				return null;
+			}
 
-			if (sessionData?.user?.id && typeof sessionData.user.id === "number") {
+			if (sessionData?.user) {
+				console.info(`Access token valid for user ID: ${sessionData.user.id}`);
 				const user = await getUserById(sessionData.user.id);
 				if (user) return user;
 			}
-		} catch (error) {}
+		} catch (error) {
+			console.error("Error verifying access token:", error);
+			// Continue to refresh token flow
+		}
 	}
-
+	
+	console.info("No valid session, checking refresh token...");
 	const refreshCookie = cookieStore.get(REFRESH_TOKEN_NAME);
-	if (!refreshCookie) return null;
-
+	if (!refreshCookie?.value) {
+		console.info("No refresh token present");
+		return null;
+	}
+	
 	try {
+		console.info("Verifying refresh token...");
 		const refreshData = await verifyToken(refreshCookie.value, AUTH_SECRET);
-		if (!refreshData?.user?.id || typeof refreshData.user.id !== "number")
+		if (refreshData?.expires && new Date(refreshData.expires) < new Date()) {
+			console.warn("Refresh token expired");
 			return null;
-
+		}
+		
+		if (!refreshData?.user?.id || typeof refreshData.user.id !== "number") {
+			console.warn("Invalid user data in refresh token");
+			return null;
+		}
+		
+		console.info(`Refresh token valid for user ID: ${refreshData.user.id}`);
+		
+		// Verify token exists in database
 		const storedToken = await getRefreshTokenFromDb(refreshCookie.value);
-		if (!storedToken) return null;
+		if (!storedToken) {
+			console.warn("Refresh token not found in database");
+			return null;
+		}
+		
+		console.info("Refresh token found in database");
+		
+		const user = await getUserById(refreshData.user.id);
+		if (!user) return null;
+		
+		console.info(`User authenticated via refresh token: ${refreshData.user.id}`);
 
 		const session: SessionData = {
 			user: {
 				id: refreshData.user.id,
-				role: refreshData.user.role,
+				role: refreshData.user.role || user.role,
 			},
 		};
 
 		const accessToken = await signAccessToken(session, AUTH_SECRET);
 		cookieStore.set(ACCESS_TOKEN_NAME, accessToken, {
-			expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY), // Set to expire in 15 minutes
+			expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY),
 			httpOnly: true,
 			secure: true,
 			sameSite: "lax",
 		});
 
-		return await getUserById(refreshData.user.id);
+		return user;
 	} catch (error) {
+		console.error("Error verifying refresh token:", error);
 		await deleteSession();
 		return null;
 	}

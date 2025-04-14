@@ -1,57 +1,10 @@
 "use server";
 
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { cookies } from "next/headers";
 import { db } from "..";
 import { membership, type NewUser, users } from "@apiaas/db/schema";
 import { activateLicenseKey } from "@/lib/payments/polar";
 import { hashPassword, verifyToken } from "@apiaas/auth";
-import { env } from "@/env";
-
-export async function getUser() {
-	const sessionCookie = (await cookies()).get("session");
-	if (!sessionCookie || !sessionCookie.value) {
-		return null;
-	}
-
-	const sessionData = await verifyToken(sessionCookie.value, env.AUTH_SECRET);
-	if (
-		!sessionData ||
-		!sessionData.user ||
-		typeof sessionData.user.id !== "number" ||
-		!sessionData.expires
-	) {
-		return null;
-	}
-
-	if (new Date(sessionData.expires) < new Date()) {
-		return null;
-	}
-
-	const query = db
-		.select({
-			id: users.id,
-			email: users.email,
-			name: users.name,
-			role: users.role,
-		})
-		.from(users)
-		.where(
-			and(eq(users.id, sql.placeholder("userId")), isNull(users.deletedAt)),
-		)
-		.limit(1)
-		.prepare("get_user_by_session");
-
-	const user = await query.execute({
-		userId: sessionData.user.id,
-	});
-
-	if (user.length === 0) {
-		return null;
-	}
-
-	return user[0];
-}
 
 export async function getCustomerId(userId: number) {
 	const query = db
