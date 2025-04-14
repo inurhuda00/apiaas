@@ -24,8 +24,8 @@ app.use(
 		origin: [
 			"http://localhost:3000",
 			"https://mondive.xyz",
-			"https://*.mondive.xyz",
-			"https://*.mondive.xyz",
+			"https://www.mondive.xyz",
+			"https://api.mondive.xyz",
 		],
 		allowHeaders: [
 			"content-type",
