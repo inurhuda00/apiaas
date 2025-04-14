@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken } from "@apiaas/auth";
-import { deleteRefreshToken, getRefreshToken } from "./lib/db/queries/token";
 import { env } from "./env";
+import { eq } from "drizzle-orm";
+import { db } from "./lib/db";
+import { refreshTokens } from "@apiaas/db/schema";
+
 const ACCESS_TOKEN_NAME = "session";
 const REFRESH_TOKEN_NAME = "refresh";
 const AUTH_SECRET = env.AUTH_SECRET;
@@ -95,7 +98,10 @@ async function getAuthenticatedUser(cookieStore: NextRequest["cookies"]) {
 		console.info(`Refresh token valid for user ID: ${refreshData.user.id}`);
 
 		// Verify token exists in database
-		const storedToken = await getRefreshToken(refreshCookie.value);
+		const storedToken = await db.query.refreshTokens.findFirst({
+			where: eq(refreshTokens.token, refreshCookie.value),
+		});
+			
 		if (!storedToken) {
 			console.warn("Refresh token not found in database");
 			return null;
@@ -115,7 +121,7 @@ async function getAuthenticatedUser(cookieStore: NextRequest["cookies"]) {
 async function clearAuthTokens(cookieStore: NextRequest["cookies"]) {
 	const refreshCookie = cookieStore.get(REFRESH_TOKEN_NAME);
 	if (refreshCookie?.value) {
-		await deleteRefreshToken(refreshCookie.value);
+		await db.delete(refreshTokens).where(eq(refreshTokens.token, refreshCookie.value));
 	}
 
 	cookieStore.delete(ACCESS_TOKEN_NAME);
