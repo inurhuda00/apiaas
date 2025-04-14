@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, use, useRef } from "react";
-import { useUser } from "@/lib/auth";
+import { useState, useCallback, use, useRef } from "react";
 import {
 	Accordion,
 	AccordionContent,
@@ -23,6 +22,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { env } from "@/env";
+import { useSession } from "@/components/providers/session";
 
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -177,7 +177,7 @@ const productService = {
 };
 
 export function UploadImageForm() {
-	const { sessionPromise } = useUser();
+	const { sessionPromise } = useSession();
 	const sessionToken = use(sessionPromise);
 
 	const uploadStateRef = useRef<FileUploadState>({

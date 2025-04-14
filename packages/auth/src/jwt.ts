@@ -1,54 +1,38 @@
 import { SignJWT, jwtVerify } from "jose";
 import type { SessionData } from "./types";
 
-const ACCESS_TOKEN_EXPIRY = "15m"; // e.g., 15 minutes
-const REFRESH_TOKEN_EXPIRY = "7d"; // e.g., 7 days
+export const ACCESS_TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
+export const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000;
 
-/**
- * Sign an Access Token (JWT) with the provided payload and secret
- */
-export async function signAccessToken(
-	payload: SessionData,
-	authSecret: string,
-) {
-	const key = new TextEncoder().encode(authSecret);
+export async function signAccessToken(payload: SessionData, secret: string) {
+	const key = new TextEncoder().encode(secret);
+	const expiresIn = new Date(Date.now() + ACCESS_TOKEN_EXPIRY);
 	return await new SignJWT({ ...payload })
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
-		.setExpirationTime(ACCESS_TOKEN_EXPIRY)
+		.setExpirationTime(expiresIn.getTime() / 1000)
 		.sign(key);
 }
 
-/**
- * Sign a Refresh Token (JWT) with the provided payload and secret
- */
-export async function signRefreshToken(
-	payload: SessionData,
-	authSecret: string,
-) {
-	const key = new TextEncoder().encode(authSecret);
-	// Refresh token payload might be simpler, e.g., just { userId: payload.userId }
-	// but using the full SessionData is also acceptable.
+export async function signRefreshToken(payload: SessionData, secret: string) {
+	const key = new TextEncoder().encode(secret);
+	const expiresIn = new Date(Date.now() + REFRESH_TOKEN_EXPIRY);
 	return await new SignJWT({ ...payload })
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
-		.setExpirationTime(REFRESH_TOKEN_EXPIRY)
+		.setExpirationTime(expiresIn.getTime() / 1000)
 		.sign(key);
 }
 
-/**
- * Verify a JWT token (typically an Access Token) using the provided secret
- */
-export async function verifyToken(token: string, authSecret: string) {
-	const key = new TextEncoder().encode(authSecret);
+export async function verifyToken(token: string, secret: string) {
+	const key = new TextEncoder().encode(secret);
 	try {
 		const { payload } = await jwtVerify(token, key, {
 			algorithms: ["HS256"],
 		});
 		return payload as SessionData;
 	} catch (error) {
-		// Handle potential errors like expired token, invalid signature etc.
 		console.error("JWT Verification failed:", error);
-		return null; // Return null or throw a specific error
+		return null;
 	}
 }

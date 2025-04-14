@@ -2,6 +2,7 @@ import { signAccessToken, verifyToken } from "@apiaas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { env } from "./env";
+import { getAccessToken, getUser } from "./lib/auth/session";
 
 const protectedRoutes = new Set([
 	"/overview",
@@ -74,57 +75,28 @@ function getCachingHeaders(
 
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
-	const sessionCookie = request.cookies.get("session");
+	const loggedInUser = await getUser();
 
-	if (sessionCookie && signInRoutes.has(pathname)) {
+	console.log(loggedInUser);
+
+	if (loggedInUser && signInRoutes.has(pathname)) {
 		return NextResponse.redirect(new URL("/overview", request.url));
 	}
 
 	if (protectedRoutes.has(pathname)) {
-		if (!sessionCookie) {
+		if (!loggedInUser) {
 			return NextResponse.redirect(new URL("/sign-in", request.url));
-		}
-
-		try {
-			const parsed = await verifyToken(sessionCookie.value, env.AUTH_SECRET);
-			const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-			if (!parsed?.user) {
-				return NextResponse.redirect(new URL("/sign-in", request.url));
-			}
-
-			const response = NextResponse.next();
-			response.cookies.set({
-				name: "session",
-				value: await signAccessToken(
-					{
-						...parsed,
-						expires: expiresInOneDay.toISOString(),
-					},
-					env.AUTH_SECRET,
-				),
-				httpOnly: true,
-				secure: true,
-				sameSite: "lax",
-				expires: expiresInOneDay,
-			});
-			return response;
-		} catch (error) {
-			console.error("Error updating session:", error);
-			const response = NextResponse.redirect(new URL("/sign-in", request.url));
-			response.cookies.delete("session");
-			return response;
 		}
 	}
 
-	// const cacheHeaders = getCachingHeaders(pathname, request.method);
-	// if (cacheHeaders) {
-	// 	const response = NextResponse.next();
-	// 	cacheHeaders.forEach((value, key) => {
-	// 		response.headers.set(key, value);
-	// 	});
-	// 	return response;
-	// }
+	const cacheHeaders = getCachingHeaders(pathname, request.method);
+	if (cacheHeaders) {
+		const response = NextResponse.next();
+		cacheHeaders.forEach((value, key) => {
+			response.headers.set(key, value);
+		});
+		return response;
+	}
 
 	return NextResponse.next();
 }

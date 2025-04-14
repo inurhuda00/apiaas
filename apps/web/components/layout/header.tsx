@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useUser } from "@/lib/auth";
+import { useUser } from "@/components/providers/auth";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
 import { Fragment, use } from "react";

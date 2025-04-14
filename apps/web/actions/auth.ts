@@ -1,7 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { comparePasswords, hashPassword, setSession } from "@/lib/auth/session";
+import {
+	comparePasswords,
+	deleteSession,
+	hashPassword,
+	setSession,
+} from "@/lib/auth/session";
 import {
 	signInSchema,
 	updatePasswordSchema,
@@ -12,17 +17,13 @@ import {
 	signOutSchema,
 } from "./auth.validation";
 import { validatedAction, validatedActionWithUser } from "./middleware";
-import { cookies } from "next/headers";
 import {
+	createUser,
 	getUserByEmail,
 	updateUserPassword,
 	softDeleteUser,
 	updateUserAccount,
-} from "@/lib/db/queries/auth";
-import type { User } from "@apiaas/db/schema";
-import { createUser } from "@/lib/db/queries/user";
-import { activateLicenseKey } from "@/lib/payments/polar";
-import { db } from "@/lib/db";
+} from "@/lib/db/queries/user";
 
 export const signIn = validatedAction(signInSchema, async (data, _) => {
 	const { email, password } = data;
@@ -107,7 +108,7 @@ export const forgotPassword = validatedAction(
 );
 
 export const signOut = validatedActionWithUser(signOutSchema, async () => {
-	(await cookies()).delete("session");
+	await deleteSession();
 	redirect("/");
 });
 
@@ -116,7 +117,11 @@ export const updatePassword = validatedActionWithUser(
 	async (data, _, { email }) => {
 		const { currentPassword, newPassword } = data;
 
-		const user = (await getUserByEmail(email)) as User;
+		const user = await getUserByEmail(email);
+
+		if (!user) {
+			return { error: "User not found." };
+		}
 
 		const isPasswordValid = await comparePasswords(
 			currentPassword,
@@ -145,7 +150,11 @@ export const deleteAccount = validatedActionWithUser(
 	async (data, _, { email }) => {
 		const { password } = data;
 
-		const user = (await getUserByEmail(email)) as User;
+		const user = await getUserByEmail(email);
+
+		if (!user) {
+			return { error: "User not found." };
+		}
 
 		const isPasswordValid = await comparePasswords(password, user.password);
 		if (!isPasswordValid) {
@@ -153,7 +162,7 @@ export const deleteAccount = validatedActionWithUser(
 		}
 
 		await softDeleteUser(user.id);
-		(await cookies()).delete("session");
+		await deleteSession();
 		redirect("/sign-in");
 	},
 );

@@ -1,13 +1,11 @@
 "use client";
 
 import { startTransition, use, useActionState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useUser } from "@/lib/auth";
+import { useUser } from "@/components/providers/auth";
 import { updateAccount } from "@/actions/auth";
-import { Icons } from "@/components/ui/icons";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 type ActionState = {

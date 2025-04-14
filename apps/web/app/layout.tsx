@@ -1,14 +1,15 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
-import { UserProvider } from "@/lib/auth";
+import { UserProvider } from "@/components/providers/auth";
 import { getUser } from "@/lib/db/queries/user";
-import { getCookieValue } from "@/lib/auth/session";
 import { ThemeProvider } from "@/lib/utils/theme";
 import { Toaster } from "@/components/ui/toaster";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import NextTopLoader from "nextjs-toploader";
+import { getAccessToken } from "@/lib/auth/session";
+import { SessionProvider } from "@/components/providers/session";
 
 export const metadata: Metadata = {
 	title: "Next.js SaaS Starter",
@@ -27,7 +28,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	const userPromise = getUser();
-	const sessionPromise = getCookieValue();
+	const sessionPromise = getAccessToken();
 
 	return (
 		<html lang="en" className={`${manrope.className}`} suppressHydrationWarning>
@@ -50,12 +51,11 @@ export default function RootLayout({
 						showSpinner={false}
 					/>
 					<Toaster />
-					<UserProvider
-						userPromise={userPromise}
-						sessionPromise={sessionPromise}
-					>
-						{children}
-					</UserProvider>
+					<SessionProvider sessionPromise={sessionPromise}>
+						<UserProvider userPromise={userPromise}>
+							{children}
+						</UserProvider>
+					</SessionProvider>
 				</ThemeProvider>
 				<SpeedInsights />
 				<Analytics />

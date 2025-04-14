@@ -2,7 +2,12 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { eq, and, gt } from "drizzle-orm";
-import { signAccessToken, signRefreshToken, verifyToken } from "@apiaas/auth";
+import {
+	signAccessToken,
+	signRefreshToken,
+	verifyToken,
+	REFRESH_TOKEN_EXPIRY,
+} from "@apiaas/auth";
 import { comparePasswords } from "@apiaas/auth";
 import { database } from "@apiaas/db";
 import { users, refreshTokens, type NewRefreshToken } from "@apiaas/db/schema";
@@ -47,13 +52,25 @@ authRoute.post(
 			});
 
 			if (!user) {
-				return c.json({ success: false, error: "Invalid credentials" }, 401);
+				return c.json(
+					{
+						success: false,
+						error: "Invalid email or password. Please try again.",
+					},
+					401,
+				);
 			}
 
 			const isPasswordValid = await comparePasswords(password, user.password);
 
 			if (!isPasswordValid) {
-				return c.json({ success: false, error: "Invalid credentials" }, 401);
+				return c.json(
+					{
+						success: false,
+						error: "Invalid email or password. Please try again.",
+					},
+					401,
+				);
 			}
 
 			const sessionPayload = {
@@ -72,20 +89,18 @@ authRoute.post(
 				sessionPayload,
 				c.env.AUTH_SECRET,
 			);
-			const refreshTokenExpires = new Date(
-				Date.now() + 7 * 24 * 60 * 60 * 1000,
-			);
 
 			const newRefreshToken: NewRefreshToken = {
 				token: refreshToken,
 				userId: user.id,
-				expiresAt: refreshTokenExpires,
+				expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
 			};
+
 			await db.insert(refreshTokens).values(newRefreshToken);
 
 			setCookie(c, "refreshToken", refreshToken, {
 				httpOnly: true,
-				expires: refreshTokenExpires,
+				expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
 				path: "/api/auth",
 				sameSite: "Lax",
 				secure: c.env.NODE_ENV === "production",
@@ -159,19 +174,16 @@ authRoute.post("/refresh", async (c) => {
 			newSessionPayload,
 			c.env.AUTH_SECRET,
 		);
-		const newRefreshTokenExpires = new Date(
-			Date.now() + 7 * 24 * 60 * 60 * 1000,
-		);
 
 		await db.insert(refreshTokens).values({
 			token: newRefreshTokenValue,
 			userId: decodedPayload.user.id,
-			expiresAt: newRefreshTokenExpires,
+			expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
 		});
 
 		setCookie(c, "refreshToken", newRefreshTokenValue, {
 			httpOnly: true,
-			expires: newRefreshTokenExpires,
+			expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
 			path: "/api/auth",
 			sameSite: "Lax",
 			secure: c.env.NODE_ENV === "production",

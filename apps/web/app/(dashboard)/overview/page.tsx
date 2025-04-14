@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Fragment, use } from "react";
 import Navigation from "../_components/navigations";
-import { useUser } from "@/lib/auth";
+import { useUser } from "@/components/providers/auth";
 import { Icons } from "@/components/ui/icons";
 
 export default function OverviewPage() {
