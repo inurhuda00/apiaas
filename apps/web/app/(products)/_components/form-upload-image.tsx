@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useCallback, use, useRef } from "react";
+import {
+	useState,
+	useCallback,
+	use,
+	useRef,
+	useActionState,
+	startTransition,
+} from "react";
 import {
 	Accordion,
 	AccordionContent,
@@ -23,6 +30,8 @@ import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { env } from "@/env";
 import { useSession } from "@/components/providers/session";
+import type { ActionState } from "@/actions/middleware";
+import { createProduct } from "@/actions/products";
 
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -190,17 +199,11 @@ export function UploadImageForm() {
 	});
 
 	const productIdRef = useRef<string>("");
-	const isTemporaryProductRef = useRef<boolean>(false);
 
-	const [formState, setFormState] = useState({
-		name: "Default",
-		description: "",
-		price: "",
-		category: "",
-		error: "",
-		success: "",
-		pending: false,
-	});
+	const [state, formAction, pending] = useActionState<ActionState, FormData>(
+		createProduct,
+		{},
+	);
 
 	const [progresses, setProgresses] = useState<Record<string, number>>({});
 
@@ -261,7 +264,6 @@ export function UploadImageForm() {
 			);
 
 			productIdRef.current = tempProduct.id;
-			isTemporaryProductRef.current = true;
 
 			return tempProduct.id;
 		} catch (error) {
@@ -349,93 +351,14 @@ export function UploadImageForm() {
 		}
 	}
 
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		formData.append("productId", productIdRef.current);
 
-		setFormState((prev) => ({
-			...prev,
-			pending: true,
-			error: "",
-			success: "",
-		}));
-
-		try {
-			if (!formState.name) {
-				throw new Error("Product name is required");
-			}
-			if (!formState.price) {
-				throw new Error("Price is required");
-			}
-			if (!formState.category) {
-				throw new Error("Category is required");
-			}
-
-			let productId = productIdRef.current;
-
-			if (isTemporaryProductRef.current) {
-				toast({
-					title: "Updating product",
-					description: "Finalizing product details...",
-				});
-
-				isTemporaryProductRef.current = false;
-
-				setFormState((prev) => ({
-					...prev,
-					success: "Product updated successfully!",
-				}));
-			} else {
-				const productData = await productService.createProduct(
-					{
-						name: formState.name,
-						description: formState.description,
-						price: formState.price,
-						category: formState.category,
-					},
-					sessionToken,
-				);
-
-				productId = productData.id;
-				productIdRef.current = productId;
-
-				setFormState((prev) => ({
-					...prev,
-					success: "Product created successfully!",
-				}));
-
-				toast({
-					title: "Product created",
-					description: "Product created successfully!",
-				});
-			}
-
-			setFormState((prev) => ({
-				...prev,
-				pending: false,
-				success: "Product and all files uploaded successfully!",
-			}));
-
-			toast({
-				title: "Success!",
-				description: "Product and all files uploaded successfully!",
-				variant: "success",
-			});
-		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : "Failed to upload product";
-
-			setFormState((prev) => ({
-				...prev,
-				pending: false,
-				error: errorMessage,
-			}));
-
-			toast({
-				title: "Error",
-				description: errorMessage,
-				variant: "destructive",
-			});
-		}
+		startTransition(() => {
+			formAction(formData);
+		});
 	}
 
 	return (
@@ -453,23 +376,17 @@ export function UploadImageForm() {
 					<AccordionContent className="px-4 pb-4">
 						<div className="space-y-4">
 							<div>
-								<div className="flex justify-between mb-1">
-									<Label htmlFor="name" className="font-medium">
-										Product name <span className="text-red-500">*</span>
-									</Label>
-									<span className="text-sm text-muted-foreground">
-										{formState.name.length}
-									</span>
-								</div>
+								<Label htmlFor="name" className="font-medium">
+									Product name <span className="text-red-500">*</span>
+								</Label>
 								<Input
 									id="name"
 									name="name"
-									value={formState.name}
-									onChange={(e) =>
-										setFormState({ ...formState, name: e.target.value })
-									}
+									type="text"
+									autoComplete="name"
+									defaultValue={state.name}
+									placeholder="Product name"
 									className="mt-1"
-									placeholder="Default"
 								/>
 								<p className="text-sm text-muted-foreground mt-1">
 									Give your product a short and clear name
@@ -477,21 +394,13 @@ export function UploadImageForm() {
 							</div>
 
 							<div>
-								<div className="flex justify-between mb-1">
-									<Label htmlFor="description" className="font-medium">
-										Product description
-									</Label>
-									<span className="text-sm text-muted-foreground">
-										{formState.description.length}
-									</span>
-								</div>
+								<Label htmlFor="description" className="font-medium">
+									Product description
+								</Label>
 								<Textarea
 									id="description"
 									name="description"
-									value={formState.description}
-									onChange={(e) =>
-										setFormState({ ...formState, description: e.target.value })
-									}
+									defaultValue={state.description}
 									className="mt-1"
 									placeholder="Describe your product"
 								/>
@@ -518,7 +427,7 @@ export function UploadImageForm() {
 						<FileUploader
 							accept={{ "image/*": [] }}
 							maxSize={10 * 1024 * 1024}
-							maxFiles={10}
+							maxFiles={5}
 							multiple={true}
 							value={uploadStateRef.current.mediaFiles}
 							progresses={progresses}
@@ -577,10 +486,25 @@ export function UploadImageForm() {
 										id="price"
 										name="price"
 										type="text"
-										value={formState.price}
-										onChange={(e) =>
-											setFormState({ ...formState, price: e.target.value })
-										}
+										inputMode="numeric"
+										pattern="[0-9]*"
+										min="0"
+										step="0.01"
+										onKeyDown={(e) => {
+											if (
+												!/^[0-9]$/.test(e.key) &&
+												![
+													"Backspace",
+													"Delete",
+													"ArrowLeft",
+													"ArrowRight",
+													"Tab",
+												].includes(e.key) &&
+												!e.ctrlKey
+											) {
+												e.preventDefault();
+											}
+										}}
 										className="pl-8"
 									/>
 								</div>
@@ -590,12 +514,7 @@ export function UploadImageForm() {
 								<Label htmlFor="category" className="font-medium">
 									Category <span className="text-red-500">*</span>
 								</Label>
-								<Select
-									onValueChange={(value) =>
-										setFormState({ ...formState, category: value })
-									}
-									defaultValue={formState.category}
-								>
+								<Select defaultValue={state.category}>
 									<SelectTrigger className="mt-1">
 										<SelectValue placeholder="Select a category" />
 									</SelectTrigger>
@@ -628,7 +547,7 @@ export function UploadImageForm() {
 					<AccordionContent className="px-4 pb-4">
 						<FileUploader
 							maxSize={5 * 1024 * 1024 * 1024}
-							maxFiles={100}
+							maxFiles={5}
 							multiple={true}
 							value={uploadStateRef.current.files}
 							progresses={progresses}
@@ -666,22 +585,16 @@ export function UploadImageForm() {
 			</Accordion>
 
 			<div className="flex justify-end">
-				<SubmitButton pending={formState.pending}>
-					{formState.pending
-						? "Creating Product..."
-						: isTemporaryProductRef.current
-							? "Update Product"
-							: "Create Product"}
-				</SubmitButton>
+				<SubmitButton pending={pending}>Create Product</SubmitButton>
 			</div>
 
 			<div className="mt-4">
-				{formState.error && (
-					<div className="text-red-500 text-sm">{formState.error}</div>
+				{state.error && (
+					<div className="text-red-500 text-sm">{state.error}</div>
 				)}
 
-				{formState.success && (
-					<div className="text-green-500 text-sm">{formState.success}</div>
+				{state.success && (
+					<div className="text-green-500 text-sm">{state.success}</div>
 				)}
 			</div>
 		</form>

@@ -32,7 +32,6 @@ export function SignUpForm() {
 					name="name"
 					type="text"
 					autoComplete="name"
-					required
 					className="mt-1"
 				/>
 			</div>
@@ -44,7 +43,6 @@ export function SignUpForm() {
 					name="email"
 					type="email"
 					autoComplete="email"
-					required
 					className="mt-1"
 				/>
 			</div>
@@ -56,7 +54,6 @@ export function SignUpForm() {
 					name="password"
 					type="password"
 					autoComplete="new-password"
-					required
 					className="mt-1"
 				/>
 				<p className="mt-1 text-xs text-gray-500">

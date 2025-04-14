@@ -22,6 +22,7 @@ app.use(
 	"*",
 	cors({
 		origin: [
+			"http://localhost:8787",
 			"http://localhost:3000",
 			"https://mondive.xyz",
 			"https://www.mondive.xyz",

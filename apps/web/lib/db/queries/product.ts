@@ -10,6 +10,7 @@ import {
 	type Product,
 	type Category,
 	type Image,
+	type NewProduct,
 } from "@apiaas/db/schema";
 import {
 	and,
@@ -21,12 +22,10 @@ import {
 	exists,
 	ne,
 	type SQL,
-	type Column,
 } from "drizzle-orm";
-import {
-	searchParamsCache,
-	type ExtendedColumnSort,
-	type ExtendedColumnFilter,
+import type {
+	ExtendedColumnSort,
+	ExtendedColumnFilter,
 } from "@/lib/utils/parsers";
 
 export type ProductWithRelations = Pick<
@@ -408,20 +407,30 @@ export async function getRelatedProducts(
 	});
 }
 
-// Helper function to determine column type
 function getColumnType(column: unknown): string | null {
-	// Access the internal Drizzle ORM structure to check type
-	// This is somewhat implementation-specific but works for boolean detection
 	if (column && typeof column === "object" && "dataType" in column) {
 		const dataType = (column as { dataType?: string }).dataType;
 		return dataType?.toLowerCase() || null;
 	}
 
-	// Fallback detection for boolean columns
 	const columnStr = String(column);
 	if (columnStr.includes("boolean(")) {
 		return "boolean";
 	}
 
 	return null;
+}
+
+export async function makeProduct(newProduct: NewProduct) {
+	const [product] = await db.insert(products).values(newProduct).returning({
+		id: products.id,
+		name: products.name,
+		slug: products.slug,
+		description: products.description,
+		categoryId: products.categoryId,
+		ownerId: products.ownerId,
+		createdAt: products.createdAt,
+		updatedAt: products.updatedAt,
+	});
+	return product;
 }

@@ -1,28 +1,31 @@
 "use server";
 
-import { mockFileUpload } from "@/lib/utils/mock-upload";
+import { makeProduct } from "@/lib/db/queries/product";
 import { validatedActionWithUser } from "./middleware";
-import { UploadAssetsSchema } from "./products.validation";
+import { CreateProductSchema } from "./products.validation";
+import { slugify } from "@/lib/utils/slugify";
 
-export const uploadAssets = validatedActionWithUser(
-	UploadAssetsSchema,
+export const createProduct = validatedActionWithUser(
+	CreateProductSchema,
 	async (data, _, user) => {
-		const progresses: Record<string, number> = {};
+		if (!user.role.includes("admin")) {
+			return {
+				error: "You are not authorized to create products",
+			};
+		}
 
-		return data.images.map(async (file) => {
-			try {
-				await mockFileUpload(
-					file,
-					{ minDuration: 2000, failureRate: 0.1 },
-					(progress) => {
-						progresses[file.name] = progress;
-					},
-				);
+		const { name, description } = data;
 
-				return { progresses, error: "", success: "" };
-			} catch (error) {
-				return { error };
-			}
+		const product = await makeProduct({
+			name,
+			description,
+			ownerId: user.id,
+			categoryId: 1,
+			slug: slugify(name),
 		});
+
+		return {
+			product,
+		};
 	},
 );
