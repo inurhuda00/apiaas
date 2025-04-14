@@ -76,7 +76,7 @@ const faqs = [
 	},
 ];
 
-export default function UpgradePage() {
+export default async function UpgradePage() {
 	return (
 		<div className="flex-grow py-12 bg-gradient-to-b from-white to-gray-50">
 			<MaxWidthWrapper>

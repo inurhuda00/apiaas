@@ -3,7 +3,7 @@
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import Link from "next/link";
 
-export default function LicensePage() {
+export default async function LicensePage() {
 	return (
 		<div className="flex-grow py-12">
 			<MaxWidthWrapper className="max-w-4xl">
