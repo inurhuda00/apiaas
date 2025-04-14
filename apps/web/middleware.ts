@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "@apiaas/auth";
+import { type SessionData, signAccessToken, verifyToken } from "@apiaas/auth";
 import { env } from "./env";
-import { eq } from "drizzle-orm";
-import { db } from "./lib/db";
-import { refreshTokens } from "@apiaas/db/schema";
+import { setAccessToken } from "./lib/auth/session";
 
 const ACCESS_TOKEN_NAME = "session";
 const REFRESH_TOKEN_NAME = "refresh";
+
 const AUTH_SECRET = env.AUTH_SECRET;
 
 const protectedRoutes = new Set([
@@ -65,10 +64,16 @@ async function getAuthenticatedUser(cookieStore: NextRequest["cookies"]) {
 			const sessionData = await verifyToken(sessionCookie.value, AUTH_SECRET);
 			if (sessionData?.expires && new Date(sessionData.expires) < new Date()) {
 				console.warn("Access token expired");
-			} else if (sessionData?.user) {
-				console.info(`Access token valid for user ID: ${sessionData.user.id}`);
-				return sessionData.user;
+				return null;
 			}
+
+			if (!sessionData?.user) {
+				console.warn("Invalid user data in access token");
+				return null;
+			}
+
+			console.info(`Access token valid for user ID: ${sessionData.user.id}`);
+			return sessionData.user;
 		} catch (error) {
 			console.error("Error verifying access token:", error);
 		}
@@ -90,27 +95,23 @@ async function getAuthenticatedUser(cookieStore: NextRequest["cookies"]) {
 			return null;
 		}
 
-		if (!refreshData?.user?.id || typeof refreshData.user.id !== "number") {
+		if (!refreshData?.user) {
 			console.warn("Invalid user data in refresh token");
 			return null;
 		}
 
 		console.info(`Refresh token valid for user ID: ${refreshData.user.id}`);
 
-		// Verify token exists in database
-		const storedToken = await db.query.refreshTokens.findFirst({
-			where: eq(refreshTokens.token, refreshCookie.value),
-		});
-			
-		if (!storedToken) {
-			console.warn("Refresh token not found in database");
-			return null;
-		}
+		const session: SessionData = {
+			user: {
+				id: refreshData.user.id,
+				role: refreshData.user.role,
+			},
+		};
 
-		console.info("Refresh token found in database");
-		console.info(
-			`User authenticated via refresh token: ${refreshData.user.id}`,
-		);
+		const accessToken = await signAccessToken(session, AUTH_SECRET);
+		await setAccessToken(accessToken);
+
 		return refreshData.user;
 	} catch (error) {
 		console.error("Error verifying refresh token:", error);
@@ -119,11 +120,6 @@ async function getAuthenticatedUser(cookieStore: NextRequest["cookies"]) {
 }
 
 async function clearAuthTokens(cookieStore: NextRequest["cookies"]) {
-	const refreshCookie = cookieStore.get(REFRESH_TOKEN_NAME);
-	if (refreshCookie?.value) {
-		await db.delete(refreshTokens).where(eq(refreshTokens.token, refreshCookie.value));
-	}
-
 	cookieStore.delete(ACCESS_TOKEN_NAME);
 	cookieStore.delete(REFRESH_TOKEN_NAME);
 }

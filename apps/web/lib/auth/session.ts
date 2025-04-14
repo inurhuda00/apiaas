@@ -75,14 +75,13 @@ export async function getAuthenticatedUser() {
 
 		console.info(`Refresh token valid for user ID: ${refreshData.user.id}`);
 
-		// Verify token exists in database
-		const storedToken = await getRefreshTokenFromDb(refreshCookie.value);
-		if (!storedToken) {
+		// verify refresh token is in database
+		const refreshToken = await getRefreshTokenFromDb(refreshCookie.value);
+
+		if (!refreshToken) {
 			console.warn("Refresh token not found in database");
 			return null;
 		}
-
-		console.info("Refresh token found in database");
 
 		const user = await getUserById(refreshData.user.id);
 		if (!user) return null;
@@ -99,12 +98,7 @@ export async function getAuthenticatedUser() {
 		};
 
 		const accessToken = await signAccessToken(session, AUTH_SECRET);
-		cookieStore.set(ACCESS_TOKEN_NAME, accessToken, {
-			expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY),
-			httpOnly: true,
-			secure: true,
-			sameSite: "lax",
-		});
+		await setAccessToken(accessToken);
 
 		return user;
 	} catch (error) {
@@ -142,6 +136,24 @@ export async function deleteSession() {
 	cookieStore.delete(REFRESH_TOKEN_NAME);
 }
 
+export async function setAccessToken(accessToken: string) {
+	(await cookies()).set(ACCESS_TOKEN_NAME, accessToken, {
+		expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY),
+		httpOnly: true,
+		secure: true,
+		sameSite: "lax",
+	});
+}
+
+export async function setRefreshToken(refreshToken: string) {
+	(await cookies()).set(REFRESH_TOKEN_NAME, refreshToken, {
+		expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
+		httpOnly: true,
+		secure: true,
+		sameSite: "lax",
+	});
+}
+
 export async function setSession(user: { id: number; role: string }) {
 	const session: SessionData = {
 		user: {
@@ -155,17 +167,6 @@ export async function setSession(user: { id: number; role: string }) {
 
 	await createRefreshToken(refreshToken, user.id);
 
-	(await cookies()).set(ACCESS_TOKEN_NAME, accessToken, {
-		expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY), // Set to expire in 15 minutes
-		httpOnly: true,
-		secure: true,
-		sameSite: "lax",
-	});
-
-	(await cookies()).set(REFRESH_TOKEN_NAME, refreshToken, {
-		expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
-		httpOnly: true,
-		secure: true,
-		sameSite: "lax",
-	});
+	await setAccessToken(accessToken);
+	await setRefreshToken(refreshToken);
 }
