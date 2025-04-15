@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import type { ActionState } from "@/actions/middleware";
 import { signUp } from "@/actions/auth";
 import { SubmitButton } from "@/components/ui/submit-button";
+import Form from "next/form";
 
 export function ActivateForm() {
 	const searchParams = useSearchParams();
@@ -16,7 +17,7 @@ export function ActivateForm() {
 		{ error: "", success: "", email: "" },
 	);
 	return (
-		<form action={formAction} className="text-left space-y-4">
+		<Form action={formAction} className="text-left space-y-4">
 			<div>
 				<Label htmlFor="email">Email address</Label>
 				<Input
@@ -60,6 +61,6 @@ export function ActivateForm() {
 			)}
 
 			<SubmitButton pending={pending}>Create account</SubmitButton>
-		</form>
+		</Form>
 	);
 }

@@ -4,6 +4,7 @@ import {
 	DataControlsSkeleton,
 	PaginateSkeleton,
 } from "./skeletons/data-controls-skeleton";
+import { FileUploaderSkeleton } from "./skeletons/file-uploader-skeleton";
 
 export const DynamicProductCard = dynamic(
 	() =>
@@ -27,4 +28,11 @@ export const DynamicPaginate = dynamic(
 			default: mod.Paginate,
 		})),
 	{ loading: () => <PaginateSkeleton /> },
+);
+
+export const DynamicFileUploader = dynamic(
+	() => import("@/components/upload/file-uploader").then((mod) => ({
+		default: mod.FileUploader,
+	})),
+	{ loading: () => <FileUploaderSkeleton /> },
 );

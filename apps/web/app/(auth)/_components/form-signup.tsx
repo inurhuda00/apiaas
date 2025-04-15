@@ -9,6 +9,7 @@ import { Icons } from "@/components/ui/icons";
 import type { ActionState } from "@/actions/middleware";
 import { signUp } from "@/actions/auth";
 import { SubmitButton } from "@/components/ui/submit-button";
+import Form from "next/form";
 
 export function SignUpForm() {
 	const searchParams = useSearchParams();
@@ -21,7 +22,7 @@ export function SignUpForm() {
 	);
 
 	return (
-		<form action={formAction} className="space-y-4">
+		<Form action={formAction} className="space-y-4">
 			<input type="hidden" name="redirect" value={redirect || ""} />
 			<input type="hidden" name="priceId" value={priceId || ""} />
 			<input type="hidden" name="inviteId" value={inviteId || ""} />
@@ -66,6 +67,6 @@ export function SignUpForm() {
 			)}
 
 			<SubmitButton pending={pending}>Create account</SubmitButton>
-		</form>
+		</Form>
 	);
 }

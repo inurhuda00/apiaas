@@ -6,6 +6,7 @@ import type { ActionState } from "@/actions/middleware";
 import { forgotPassword } from "@/actions/auth";
 import { useActionState } from "react";
 import { cn } from "@/lib/utils/cn";
+import Form from "next/form";
 
 export function ForgotPasswordForm() {
 	const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -14,7 +15,7 @@ export function ForgotPasswordForm() {
 	);
 
 	return (
-		<form action={formAction} className="space-y-4">
+		<Form action={formAction} className="space-y-4">
 			<div className={cn({ "opacity-0": state.success })}>
 				<Label htmlFor="email">Email address</Label>
 				<Input
@@ -45,6 +46,6 @@ export function ForgotPasswordForm() {
 			)}
 
 			<SubmitButton pending={pending}>Send Reset Link</SubmitButton>
-		</form>
+		</Form>
 	);
 }

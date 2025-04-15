@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, use, type ReactNode } from "react";
 import type { User } from "@apiaas/db/schema";
 
 type UserContextType = {
@@ -10,7 +10,7 @@ type UserContextType = {
 const UserContext = createContext<UserContextType | null>(null);
 
 export function useUser(): UserContextType {
-	const context = useContext(UserContext);
+	const context = use(UserContext);
 	if (context === null) {
 		throw new Error("useUser must be used within a UserProvider");
 	}
@@ -24,8 +24,8 @@ export function UserProvider({
 	children: ReactNode;
 } & UserContextType) {
 	return (
-		<UserContext.Provider value={{ userPromise }}>
+		<UserContext value={{ userPromise }}>
 			{children}
-		</UserContext.Provider>
+		</UserContext>
 	);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, use, type ReactNode } from "react";
 
 type SessionContextType = {
 	sessionPromise: Promise<string | undefined>;
@@ -9,7 +9,7 @@ type SessionContextType = {
 const SessionContext = createContext<SessionContextType | null>(null);
 
 export function useSession(): SessionContextType {
-	const context = useContext(SessionContext);
+	const context = use(SessionContext);
 	if (context === null) {
 		throw new Error("useSession must be used within a SessionProvider");
 	}
@@ -23,8 +23,8 @@ export function SessionProvider({
 	children: ReactNode;
 } & SessionContextType) {
 	return (
-		<SessionContext.Provider value={{ sessionPromise }}>
+		<SessionContext value={{ sessionPromise }}>
 			{children}
-		</SessionContext.Provider>
+		</SessionContext>
 	);
 }
