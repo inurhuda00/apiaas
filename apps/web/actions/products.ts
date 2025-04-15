@@ -1,31 +1,57 @@
 "use server";
 
-import { makeProduct } from "@/lib/db/queries/product";
+import {
+	generateProductSlug,
+	getProductById,
+	syncProduct,
+} from "@/lib/db/queries/product";
 import { validatedActionWithUser } from "./middleware";
-import { CreateProductSchema } from "./products.validation";
-import { slugify } from "@/lib/utils/slugify";
+import { UpdateProductSchema } from "./products.validation";
+import { getCategoryById } from "@/lib/db/queries/category";
 
-export const createProduct = validatedActionWithUser(
-	CreateProductSchema,
+export const updateProduct = validatedActionWithUser(
+	UpdateProductSchema,
 	async (data, _, user) => {
 		if (!user.role.includes("admin")) {
 			return {
+				...data,
 				error: "You are not authorized to create products",
 			};
 		}
 
-		const { name, description } = data;
+		const { productId, categoryId, locked, price, ...rest } = data;
 
-		const product = await makeProduct({
-			name,
-			description,
+		const existingProduct = await getProductById(productId);
+
+		if (!existingProduct) {
+			return {
+				...rest,
+				error: "Product not found",
+			};
+		}
+
+		const category = await getCategoryById(categoryId);
+
+		if (!category) {
+			return {
+				...rest,
+				error: "Category not found",
+			};
+		}
+
+		const slug = await generateProductSlug(rest.name);
+
+		const updatedProduct = await syncProduct(existingProduct.id, {
+			...rest,
 			ownerId: user.id,
-			categoryId: 1,
-			slug: slugify(name),
+			categoryId: categoryId,
+			locked: locked ?? true,
+			price: price ?? 0,
+			slug,
 		});
 
 		return {
-			product,
+			...updatedProduct,
 		};
 	},
 );

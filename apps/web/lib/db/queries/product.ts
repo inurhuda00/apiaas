@@ -421,16 +421,34 @@ function getColumnType(column: unknown): string | null {
 	return null;
 }
 
-export async function makeProduct(newProduct: NewProduct) {
-	const [product] = await db.insert(products).values(newProduct).returning({
-		id: products.id,
-		name: products.name,
-		slug: products.slug,
-		description: products.description,
-		categoryId: products.categoryId,
-		ownerId: products.ownerId,
-		createdAt: products.createdAt,
-		updatedAt: products.updatedAt,
+export async function getProductById(productId: number) {
+	const product = await db.query.products.findFirst({
+		where: eq(products.id, productId),
 	});
 	return product;
+}
+
+export async function syncProduct(productId: number, product: NewProduct) {
+	const [updatedProduct] = await db
+		.update(products)
+		.set({
+			name: product.name,
+			slug: product.slug,
+			price: product.price,
+			locked: product.locked,
+			description: product.description,
+			categoryId: product.categoryId,
+		})
+		.where(eq(products.id, productId))
+		.returning({
+			id: products.id,
+			name: products.name,
+			slug: products.slug,
+			price: products.price,
+			locked: products.locked,
+			description: products.description,
+			categoryId: products.categoryId,
+		});
+
+	return updatedProduct;
 }

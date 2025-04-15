@@ -9,6 +9,7 @@
 	"dependencies": {
 		"@apiaas/auth": "workspace:*",
 		"@apiaas/db": "workspace:*",
+		"@apiaas/utils": "workspace:*",
 		"@hono-rate-limiter/cloudflare": "^0.2.2",
 		"@hono/zod-validator": "^0.4.3",
 		"drizzle-kit": "^0.30.6",
