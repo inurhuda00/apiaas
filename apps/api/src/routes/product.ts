@@ -3,36 +3,66 @@ import { AuthRoleMiddleware } from "../middleware/auth";
 import type { Env, Variables } from "@/types";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import { database } from "@apiaas/db";
+import { createProduct, generateProductSlug } from "../db/queries/product";
+import { transformZodError } from "../../../../packages/utils/zod-transformer";
 
 const productRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Apply authentication middleware
 productRoute.use("/*", AuthRoleMiddleware(["admin", "free"]));
 
-// Schema for product creation
 const productSchema = z.object({
 	name: z.string().min(1, { message: "Product name is required" }),
 	description: z.string().optional(),
 	price: z.string().min(1, { message: "Price is required" }),
 	category: z.string().min(1, { message: "Category is required" }),
 });
-// Schema for product media upload
+
 const mediaUploadSchema = z.object({
-	productId: z.string().min(1, { message: "Product ID is required" }),
-	file: z.instanceof(File, { message: "File is required" }),
+	productId: z.number().min(1, { message: "Product ID is required" }),
+	file: z.instanceof(File, { message: "File is required" }).refine(
+		(file) => {
+			const allowedMimeTypes = [
+				"image/jpeg",
+				"image/png",
+				"image/gif",
+				"image/webp",
+				"image/svg+xml",
+			];
+			return allowedMimeTypes.includes(file.type);
+		},
+		{
+			message:
+				"Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG images are allowed.",
+		},
+	),
 	isPrimary: z.preprocess(
 		(val) => val === "true" || val === true,
 		z.boolean().optional().default(false),
 	),
 });
 
-// Schema for product file upload
 const fileUploadSchema = z.object({
-	productId: z.string().min(1, { message: "Product ID is required" }),
-	file: z.instanceof(File, { message: "File is required" }),
+	productId: z.number().min(1, { message: "Product ID is required" }),
+	file: z.instanceof(File, { message: "File is required" }).refine(
+		(file) => {
+			const allowedFileTypes = [
+				"application/pdf",
+				"application/zip",
+				"image/svg+xml",
+				"application/illustrator",
+				"image/x-eps",
+				"application/postscript",
+			];
+			return allowedFileTypes.includes(file.type);
+		},
+		{
+			message:
+				"Invalid file type. Only PDF, ZIP, SVG, and vector files are allowed.",
+		},
+	),
 });
 
-// Helper functions
 const generateUniqueFilename = (originalName: string) => {
 	const timestamp = Date.now();
 	const randomString = Math.random().toString(36).substring(2, 10);
@@ -40,120 +70,114 @@ const generateUniqueFilename = (originalName: string) => {
 	return `${timestamp}-${randomString}.${ext}`;
 };
 
-const validateImageMimeType = (file: File) => {
-	const allowedMimeTypes = [
-		"image/jpeg",
-		"image/png",
-		"image/gif",
-		"image/webp",
-		"image/svg+xml",
-	];
-
-	if (!allowedMimeTypes.includes(file.type)) {
-		throw new Error(
-			`Invalid file type. Allowed types: ${allowedMimeTypes.join(", ")}`,
-		);
-	}
+// Helper function to handle errors
+const handleError = (c: any, error: any, defaultMessage: string) => {
+	console.error(defaultMessage, error);
+	return c.json(
+		{
+			success: false,
+			error: error instanceof Error ? error.message : defaultMessage,
+		},
+		500,
+	);
 };
 
-// Create a new product
-productRoute.post(
-	"/create",
-	zValidator("json", productSchema, (result, c) => {
+// Validator middleware factory
+const createValidator = (schema: z.ZodSchema) => {
+	return zValidator("json", schema, (result, c) => {
 		if (!result.success) {
-			return c.json(
-				{
-					success: false,
-					error: result.error.format(),
-				},
-				400,
-			);
+			const error = transformZodError(result.error);
+			return c.json(error, 422);
 		}
-	}),
-	async (c) => {
-		try {
-			const data = await c.req.valid("json");
-			const user = c.get("user");
+	});
+};
 
-			// In a real implementation, you would save the product to your database here
-			// For the demo, we'll just return the product data with a mock ID
-			const productId = `prod_${Date.now()}`;
-
-			return c.json({
-				success: true,
-				data: {
-					id: productId,
-					...data,
-					userId: user.id,
-					createdAt: new Date().toISOString(),
-				},
-			});
-		} catch (error) {
-			console.error("Product creation error:", error);
-			return c.json(
-				{
-					success: false,
-					error:
-						error instanceof Error ? error.message : "Failed to create product",
-				},
-				500,
-			);
+// Form validator middleware factory
+const createFormValidator = (schema: z.ZodSchema) => {
+	return zValidator("form", schema, (result, c) => {
+		if (!result.success) {
+			const error = transformZodError(result.error);
+			return c.json(error, 422);
 		}
-	},
-);
+	});
+};
 
-// Upload product media (images)
+productRoute.post("/create", createValidator(productSchema), async (c) => {
+	try {
+		const data = c.req.valid("json");
+		const user = c.get("user");
+
+		const db = database(c.env.DATABASE_URL);
+		const slug = await generateProductSlug(db, data.name);
+
+		const newProduct = await createProduct(db, {
+			slug,
+			price: 0,
+			categoryId: 0,
+			ownerId: user.id,
+			locked: false,
+		});
+
+		if (!newProduct) {
+			throw new Error("Failed to create product");
+		}
+
+		return c.json({
+			success: true,
+			data: {
+				id: newProduct.id,
+				...data,
+				userId: user.id,
+				createdAt: new Date().toISOString(),
+			},
+		});
+	} catch (error) {
+		return handleError(c, error, "Failed to create product");
+	}
+});
+
+// Helper function to upload file to bucket
+const uploadToBucket = async (
+	c: any,
+	file: File,
+	productId: number | string,
+	path: string,
+	metadata: Record<string, string>,
+) => {
+	const uniqueFilename = generateUniqueFilename(file.name);
+
+	await c.env.BUCKET.put(
+		`products/${productId}/${path}/${uniqueFilename}`,
+		file,
+		{
+			httpMetadata: {
+				contentType: file.type,
+			},
+			customMetadata: {
+				...metadata,
+				originalName: file.name,
+				uploadedAt: new Date().toISOString(),
+			},
+		},
+	);
+
+	return uniqueFilename;
+};
+
 productRoute.post(
 	"/media",
-	zValidator("form", mediaUploadSchema, (result, c) => {
-		if (!result.success) {
-			return c.json(
-				{
-					success: false,
-					error: result.error.format(),
-				},
-				400,
-			);
-		}
-	}),
+	createFormValidator(mediaUploadSchema),
 	async (c) => {
 		try {
-			const data = await c.req.valid("form");
-			const file = data.file;
-			const productId = data.productId;
-			const isPrimary = data.isPrimary;
-
-			try {
-				validateImageMimeType(file);
-			} catch (err) {
-				return c.json(
-					{
-						success: false,
-						error: err instanceof Error ? err.message : "Invalid file type",
-					},
-					400,
-				);
-			}
-
-			const uniqueFilename = generateUniqueFilename(file.name);
+			const data = c.req.valid("form");
+			const { file, productId, isPrimary } = data;
 			const user = c.get("user");
 
-			await c.env.BUCKET.put(
-				`products/${productId}/media/${uniqueFilename}`,
-				file,
-				{
-					httpMetadata: {
-						contentType: file.type,
-					},
-					customMetadata: {
-						userId: user.id.toString(),
-						productId,
-						originalName: file.name,
-						isPrimary: isPrimary.toString(),
-						uploadedAt: new Date().toISOString(),
-					},
-				},
-			);
+			const uniqueFilename = await uploadToBucket(c, file, productId, "media", {
+				userId: user.id.toString(),
+				productId: productId.toString(),
+				isPrimary: isPrimary.toString(),
+			});
 
 			const publicUrl = `https://assets.mondive.xyz/products/${productId}/media/${uniqueFilename}`;
 
@@ -168,59 +192,25 @@ productRoute.post(
 				},
 			});
 		} catch (error) {
-			console.error("Media upload error:", error);
-			return c.json(
-				{
-					success: false,
-					error:
-						error instanceof Error ? error.message : "Failed to upload media",
-				},
-				500,
-			);
+			return handleError(c, error, "Failed to upload media");
 		}
 	},
 );
 
-// Upload product files (downloadable files)
 productRoute.post(
 	"/files",
-	zValidator("form", fileUploadSchema, (result, c) => {
-		if (!result.success) {
-			return c.json(
-				{
-					success: false,
-					error: result.error.format(),
-				},
-				400,
-			);
-		}
-	}),
+	createFormValidator(fileUploadSchema),
 	async (c) => {
 		try {
 			const data = await c.req.valid("form");
-			const file = data.file;
-			const productId = data.productId;
-
-			const uniqueFilename = generateUniqueFilename(file.name);
+			const { file, productId } = data;
 			const user = c.get("user");
 
-			await c.env.BUCKET.put(
-				`products/${productId}/files/${uniqueFilename}`,
-				file,
-				{
-					httpMetadata: {
-						contentType: file.type,
-					},
-					customMetadata: {
-						userId: user.id.toString(),
-						productId,
-						originalName: file.name,
-						uploadedAt: new Date().toISOString(),
-					},
-				},
-			);
+			const uniqueFilename = await uploadToBucket(c, file, productId, "files", {
+				userId: user.id.toString(),
+				productId: productId.toString(),
+			});
 
-			// For downloadable files, we won't expose the direct URL
 			return c.json({
 				success: true,
 				data: {
@@ -231,38 +221,36 @@ productRoute.post(
 				},
 			});
 		} catch (error) {
-			console.error("File upload error:", error);
-			return c.json(
-				{
-					success: false,
-					error:
-						error instanceof Error ? error.message : "Failed to upload file",
-				},
-				500,
-			);
+			return handleError(c, error, "Failed to upload file");
 		}
 	},
 );
 
-// Get all media for a product
+// Helper function to list bucket objects
+const listBucketObjects = async (c: any, productId: string, path: string) => {
+	if (!productId) {
+		return c.json(
+			{
+				success: false,
+				error: "Product ID is required",
+			},
+			400,
+		);
+	}
+
+	const prefix = `products/${productId}/${path}/`;
+	return await c.env.BUCKET.list({ prefix });
+};
+
 productRoute.get("/media/:productId", async (c) => {
 	try {
 		const productId = c.req.param("productId");
+		const objects = await listBucketObjects(c, productId, "media");
 
-		if (!productId) {
-			return c.json(
-				{
-					success: false,
-					error: "Product ID is required",
-				},
-				400,
-			);
-		}
+		if (!objects) return; // Early return if error response already sent
 
-		const prefix = `products/${productId}/media/`;
-		const objects = await c.env.BUCKET.list({ prefix });
-
-		const mediaItems = objects.objects.map((obj) => {
+		const mediaItems = objects.objects.map((obj: any) => {
+			const prefix = `products/${productId}/media/`;
 			const filename = obj.key.replace(prefix, "");
 			return {
 				filename,
@@ -279,36 +267,19 @@ productRoute.get("/media/:productId", async (c) => {
 			data: mediaItems,
 		});
 	} catch (error) {
-		console.error("Get media error:", error);
-		return c.json(
-			{
-				success: false,
-				error: error instanceof Error ? error.message : "Failed to get media",
-			},
-			500,
-		);
+		return handleError(c, error, "Failed to get media");
 	}
 });
 
-// Get all files for a product
 productRoute.get("/files/:productId", async (c) => {
 	try {
 		const productId = c.req.param("productId");
+		const objects = await listBucketObjects(c, productId, "files");
 
-		if (!productId) {
-			return c.json(
-				{
-					success: false,
-					error: "Product ID is required",
-				},
-				400,
-			);
-		}
+		if (!objects) return; // Early return if error response already sent
 
-		const prefix = `products/${productId}/files/`;
-		const objects = await c.env.BUCKET.list({ prefix });
-
-		const files = objects.objects.map((obj) => {
+		const files = objects.objects.map((obj: any) => {
+			const prefix = `products/${productId}/files/`;
 			const filename = obj.key.replace(prefix, "");
 			return {
 				filename,
@@ -324,85 +295,53 @@ productRoute.get("/files/:productId", async (c) => {
 			data: files,
 		});
 	} catch (error) {
-		console.error("Get files error:", error);
-		return c.json(
-			{
-				success: false,
-				error: error instanceof Error ? error.message : "Failed to get files",
-			},
-			500,
-		);
+		return handleError(c, error, "Failed to get files");
 	}
 });
 
-// Delete a media item
+// Helper function to delete bucket object
+const deleteBucketObject = async (
+	c: any,
+	productId: string,
+	path: string,
+	filename: string,
+) => {
+	if (!productId || !filename) {
+		return c.json(
+			{
+				success: false,
+				error: "Product ID and filename are required",
+			},
+			400,
+		);
+	}
+
+	const key = `products/${productId}/${path}/${filename}`;
+	await c.env.BUCKET.delete(key);
+
+	return c.json({
+		success: true,
+		message: `${path === "media" ? "Media" : "File"} deleted successfully`,
+	});
+};
+
 productRoute.delete("/media/:productId/:filename", async (c) => {
 	try {
 		const productId = c.req.param("productId");
 		const filename = c.req.param("filename");
-
-		if (!productId || !filename) {
-			return c.json(
-				{
-					success: false,
-					error: "Product ID and filename are required",
-				},
-				400,
-			);
-		}
-
-		const key = `products/${productId}/media/${filename}`;
-		await c.env.BUCKET.delete(key);
-
-		return c.json({
-			success: true,
-			message: "Media deleted successfully",
-		});
+		return await deleteBucketObject(c, productId, "media", filename);
 	} catch (error) {
-		console.error("Delete media error:", error);
-		return c.json(
-			{
-				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to delete media",
-			},
-			500,
-		);
+		return handleError(c, error, "Failed to delete media");
 	}
 });
 
-// Delete a file
 productRoute.delete("/files/:productId/:filename", async (c) => {
 	try {
 		const productId = c.req.param("productId");
 		const filename = c.req.param("filename");
-
-		if (!productId || !filename) {
-			return c.json(
-				{
-					success: false,
-					error: "Product ID and filename are required",
-				},
-				400,
-			);
-		}
-
-		const key = `products/${productId}/files/${filename}`;
-		await c.env.BUCKET.delete(key);
-
-		return c.json({
-			success: true,
-			message: "File deleted successfully",
-		});
+		return await deleteBucketObject(c, productId, "files", filename);
 	} catch (error) {
-		console.error("Delete file error:", error);
-		return c.json(
-			{
-				success: false,
-				error: error instanceof Error ? error.message : "Failed to delete file",
-			},
-			500,
-		);
+		return handleError(c, error, "Failed to delete file");
 	}
 });
 

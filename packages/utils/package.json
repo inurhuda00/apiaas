@@ -1,0 +1,10 @@
+{
+	"name": "@apiaas/utils",
+	"version": "0.0.1",
+	"exports": {
+		".": "./index.ts"
+	},
+	"dependencies": {
+		"zod": "^3.24.2"
+	}
+}

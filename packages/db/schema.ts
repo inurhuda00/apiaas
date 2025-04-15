@@ -7,6 +7,7 @@ import {
 	integer,
 	boolean,
 	primaryKey,
+	doublePrecision,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -36,10 +37,12 @@ export const products = pgTable("products", {
 	ownerId: integer("owner_id")
 		.notNull()
 		.references(() => users.id),
-	name: varchar("name", { length: 255 }).notNull(),
+	name: varchar("name", { length: 255 }),
 	slug: varchar("slug", { length: 255 }).notNull().unique(),
 	description: text("description"),
-	locked: boolean("locked").notNull().default(false),
+	locked: boolean("locked").notNull().default(true),
+	price: doublePrecision("price").notNull().default(0),
+	productId: varchar("product_id", { length: 255 }).unique(),
 	categoryId: integer("category_id")
 		.notNull()
 		.references(() => categories.id),
