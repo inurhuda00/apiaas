@@ -11,13 +11,14 @@ import { getCategoryById } from "@/lib/db/queries/category";
 
 export const updateProduct = validatedActionWithUser(
 	UpdateProductSchema,
-	async (data, _, user) => {
+	async (data, formData, user) => {
 		if (!user.role.includes("admin")) {
 			return {
 				...data,
 				error: "You are not authorized to create products",
 			};
 		}
+		console.log(formData);
 
 		const { productId, categoryId, locked, price, ...rest } = data;
 
@@ -43,8 +44,8 @@ export const updateProduct = validatedActionWithUser(
 
 		const updatedProduct = await syncProduct(existingProduct.id, {
 			...rest,
-			ownerId: user.id,
 			categoryId: categoryId,
+			ownerId: user.id,
 			locked: locked ?? true,
 			price: price ?? 0,
 			slug,

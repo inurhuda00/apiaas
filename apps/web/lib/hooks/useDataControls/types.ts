@@ -3,8 +3,8 @@ import type {
 	ExtendedColumnFilter,
 } from "@/lib/utils/parsers";
 import type { LucideProps } from "lucide-react";
-import type { RefAttributes, ForwardRefExoticComponent } from "react";
-import type { IconType } from "react-icons/lib";
+import type { RefAttributes, ForwardRefExoticComponent, ComponentType } from "react";
+import type { IconBaseProps, IconType } from "react-icons/lib";
 
 export type SearchStateResult<T> = {
 	readonly name: string;
@@ -29,11 +29,7 @@ export type SortOption = {
 	desc: boolean;
 	label: string;
 	group?: string;
-	icon?:
-		| ForwardRefExoticComponent<
-				Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
-		  >
-		| IconType;
+	icon?: ComponentType<IconBaseProps>
 };
 
 export type FilterBadge = {

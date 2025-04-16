@@ -4,7 +4,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "..";
 import { membership, type NewUser, users } from "@apiaas/db/schema";
 import { activateLicenseKey } from "@/lib/payments/polar";
-import { hashPassword, verifyToken } from "@apiaas/auth";
+import { hashPassword } from "@apiaas/auth";
 
 export async function getCustomerId(userId: number) {
 	const query = db
@@ -22,7 +22,7 @@ export async function getCustomerId(userId: number) {
 		userId,
 	});
 
-	return user.customerId;
+	return user?.customerId;
 }
 
 export async function createUser({
@@ -55,10 +55,10 @@ export async function createUser({
 			throw new Error("Failed to create user");
 		}
 
-		const activatedKey = await activateLicenseKey();
-		if (!activatedKey) {
-			throw new Error("Failed to activate license key");
-		}
+		// const activatedKey = await activateLicenseKey(licenseKey);
+		// if (!activatedKey) {
+		// 	throw new Error("Failed to activate license key");
+		// }
 
 		const insertMembershipQuery = tx
 			.insert(membership)
@@ -120,7 +120,9 @@ export async function getUserByEmail(email: string) {
 			password: users.password,
 		})
 		.from(users)
-		.where(eq(users.email, sql.placeholder("email")))
+		.where(
+			and(eq(users.email, sql.placeholder("email")), isNull(users.deletedAt)),
+		)
 		.limit(1)
 		.prepare("get_user_by_email");
 
@@ -132,9 +134,11 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function updateUserPassword(userId: number, newPassword: string) {
+	const hashedPassword = await hashPassword(newPassword);
+
 	const query = db
 		.update(users)
-		.set({ password: newPassword })
+		.set({ password: hashedPassword })
 		.where(eq(users.id, sql.placeholder("userId")))
 		.prepare("update_user_password");
 
@@ -165,7 +169,7 @@ export async function updateUserAccount(
 	const query = db
 		.update(users)
 		.set({ name: data.name })
-		.where(eq(users.id, userId))
+		.where(eq(users.id, sql.placeholder("userId")))
 		.prepare("update_user_account");
 
 	return query.execute({

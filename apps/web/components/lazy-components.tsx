@@ -31,8 +31,9 @@ export const DynamicPaginate = dynamic(
 );
 
 export const DynamicFileUploader = dynamic(
-	() => import("@/components/upload/file-uploader").then((mod) => ({
-		default: mod.FileUploader,
-	})),
+	() =>
+		import("@/components/upload/file-uploader").then((mod) => ({
+			default: mod.FileUploader,
+		})),
 	{ loading: () => <FileUploaderSkeleton /> },
 );

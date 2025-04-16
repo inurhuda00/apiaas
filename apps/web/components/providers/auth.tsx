@@ -23,9 +23,5 @@ export function UserProvider({
 }: {
 	children: ReactNode;
 } & UserContextType) {
-	return (
-		<UserContext value={{ userPromise }}>
-			{children}
-		</UserContext>
-	);
+	return <UserContext value={{ userPromise }}>{children}</UserContext>;
 }

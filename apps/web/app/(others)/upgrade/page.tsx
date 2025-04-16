@@ -15,7 +15,7 @@ const features = [
 	},
 	{
 		title: "Weekly new releases",
-		icon: <Icons.DateFormat className="h-5 w-5 text-orange-500" />,
+		icon: <Icons.CalendarMonth className="h-5 w-5 text-orange-500" />,
 	},
 	{
 		title: "Commercial license included",
@@ -23,7 +23,7 @@ const features = [
 	},
 	{
 		title: "Lifetime updates",
-		icon: <Icons.Circle className="h-5 w-5 text-orange-500" />,
+		icon: <Icons.Info className="h-5 w-5 text-orange-500" />,
 	},
 	{
 		title: "High-resolution source files",
@@ -39,7 +39,7 @@ const features = [
 	},
 	{
 		title: "Single user license",
-		icon: <Icons.Peolple className="h-5 w-5 text-orange-500" />,
+		icon: <Icons.People className="h-5 w-5 text-orange-500" />,
 	},
 ];
 

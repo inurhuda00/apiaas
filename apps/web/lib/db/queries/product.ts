@@ -27,6 +27,7 @@ import type {
 	ExtendedColumnSort,
 	ExtendedColumnFilter,
 } from "@/lib/utils/parsers";
+import { slugify } from "@apiaas/utils";
 
 export type ProductWithRelations = Pick<
 	Product,
@@ -381,7 +382,7 @@ export async function getRelatedProducts(
 	const relatedProductsQuery = db
 		.select({
 			id: products.id,
-			title: products.name,
+			name: products.name,
 			slug: products.slug,
 			thumbnail: images.url,
 			locked: products.locked,
@@ -451,4 +452,18 @@ export async function syncProduct(productId: number, product: NewProduct) {
 		});
 
 	return updatedProduct;
+}
+
+export async function generateProductSlug(name: string) {
+	const slug = slugify(name);
+
+	const existingProduct = await db.query.products.findFirst({
+		where: eq(products.slug, slug),
+	});
+
+	if (existingProduct) {
+		return generateProductSlug(`${name}-${existingProduct.id}`);
+	}
+
+	return slug;
 }

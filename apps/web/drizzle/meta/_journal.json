@@ -15,6 +15,13 @@
 			"when": 1744549483696,
 			"tag": "0001_slim_iron_patriot",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1744726323547,
+			"tag": "0002_fixed_wasp",
+			"breakpoints": true
 		}
 	]
 }

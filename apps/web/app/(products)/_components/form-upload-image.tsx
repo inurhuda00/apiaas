@@ -18,7 +18,6 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { FileUploader } from "@/components/upload/file-uploader";
 import {
 	Select,
 	SelectContent,
@@ -31,7 +30,8 @@ import axios from "axios";
 import { env } from "@/env";
 import { useSession } from "@/components/providers/session";
 import type { ActionState } from "@/actions/middleware";
-import { createProduct } from "@/actions/products";
+import { updateProduct } from "@/actions/products";
+import { DynamicFileUploader } from "@/components/lazy-components";
 
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -113,12 +113,7 @@ async function uploadWithProgress<T>(
 
 const productService = {
 	async createProduct(
-		data: {
-			name: string;
-			description?: string;
-			price: string;
-			category: string;
-		},
+		data: { name: string },
 		token?: string | null,
 	): Promise<ProductData> {
 		try {
@@ -201,7 +196,7 @@ export function UploadImageForm() {
 	const productIdRef = useRef<string>("");
 
 	const [state, formAction, pending] = useActionState<ActionState, FormData>(
-		createProduct,
+		updateProduct,
 		{},
 	);
 
@@ -254,12 +249,7 @@ export function UploadImageForm() {
 
 		try {
 			const tempProduct = await productService.createProduct(
-				{
-					name: "Temporary Product",
-					description: "This is a temporary product created for file uploads",
-					price: "0",
-					category: "digital-goods",
-				},
+				{ name: "Temporary Product" },
 				sessionToken,
 			);
 
@@ -424,7 +414,7 @@ export function UploadImageForm() {
 						<span className="text-base font-medium">Media</span>
 					</AccordionTrigger>
 					<AccordionContent className="px-4 pb-4">
-						<FileUploader
+						<DynamicFileUploader
 							accept={{ "image/*": [] }}
 							maxSize={10 * 1024 * 1024}
 							maxFiles={5}
@@ -545,7 +535,7 @@ export function UploadImageForm() {
 						<span className="text-base font-medium">Files</span>
 					</AccordionTrigger>
 					<AccordionContent className="px-4 pb-4">
-						<FileUploader
+						<DynamicFileUploader
 							maxSize={5 * 1024 * 1024 * 1024}
 							maxFiles={5}
 							multiple={true}

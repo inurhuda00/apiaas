@@ -22,9 +22,5 @@ export function SessionProvider({
 }: {
 	children: ReactNode;
 } & SessionContextType) {
-	return (
-		<SessionContext value={{ sessionPromise }}>
-			{children}
-		</SessionContext>
-	);
+	return <SessionContext value={{ sessionPromise }}>{children}</SessionContext>;
 }

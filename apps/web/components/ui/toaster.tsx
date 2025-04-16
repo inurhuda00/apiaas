@@ -37,7 +37,7 @@ export function Toaster() {
 											{props?.variant && (
 												<div className="w-[20px] h-[20px] flex items-center">
 													{props.variant === "ai" && (
-														<Icons.AI className="text-[#0064D9]" />
+														<Icons.AIOutline className="text-[#0064D9]" />
 													)}
 													{props?.variant === "success" && <Icons.Check />}
 													{props?.variant === "error" && (

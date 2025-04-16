@@ -105,7 +105,7 @@ export default async function ProductPage({ params }: PageProps) {
 												{product.thumbnail ? (
 													<Image
 														src={product.thumbnail}
-														alt={product.title}
+														alt={product.name}
 														fill
 														className="object-contain p-2 md:p-3 transition-transform group-hover:scale-105"
 													/>
@@ -119,7 +119,7 @@ export default async function ProductPage({ params }: PageProps) {
 													</Badge>
 												)}
 											</div>
-											<h4 className="text-xs mt-1 truncate">{product.title}</h4>
+											<h4 className="text-xs mt-1 truncate">{product.name}</h4>
 										</Link>
 									))}
 								</div>

@@ -65,7 +65,6 @@ export function QuantityInput({
 			>
 				<Icons.Minus
 					className="size-2"
-					absoluteStrokeWidth
 					strokeWidth={3.5}
 					tabIndex={-1}
 				/>
@@ -97,7 +96,6 @@ export function QuantityInput({
 			>
 				<Icons.Plus
 					className="size-2"
-					absoluteStrokeWidth
 					strokeWidth={3.5}
 					tabIndex={-1}
 				/>

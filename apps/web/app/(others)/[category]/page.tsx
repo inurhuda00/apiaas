@@ -84,7 +84,7 @@ async function CategoryPage(props: PageProps) {
 			desc: true,
 			label: "Newest",
 			group: "date",
-			icon: Icons.DateFormat,
+			icon: Icons.CalendarMonth,
 		},
 		{
 			key: "oldest",
@@ -92,7 +92,7 @@ async function CategoryPage(props: PageProps) {
 			desc: false,
 			label: "Oldest",
 			group: "date",
-			icon: Icons.DateFormat,
+			icon: Icons.CalendarMonth,
 		},
 		{
 			key: "az",

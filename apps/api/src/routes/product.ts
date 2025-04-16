@@ -1,106 +1,29 @@
 import { Hono } from "hono";
 import { AuthRoleMiddleware } from "../middleware/auth";
 import type { Env, Variables } from "@/types";
-import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
 import { database } from "@apiaas/db";
-import { createProduct, generateProductSlug } from "../db/queries/product";
-import { transformZodError } from "../../../../packages/utils/zod-transformer";
+import {
+	createProduct,
+	generateProductSlug,
+	getProduct,
+} from "../db/queries/product";
+import {
+	productSchema,
+	mediaUploadSchema,
+	fileUploadSchema,
+	createValidator,
+} from "../helpers/validation";
+import { handleError } from "../helpers/error";
+import {
+	deleteBucketObject,
+	getBucketObject,
+	uploadToBucket,
+} from "../helpers/bucket";
+import { listBucketObjects } from "../helpers/bucket";
 
 const productRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 productRoute.use("/*", AuthRoleMiddleware(["admin", "free"]));
-
-const productSchema = z.object({
-	name: z.string().min(1, { message: "Product name is required" }),
-	description: z.string().optional(),
-	price: z.string().min(1, { message: "Price is required" }),
-	category: z.string().min(1, { message: "Category is required" }),
-});
-
-const mediaUploadSchema = z.object({
-	productId: z.number().min(1, { message: "Product ID is required" }),
-	file: z.instanceof(File, { message: "File is required" }).refine(
-		(file) => {
-			const allowedMimeTypes = [
-				"image/jpeg",
-				"image/png",
-				"image/gif",
-				"image/webp",
-				"image/svg+xml",
-			];
-			return allowedMimeTypes.includes(file.type);
-		},
-		{
-			message:
-				"Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG images are allowed.",
-		},
-	),
-	isPrimary: z.preprocess(
-		(val) => val === "true" || val === true,
-		z.boolean().optional().default(false),
-	),
-});
-
-const fileUploadSchema = z.object({
-	productId: z.number().min(1, { message: "Product ID is required" }),
-	file: z.instanceof(File, { message: "File is required" }).refine(
-		(file) => {
-			const allowedFileTypes = [
-				"application/pdf",
-				"application/zip",
-				"image/svg+xml",
-				"application/illustrator",
-				"image/x-eps",
-				"application/postscript",
-			];
-			return allowedFileTypes.includes(file.type);
-		},
-		{
-			message:
-				"Invalid file type. Only PDF, ZIP, SVG, and vector files are allowed.",
-		},
-	),
-});
-
-const generateUniqueFilename = (originalName: string) => {
-	const timestamp = Date.now();
-	const randomString = Math.random().toString(36).substring(2, 10);
-	const ext = originalName.split(".").pop();
-	return `${timestamp}-${randomString}.${ext}`;
-};
-
-// Helper function to handle errors
-const handleError = (c: any, error: any, defaultMessage: string) => {
-	console.error(defaultMessage, error);
-	return c.json(
-		{
-			success: false,
-			error: error instanceof Error ? error.message : defaultMessage,
-		},
-		500,
-	);
-};
-
-// Validator middleware factory
-const createValidator = (schema: z.ZodSchema) => {
-	return zValidator("json", schema, (result, c) => {
-		if (!result.success) {
-			const error = transformZodError(result.error);
-			return c.json(error, 422);
-		}
-	});
-};
-
-// Form validator middleware factory
-const createFormValidator = (schema: z.ZodSchema) => {
-	return zValidator("form", schema, (result, c) => {
-		if (!result.success) {
-			const error = transformZodError(result.error);
-			return c.json(error, 422);
-		}
-	});
-};
 
 productRoute.post("/create", createValidator(productSchema), async (c) => {
 	try {
@@ -113,7 +36,7 @@ productRoute.post("/create", createValidator(productSchema), async (c) => {
 		const newProduct = await createProduct(db, {
 			slug,
 			price: 0,
-			categoryId: 0,
+			categoryId: 1,
 			ownerId: user.id,
 			locked: false,
 		});
@@ -136,37 +59,9 @@ productRoute.post("/create", createValidator(productSchema), async (c) => {
 	}
 });
 
-// Helper function to upload file to bucket
-const uploadToBucket = async (
-	c: any,
-	file: File,
-	productId: number | string,
-	path: string,
-	metadata: Record<string, string>,
-) => {
-	const uniqueFilename = generateUniqueFilename(file.name);
-
-	await c.env.BUCKET.put(
-		`products/${productId}/${path}/${uniqueFilename}`,
-		file,
-		{
-			httpMetadata: {
-				contentType: file.type,
-			},
-			customMetadata: {
-				...metadata,
-				originalName: file.name,
-				uploadedAt: new Date().toISOString(),
-			},
-		},
-	);
-
-	return uniqueFilename;
-};
-
 productRoute.post(
 	"/media",
-	createFormValidator(mediaUploadSchema),
+	createValidator(mediaUploadSchema, "form"),
 	async (c) => {
 		try {
 			const data = c.req.valid("form");
@@ -197,50 +92,30 @@ productRoute.post(
 	},
 );
 
-productRoute.post(
-	"/files",
-	createFormValidator(fileUploadSchema),
-	async (c) => {
-		try {
-			const data = await c.req.valid("form");
-			const { file, productId } = data;
-			const user = c.get("user");
+productRoute.post("/files", createValidator(fileUploadSchema), async (c) => {
+	try {
+		const data = await c.req.valid("form");
+		const { file, productId } = data;
+		const user = c.get("user");
 
-			const uniqueFilename = await uploadToBucket(c, file, productId, "files", {
-				userId: user.id.toString(),
-				productId: productId.toString(),
-			});
+		const uniqueFilename = await uploadToBucket(c, file, productId, "files", {
+			userId: user.id.toString(),
+			productId: productId.toString(),
+		});
 
-			return c.json({
-				success: true,
-				data: {
-					filename: uniqueFilename,
-					originalName: file.name,
-					size: file.size,
-					type: file.type,
-				},
-			});
-		} catch (error) {
-			return handleError(c, error, "Failed to upload file");
-		}
-	},
-);
-
-// Helper function to list bucket objects
-const listBucketObjects = async (c: any, productId: string, path: string) => {
-	if (!productId) {
-		return c.json(
-			{
-				success: false,
-				error: "Product ID is required",
+		return c.json({
+			success: true,
+			data: {
+				filename: uniqueFilename,
+				originalName: file.name,
+				size: file.size,
+				type: file.type,
 			},
-			400,
-		);
+		});
+	} catch (error) {
+		return handleError(c, error, "Failed to upload file");
 	}
-
-	const prefix = `products/${productId}/${path}/`;
-	return await c.env.BUCKET.list({ prefix });
-};
+});
 
 productRoute.get("/media/:productId", async (c) => {
 	try {
@@ -299,31 +174,32 @@ productRoute.get("/files/:productId", async (c) => {
 	}
 });
 
-// Helper function to delete bucket object
-const deleteBucketObject = async (
-	c: any,
-	productId: string,
-	path: string,
-	filename: string,
-) => {
-	if (!productId || !filename) {
-		return c.json(
-			{
-				success: false,
-				error: "Product ID and filename are required",
-			},
-			400,
-		);
+productRoute.post("/files/download/:productId", async (c) => {
+	try {
+		const productId = c.req.param("productId");
+		const filename = c.req.param("filename");
+
+		const db = database(c.env.DATABASE_URL);
+		const product = await getProduct(db, productId);
+
+		if (!product) {
+			throw new Error("Product not found");
+		}
+
+		const file = await getBucketObject(c, productId, "files", filename);
+
+		c.header("Content-Type", file.type);
+		c.header("Content-Disposition", `attachment; filename="${filename}"`);
+		c.header("Content-Length", file.size.toString());
+		c.header("Content-Transfer-Encoding", "binary");
+		c.header("Cache-Control", "no-cache, no-store, must-revalidate");
+		c.header("Pragma", "no-cache");
+		c.header("Expires", "0");
+		return c.body(file.body);
+	} catch (error) {
+		return handleError(c, error, "Failed to download file");
 	}
-
-	const key = `products/${productId}/${path}/${filename}`;
-	await c.env.BUCKET.delete(key);
-
-	return c.json({
-		success: true,
-		message: `${path === "media" ? "Media" : "File"} deleted successfully`,
-	});
-};
+});
 
 productRoute.delete("/media/:productId/:filename", async (c) => {
 	try {

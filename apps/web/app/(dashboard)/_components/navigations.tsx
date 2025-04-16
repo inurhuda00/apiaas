@@ -10,7 +10,7 @@ export default function Navigation() {
 	const pathname = usePathname();
 
 	const navItems = [
-		{ href: "/overview", icon: Icons.DashboardCustomize, label: "Overview" },
+	{ href: "/overview", icon: Icons.Overview, label: "Overview" },
 		{ href: "/settings/general", icon: Icons.Settings, label: "General" },
 		{ href: "/settings/security", icon: Icons.Security, label: "Security" },
 	];

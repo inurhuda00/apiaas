@@ -3,6 +3,14 @@ import { products } from "@apiaas/db/schema";
 import type { NewProduct } from "@apiaas/db/schema";
 import { slugify } from "@apiaas/utils";
 
+export async function getProduct(db: Database, productId: string) {
+	const product = await db.query.products.findFirst({
+		where: eq(products.id, Number(productId)),
+	});
+
+	return product;
+}
+
 export async function createProduct(db: Database, product: NewProduct) {
 	const [newProduct] = await db
 		.insert(products)

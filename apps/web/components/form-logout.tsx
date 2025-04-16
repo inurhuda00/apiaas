@@ -9,7 +9,7 @@ export function LogoutForm() {
 		onSubmit: () => {},
 	});
 	return (
-	<Form prefetch={false} action={formAction}>
+		<Form action={formAction}>
 			<SubmitButton
 				variant="ghost"
 				className="flex w-full items-center"
