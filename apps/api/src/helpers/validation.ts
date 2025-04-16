@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const createValidator = (
 	schema: z.ZodSchema,
-	type: "json" | "form" = "json",
+	type: "json" | "form" | "param" | "query" = "json",
 ) => {
 	return zValidator(type, schema, (result, c) => {
 		if (!result.success) {
@@ -62,4 +62,12 @@ export const fileUploadSchema = z.object({
 				"Invalid file type. Only PDF, ZIP, SVG, and vector files are allowed.",
 		},
 	),
+});
+
+export const productIdSchema = z.object({
+	productId: z.string().min(1, { message: "Product ID is required" }),
+});
+
+export const filenameSchema = z.object({
+	filename: z.string().min(1, { message: "Filename is required" }),
 });

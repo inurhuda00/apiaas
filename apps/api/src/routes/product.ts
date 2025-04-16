@@ -6,18 +6,22 @@ import {
 	createProduct,
 	generateProductSlug,
 	getProduct,
+	deleteProduct,
 } from "../db/queries/product";
 import {
 	productSchema,
 	mediaUploadSchema,
 	fileUploadSchema,
 	createValidator,
+	productIdSchema,
+	filenameSchema,
 } from "../helpers/validation";
 import { handleError } from "../helpers/error";
 import {
 	deleteBucketObject,
 	getBucketObject,
 	uploadToBucket,
+	deleteBucketProductFiles,
 } from "../helpers/bucket";
 import { listBucketObjects } from "../helpers/bucket";
 
@@ -121,11 +125,28 @@ productRoute.post("/files", createValidator(fileUploadSchema), async (c) => {
 productRoute.get("/media/:productId", async (c) => {
 	try {
 		const productId = c.req.param("productId");
+		if (!productId) {
+			return c.json(
+				{
+					success: false,
+					error: "Product ID is required",
+				},
+				400,
+			);
+		}
+
 		const objects = await listBucketObjects(c, productId, "media");
 
 		if (!objects) return; // Early return if error response already sent
 
-		const mediaItems = objects.objects.map((obj: any) => {
+		interface BucketObject {
+			key: string;
+			size: number;
+			uploaded: string;
+			customMetadata?: Record<string, string>;
+		}
+
+		const mediaItems = objects.objects.map((obj: BucketObject) => {
 			const prefix = `products/${productId}/media/`;
 			const filename = obj.key.replace(prefix, "");
 			return {
@@ -147,79 +168,204 @@ productRoute.get("/media/:productId", async (c) => {
 	}
 });
 
-productRoute.get("/files/:productId", async (c) => {
-	try {
-		const productId = c.req.param("productId");
-		const objects = await listBucketObjects(c, productId, "files");
+productRoute.get(
+	"/files/:productId",
+	createValidator(productIdSchema),
+	async (c) => {
+		try {
+			const productId = c.req.param("productId");
 
-		if (!objects) return; // Early return if error response already sent
+			const db = database(c.env.DATABASE_URL);
+			const existingProduct = await getProduct(db, productId);
 
-		const files = objects.objects.map((obj: any) => {
-			const prefix = `products/${productId}/files/`;
-			const filename = obj.key.replace(prefix, "");
-			return {
-				filename,
-				originalName: obj.customMetadata?.originalName,
-				size: obj.size,
-				uploadedAt: obj.uploaded,
-				metadata: obj.customMetadata,
-			};
-		});
+			if (!existingProduct) {
+				return c.json(
+					{
+						success: false,
+						error: "Product not found",
+					},
+					404,
+				);
+			}
 
-		return c.json({
-			success: true,
-			data: files,
-		});
-	} catch (error) {
-		return handleError(c, error, "Failed to get files");
-	}
-});
+			const objects = await listBucketObjects(c, productId, "files");
 
-productRoute.post("/files/download/:productId", async (c) => {
-	try {
-		const productId = c.req.param("productId");
-		const filename = c.req.param("filename");
+			if (!objects)
+				return c.json(
+					{
+						success: false,
+						error: "Failed to get files",
+					},
+					500,
+				);
 
-		const db = database(c.env.DATABASE_URL);
-		const product = await getProduct(db, productId);
+			interface BucketObject {
+				key: string;
+				size: number;
+				uploaded: string;
+				customMetadata?: Record<string, string>;
+			}
 
-		if (!product) {
-			throw new Error("Product not found");
+			const files = objects.objects.map((obj: BucketObject) => {
+				const prefix = `products/${productId}/files/`;
+				const filename = obj.key.replace(prefix, "");
+				return {
+					filename,
+					originalName: obj.customMetadata?.originalName,
+					size: obj.size,
+					uploadedAt: obj.uploaded,
+					metadata: obj.customMetadata,
+				};
+			});
+
+			return c.json({
+				success: true,
+				data: files,
+			});
+		} catch (error) {
+			return handleError(c, error, "Failed to get files");
 		}
+	},
+);
 
-		const file = await getBucketObject(c, productId, "files", filename);
+productRoute.post(
+	"/files/download/:productId/:filename",
+	createValidator(productIdSchema, "param"),
+	createValidator(filenameSchema, "param"),
+	async (c) => {
+		try {
+			const productId = c.req.param("productId");
+			const filename = c.req.param("filename");
 
-		c.header("Content-Type", file.type);
-		c.header("Content-Disposition", `attachment; filename="${filename}"`);
-		c.header("Content-Length", file.size.toString());
-		c.header("Content-Transfer-Encoding", "binary");
-		c.header("Cache-Control", "no-cache, no-store, must-revalidate");
-		c.header("Pragma", "no-cache");
-		c.header("Expires", "0");
-		return c.body(file.body);
-	} catch (error) {
-		return handleError(c, error, "Failed to download file");
-	}
-});
+			const db = database(c.env.DATABASE_URL);
+			const product = await getProduct(db, productId);
 
-productRoute.delete("/media/:productId/:filename", async (c) => {
-	try {
-		const productId = c.req.param("productId");
-		const filename = c.req.param("filename");
-		return await deleteBucketObject(c, productId, "media", filename);
-	} catch (error) {
-		return handleError(c, error, "Failed to delete media");
-	}
-});
+			if (!product) {
+				throw new Error("Product not found");
+			}
 
-productRoute.delete("/files/:productId/:filename", async (c) => {
-	try {
-		const productId = c.req.param("productId");
-		const filename = c.req.param("filename");
-		return await deleteBucketObject(c, productId, "files", filename);
-	} catch (error) {
-		return handleError(c, error, "Failed to delete file");
-	}
-});
+			const file = await getBucketObject(c, productId, "files", filename);
+
+			c.header("Content-Type", file.type);
+			c.header("Content-Disposition", `attachment; filename="${filename}"`);
+			c.header("Content-Length", file.size.toString());
+			c.header("Content-Transfer-Encoding", "binary");
+			c.header("Cache-Control", "no-cache, no-store, must-revalidate");
+			c.header("Pragma", "no-cache");
+			c.header("Expires", "0");
+
+			return c.body(file.body);
+		} catch (error) {
+			return handleError(c, error, "Failed to download file");
+		}
+	},
+);
+
+productRoute.delete(
+	"/media/:productId/:filename",
+	createValidator(productIdSchema, "param"),
+	createValidator(filenameSchema, "param"),
+	async (c) => {
+		try {
+			const productId = c.req.param("productId");
+			const filename = c.req.param("filename");
+			return await deleteBucketObject(c, productId, "media", filename);
+		} catch (error) {
+			return handleError(c, error, "Failed to delete media");
+		}
+	},
+);
+
+productRoute.delete(
+	"/files/:productId/:filename",
+	createValidator(productIdSchema, "param"),
+	createValidator(filenameSchema, "param"),
+	async (c) => {
+		try {
+			const productId = c.req.param("productId");
+			const filename = c.req.param("filename");
+			return await deleteBucketObject(c, productId, "files", filename);
+		} catch (error) {
+			return handleError(c, error, "Failed to delete file");
+		}
+	},
+);
+
+/**
+ * Delete a product and all its associated files
+ */
+productRoute.delete(
+	"/:productId",
+	createValidator(productIdSchema, "param"),
+	async (c) => {
+		try {
+			const productId = c.req.param("productId");
+			const user = c.get("user");
+
+			const db = database(c.env.DATABASE_URL);
+			const product = await getProduct(db, productId);
+
+			if (!product) {
+				return c.json(
+					{
+						success: false,
+						error: "Product not found",
+					},
+					404,
+				);
+			}
+
+			// Check if user owns the product
+			if (product.ownerId !== user.id) {
+				return c.json(
+					{
+						success: false,
+						error: "Unauthorized to delete this product",
+					},
+					403,
+				);
+			}
+
+			// Delete all media files from bucket
+			const mediaDeleted = await deleteBucketProductFiles(
+				c,
+				productId,
+				"media",
+			);
+
+			// Delete all files from bucket
+			const filesDeleted = await deleteBucketProductFiles(
+				c,
+				productId,
+				"files",
+			);
+
+			// Delete the product from database
+			const productDeleted = await deleteProduct(db, productId);
+
+			if (!productDeleted) {
+				return c.json(
+					{
+						success: false,
+						error: "Failed to delete product from database",
+					},
+					500,
+				);
+			}
+
+			return c.json({
+				success: true,
+				data: {
+					id: productId,
+					mediaDeleted,
+					filesDeleted,
+				},
+				message: "Product and associated files deleted successfully",
+			});
+		} catch (error) {
+			return handleError(c, error, "Failed to delete product");
+		}
+	},
+);
 
 export default productRoute;

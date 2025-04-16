@@ -87,3 +87,47 @@ export const deleteBucketObject = async (
 		message: `${path === "media" ? "Media" : "File"} deleted successfully`,
 	});
 };
+
+/**
+ * Delete all files associated with a product from the bucket
+ *
+ * @param c Context
+ * @param productId Product ID
+ * @param path Path (media or files)
+ * @returns True if all files were deleted successfully
+ */
+export const deleteBucketProductFiles = async (
+	c: Context,
+	productId: string,
+	path: string,
+): Promise<boolean> => {
+	if (!productId) {
+		return false;
+	}
+
+	try {
+		const prefix = `products/${productId}/${path}/`;
+		const objects = await c.env.BUCKET.list({ prefix });
+
+		interface BucketObject {
+			key: string;
+			size: number;
+			uploaded: string;
+			customMetadata?: Record<string, string>;
+		}
+
+		if (!objects || !objects.objects || objects.objects.length === 0) {
+			return true; // No files to delete
+		}
+
+		// Delete all objects in the bucket with this prefix
+		for (const obj of objects.objects) {
+			await c.env.BUCKET.delete(obj.key);
+		}
+
+		return true;
+	} catch (error) {
+		console.error(`Error deleting ${path} for product ${productId}:`, error);
+		return false;
+	}
+};

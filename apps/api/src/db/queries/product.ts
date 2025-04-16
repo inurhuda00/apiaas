@@ -48,3 +48,25 @@ export async function generateProductSlug(db: Database, name: string) {
 
 	return slug;
 }
+
+/**
+ * Delete a product by ID
+ *
+ * @param db Database instance
+ * @param productId Product ID to delete
+ * @returns Boolean indicating if the deletion was successful
+ */
+export async function deleteProduct(db: Database, productId: string) {
+	try {
+		// Delete product and return the deleted product
+		const [deletedProduct] = await db
+			.delete(products)
+			.where(eq(products.id, Number(productId)))
+			.returning({ id: products.id });
+
+		return !!deletedProduct;
+	} catch (error) {
+		console.error("Error deleting product:", error);
+		return false;
+	}
+}

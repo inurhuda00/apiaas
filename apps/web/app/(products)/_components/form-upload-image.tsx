@@ -7,6 +7,7 @@ import {
 	useRef,
 	useActionState,
 	startTransition,
+	useEffect,
 } from "react";
 import {
 	Accordion,
@@ -32,6 +33,7 @@ import { useSession } from "@/components/providers/session";
 import type { ActionState } from "@/actions/middleware";
 import { updateProduct } from "@/actions/products";
 import { DynamicFileUploader } from "@/components/lazy-components";
+import { usePathname } from "next/navigation";
 
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -178,11 +180,31 @@ const productService = {
 			token,
 		);
 	},
+
+	async deleteProduct(productId: string, token?: string | null): Promise<void> {
+		if (!productId) return;
+
+		try {
+			await axios.delete(`${API_BASE_URL}/v1/product/${productId}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+				withCredentials: true,
+			});
+			console.log(
+				`Product ${productId} and its associated files deleted successfully`,
+			);
+		} catch (error) {
+			console.error("Failed to delete product:", error);
+			// Continue silently as this is cleanup code
+		}
+	},
 };
 
 export function UploadImageForm() {
 	const { sessionPromise } = useSession();
 	const sessionToken = use(sessionPromise);
+	const pathname = usePathname();
 
 	const uploadStateRef = useRef<FileUploadState>({
 		mediaFiles: [],
@@ -194,6 +216,7 @@ export function UploadImageForm() {
 	});
 
 	const productIdRef = useRef<string>("");
+	const prevPathRef = useRef<string>(pathname);
 
 	const [state, formAction, pending] = useActionState<ActionState, FormData>(
 		updateProduct,
@@ -201,6 +224,65 @@ export function UploadImageForm() {
 	);
 
 	const [progresses, setProgresses] = useState<Record<string, number>>({});
+
+	// Function to clean up resources
+	const cleanupResources = useCallback(async () => {
+		if (
+			productIdRef.current &&
+			(uploadStateRef.current.mediaFiles.length > 0 ||
+				uploadStateRef.current.files.length > 0)
+		) {
+			try {
+				// Delete the product and all associated files through the API
+				await productService.deleteProduct(productIdRef.current, sessionToken);
+
+				// Clear local state
+				uploadStateRef.current.mediaFiles = [];
+				uploadStateRef.current.files = [];
+				uploadStateRef.current.uploadedMediaItems = [];
+				uploadStateRef.current.uploadedFileItems = [];
+				uploadStateRef.current.progresses = {};
+				uploadStateRef.current.pendingUploads = new Set();
+				productIdRef.current = "";
+				setProgresses({});
+			} catch (error) {
+				console.error("Error during cleanup:", error);
+			}
+		}
+	}, [sessionToken]);
+
+	// Check for page navigation using the pathname
+	useEffect(() => {
+		if (prevPathRef.current !== pathname && prevPathRef.current) {
+			cleanupResources();
+		}
+		prevPathRef.current = pathname;
+	}, [pathname, cleanupResources]);
+
+	// Handle beforeunload event
+	useEffect(() => {
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			if (
+				productIdRef.current &&
+				(uploadStateRef.current.mediaFiles.length > 0 ||
+					uploadStateRef.current.files.length > 0)
+			) {
+				// Show confirmation dialog
+				e.preventDefault();
+				e.returnValue = "";
+				return "";
+			}
+		};
+
+		window.addEventListener("beforeunload", handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener("beforeunload", handleBeforeUnload);
+
+			// Cleanup on component unmount
+			cleanupResources();
+		};
+	}, [cleanupResources]);
 
 	const isMediaFileAlreadyUploaded = useCallback((file: File): boolean => {
 		return uploadStateRef.current.uploadedMediaItems.some((item) => {
