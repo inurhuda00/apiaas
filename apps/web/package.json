@@ -2,14 +2,14 @@
 	"name": "web",
 	"private": true,
 	"scripts": {
+		"dev": "next dev --turbopack",
 		"build": "next build --turbopack",
+		"start": "next start --turbopack",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:seed": "tsx ./lib/db/seed.ts",
 		"db:setup": "tsx ./lib/db/setup.ts",
-		"db:studio": "drizzle-kit studio",
-		"dev": "next dev --turbopack",
-		"start": "next start --turbopack"
+		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"@apiaas/auth": "workspace:*",

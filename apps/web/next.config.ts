@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
 	experimental: {
+		turbo: {
+			resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".mdx"],
+		},
 		ppr: true,
 		useCache: true,
 		serverActions: {
