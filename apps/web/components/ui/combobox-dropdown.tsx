@@ -1,6 +1,5 @@
 "use client";
 
-import { Check, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 
 import { CommandList } from "cmdk";
@@ -14,6 +13,7 @@ import {
 	CommandItem,
 } from "./command";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Icons } from "./icons";
 
 export type ComboboxItem = {
 	id: string;
@@ -108,7 +108,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
 									renderListItem({ isChecked, item })
 								) : (
 									<>
-										<Check
+										<Icons.Check
 											className={cn(
 												"mr-2 h-4 w-4",
 												isChecked ? "opacity-100" : "opacity-0",
@@ -166,7 +166,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
 								)
 							: (placeholder ?? "Select item...")}
 					</span>
-					<ChevronsUpDown className="size-4 opacity-50 absolute right-2" />
+					<Icons.ChevronDown className="size-4 opacity-50 absolute right-2" />
 				</Button>
 			</PopoverTrigger>
 
