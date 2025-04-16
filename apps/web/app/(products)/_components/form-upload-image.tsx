@@ -421,7 +421,7 @@ export function UploadImageForm() {
 							multiple={true}
 							value={uploadStateRef.current.mediaFiles}
 							progresses={progresses}
-							onValueChange={(newFiles) => {
+							onValueChange={(newFiles: File[]) => {
 								const files = newFiles as File[];
 
 								const addedFiles = identifyNewFiles(
@@ -541,7 +541,7 @@ export function UploadImageForm() {
 							multiple={true}
 							value={uploadStateRef.current.files}
 							progresses={progresses}
-							onValueChange={(newFiles) => {
+							onValueChange={(newFiles: File[]) => {
 								const files = newFiles as File[];
 
 								const addedFiles = identifyNewFiles(

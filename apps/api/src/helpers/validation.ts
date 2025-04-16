@@ -17,8 +17,6 @@ export const createValidator = (
 export const productSchema = z.object({
 	name: z.string().min(1, { message: "Product name is required" }),
 	description: z.string().optional(),
-	price: z.string().min(1, { message: "Price is required" }),
-	category: z.string().min(1, { message: "Category is required" }),
 });
 
 export const mediaUploadSchema = z.object({

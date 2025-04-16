@@ -39,6 +39,7 @@ productRoute.post("/create", createValidator(productSchema), async (c) => {
 			categoryId: 1,
 			ownerId: user.id,
 			locked: false,
+			name: data.name,
 		});
 
 		if (!newProduct) {
