@@ -9,10 +9,7 @@ export function DataControlsSkeleton() {
 					{/* Filter Buttons Skeleton */}
 					<div className="flex flex-wrap gap-2">
 						{[...Array(3)].map((_, index) => (
-							<div
-								key={`filter-${Math.random()}-${index}`}
-								className="h-8 w-20 bg-gray-200 rounded"
-							/>
+							<div key={`filter-${Math.random()}-${index}`} className="h-8 w-20 bg-gray-200 rounded" />
 						))}
 					</div>
 
@@ -24,10 +21,7 @@ export function DataControlsSkeleton() {
 			{/* Active Filters Skeleton */}
 			<div className="flex flex-wrap items-center gap-2">
 				{[...Array(2)].map((_, index) => (
-					<div
-						key={`active-filter-${Math.random()}-${index}`}
-						className="h-6 w-24 bg-gray-200 rounded"
-					/>
+					<div key={`active-filter-${Math.random()}-${index}`} className="h-6 w-24 bg-gray-200 rounded" />
 				))}
 			</div>
 		</div>
@@ -38,10 +32,7 @@ export function PaginateSkeleton() {
 	return (
 		<div className="flex items-center justify-center space-x-2 mt-8">
 			{[...Array(5)].map((_, index) => (
-				<div
-					key={`pagination-${Math.random()}-${index}`}
-					className="h-9 w-9 bg-gray-200 rounded"
-				/>
+				<div key={`pagination-${Math.random()}-${index}`} className="h-9 w-9 bg-gray-200 rounded" />
 			))}
 		</div>
 	);

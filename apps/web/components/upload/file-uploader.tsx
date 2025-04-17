@@ -3,10 +3,7 @@
 import Image from "next/image";
 import type React from "react";
 import { useCallback, useEffect, useState, useRef } from "react";
-import Dropzone, {
-	type DropzoneOptions as DropzoneProps,
-	type FileRejection,
-} from "react-dropzone";
+import Dropzone, { type DropzoneOptions as DropzoneProps, type FileRejection } from "react-dropzone";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -161,9 +158,7 @@ export function FileUploader(props: FileUploaderProps) {
 
 			// IMPORTANT: Filter out files that have already been sent for upload
 			// This is the key to preventing duplicate uploads
-			const filesToUpload = newFiles.filter(
-				(file) => !pendingUploadRef.current.has(file.name),
-			);
+			const filesToUpload = newFiles.filter((file) => !pendingUploadRef.current.has(file.name));
 
 			if (filesToUpload.length === 0) {
 				// All files already sent for upload, nothing to do
@@ -227,22 +222,14 @@ export function FileUploader(props: FileUploaderProps) {
 						{isDragActive ? (
 							<div className="flex flex-col items-center justify-center gap-4 sm:px-5">
 								<div className="rounded-full border border-dashed p-3">
-									<Icons.FileUpload
-										className="size-7 text-muted-foreground"
-										aria-hidden="true"
-									/>
+									<Icons.FileUpload className="size-7 text-muted-foreground" aria-hidden="true" />
 								</div>
-								<p className="font-medium text-muted-foreground">
-									Drop the files here
-								</p>
+								<p className="font-medium text-muted-foreground">Drop the files here</p>
 							</div>
 						) : (
 							<div className="flex flex-col items-center justify-center gap-4 sm:px-5">
 								<div className="rounded-full border border-dashed p-3">
-									<Icons.FileUpload
-										className="size-7 text-muted-foreground"
-										aria-hidden="true"
-									/>
+									<Icons.FileUpload className="size-7 text-muted-foreground" aria-hidden="true" />
 								</div>
 								<div className="space-y-px">
 									<p className="font-medium text-muted-foreground">
@@ -312,24 +299,14 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
 				) : null}
 				<div className="flex w-full flex-col gap-2">
 					<div className="space-y-px">
-						<p className="line-clamp-1 text-sm font-medium text-foreground/80">
-							{file.name}
-						</p>
-						<p className="text-xs text-muted-foreground">
-							{formatBytes(file.size)}
-						</p>
+						<p className="line-clamp-1 text-sm font-medium text-foreground/80">{file.name}</p>
+						<p className="text-xs text-muted-foreground">{formatBytes(file.size)}</p>
 					</div>
 					{progress ? <Progress value={progress} className="h-2" /> : null}
 				</div>
 			</div>
 			<div className="flex items-center gap-2">
-				<Button
-					type="button"
-					variant="outline"
-					size="icon"
-					className="size-7"
-					onClick={onRemove}
-				>
+				<Button type="button" variant="outline" size="icon" className="size-7" onClick={onRemove}>
 					<Icons.Close className="size-4 " aria-hidden="true" />
 					<span className="sr-only">Remove file</span>
 				</Button>

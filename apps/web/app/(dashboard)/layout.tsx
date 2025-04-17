@@ -11,9 +11,7 @@ export default function DashboardLayout({
 		<Fragment>
 			<Header />
 			<div className="flex-grow flex flex-col">
-				<MaxWidthWrapper className="flex flex-col min-h-[calc(100dvh-68px)] p-6">
-					{children}
-				</MaxWidthWrapper>
+				<MaxWidthWrapper className="flex flex-col min-h-[calc(100dvh-68px)] p-6">{children}</MaxWidthWrapper>
 			</div>
 		</Fragment>
 	);

@@ -1,7 +1,4 @@
-import type {
-	ExtendedColumnSort,
-	ExtendedColumnFilter,
-} from "@/lib/utils/parsers";
+import type { ExtendedColumnSort, ExtendedColumnFilter } from "@/lib/utils/parsers";
 import { createUrl, type SortItem } from "@/lib/utils/url";
 
 export type SearchStateResult<T> = {
@@ -36,22 +33,13 @@ export function useDataControls<T>(
 ) {
 	// Filter State Management
 	const isFilterActive = (field: string, operator: string, value: string) =>
-		search.filters.some(
-			(f) =>
-				f.field === field &&
-				f.operator === operator &&
-				String(f.value) === value,
-		);
+		search.filters.some((f) => f.field === field && f.operator === operator && String(f.value) === value);
 
 	const createFilterStates = () => {
 		const states: Record<string, boolean> = {};
 
 		for (const option of filterOptions) {
-			states[option.key] = isFilterActive(
-				option.field,
-				option.operator,
-				option.value,
-			);
+			states[option.key] = isFilterActive(option.field, option.operator, option.value);
 		}
 
 		return states;
@@ -72,17 +60,9 @@ export function useDataControls<T>(
 	};
 
 	// URL Building
-	const getFilterUrl = (
-		field: string,
-		operator: string,
-		value: string,
-		keepExisting = false,
-	) => {
+	const getFilterUrl = (field: string, operator: string, value: string, keepExisting = false) => {
 		const filters = keepExisting
-			? [
-					...search.filters.filter((f) => f.field !== field),
-					{ field, operator, value, variant: "select" },
-				]
+			? [...search.filters.filter((f) => f.field !== field), { field, operator, value, variant: "select" }]
 			: [{ field, operator, value, variant: "select" }];
 
 		return createUrl({

@@ -24,9 +24,7 @@ export function UserInfo({ user }: UserInfoProps) {
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" className="relative h-8 w-8 ">
 						<Avatar className="h-8 w-8">
-							<AvatarFallback>
-								{user.name?.charAt(0) || user.email?.charAt(0) || "U"}
-							</AvatarFallback>
+							<AvatarFallback>{user.name?.charAt(0) || user.email?.charAt(0) || "U"}</AvatarFallback>
 						</Avatar>
 					</Button>
 				</DropdownMenuTrigger>
@@ -34,11 +32,7 @@ export function UserInfo({ user }: UserInfoProps) {
 					<div className="flex items-center justify-start gap-2 p-2">
 						<div className="flex flex-col space-y-1 leading-none">
 							{user.name && <p className="font-medium">{user.name}</p>}
-							{user.email && (
-								<p className="w-[200px] truncate text-sm text-gray-500">
-									{user.email}
-								</p>
-							)}
+							{user.email && <p className="w-[200px] truncate text-sm text-gray-500">{user.email}</p>}
 						</div>
 					</div>
 					<DropdownMenuSeparator />

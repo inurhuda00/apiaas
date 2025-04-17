@@ -15,9 +15,7 @@ export function Footer() {
 						<div className="space-y-4">
 							<Link href="/" className="flex items-center gap-2">
 								<Icons.LogoIcon className="h-6 w-6 text-foreground" />
-								<span className="font-bold text-lg text-foreground">
-									Funnnit
-								</span>
+								<span className="font-bold text-lg text-foreground">Funnnit</span>
 							</Link>
 							<p className="text-muted-foreground">Exploring art for Fun</p>
 						</div>
@@ -28,28 +26,16 @@ export function Footer() {
 								Info
 							</h3>
 							<nav className="space-y-3 text-sm">
-								<Link
-									href="/about"
-									className="block text-foreground hover:text-primary transition-colors"
-								>
+								<Link href="/about" className="block text-foreground hover:text-primary transition-colors">
 									About
 								</Link>
-								<Link
-									href="/license"
-									className="block text-foreground hover:text-primary transition-colors"
-								>
+								<Link href="/license" className="block text-foreground hover:text-primary transition-colors">
 									License
 								</Link>
-								<Link
-									href="/contact"
-									className="block text-foreground hover:text-primary transition-colors"
-								>
+								<Link href="/contact" className="block text-foreground hover:text-primary transition-colors">
 									Contact
 								</Link>
-								<Link
-									href="/privacy"
-									className="block text-foreground hover:text-primary transition-colors"
-								>
+								<Link href="/privacy" className="block text-foreground hover:text-primary transition-colors">
 									Privacy Policy
 								</Link>
 							</nav>
@@ -60,22 +46,13 @@ export function Footer() {
 								Account
 							</h3>
 							<nav className="space-y-3 text-sm">
-								<Link
-									href="/sign-in"
-									className="block text-foreground hover:text-primary transition-colors"
-								>
+								<Link href="/sign-in" className="block text-foreground hover:text-primary transition-colors">
 									Sign In
 								</Link>
-								<Link
-									href="/activate"
-									className="block text-foreground hover:text-primary transition-colors"
-								>
+								<Link href="/activate" className="block text-foreground hover:text-primary transition-colors">
 									Activate
 								</Link>
-								<Link
-									href="/reset-password"
-									className="block text-foreground hover:text-primary transition-colors"
-								>
+								<Link href="/reset-password" className="block text-foreground hover:text-primary transition-colors">
 									Reset Password
 								</Link>
 								<Link
@@ -94,9 +71,7 @@ export function Footer() {
 				<div className="flex items-center justify-between py-6 border-t border-border">
 					<div className="flex items-center gap-2">
 						<span className="w-2 h-2 bg-green-500" />
-						<span className="text-sm text-muted-foreground">
-							All systems operational
-						</span>
+						<span className="text-sm text-muted-foreground">All systems operational</span>
 					</div>
 
 					<ThemeSwitcher />

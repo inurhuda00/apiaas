@@ -45,10 +45,7 @@ waitlistRoute.post("/", zValidator("json", waitlistSchema), async (c) => {
 
 	if (!firstOutcome.success) {
 		console.info("Turnstile verification failed", firstOutcome);
-		return c.json(
-			{ error: "Turnstile verification failed" },
-			439 as ContentfulStatusCode,
-		);
+		return c.json({ error: "Turnstile verification failed" }, 439 as ContentfulStatusCode);
 	}
 
 	const resend = new Resend(c.env.RESEND_API_KEY);

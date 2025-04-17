@@ -22,9 +22,7 @@ export const signUpSchema = z.object({
 		.string({ required_error: "Password is required" })
 		.min(8, "Password must be at least 8 characters")
 		.max(100, "Password cannot exceed 100 characters"),
-	licenseKey: z
-		.string({ required_error: "License key is required" })
-		.min(1, "License key cannot be empty"),
+	licenseKey: z.string({ required_error: "License key is required" }).min(1, "License key cannot be empty"),
 });
 
 export const signOutSchema = z.object({});
@@ -65,8 +63,5 @@ export const deleteAccountSchema = z.object({
 });
 
 export const updateAccountSchema = z.object({
-	name: z
-		.string()
-		.min(1, "Name is required")
-		.max(100, "Name cannot exceed 100 characters"),
+	name: z.string().min(1, "Name is required").max(100, "Name cannot exceed 100 characters"),
 });

@@ -1,10 +1,6 @@
 import type { Context } from "hono";
 
-export const handleError = (
-	c: Context,
-	error: unknown,
-	defaultMessage: string,
-) => {
+export const handleError = (c: Context, error: unknown, defaultMessage: string) => {
 	console.error(defaultMessage, error);
 	return c.json(
 		{

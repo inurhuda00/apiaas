@@ -7,10 +7,7 @@ export function FileUploaderSkeleton() {
 			<div className="group relative grid h-52 w-full place-items-center rounded-lg border-2 border-dashed border-muted-foreground/25 px-5 py-2.5 text-center">
 				<div className="flex flex-col items-center justify-center gap-4 sm:px-5">
 					<div className="rounded-full border border-dashed p-3">
-						<Icons.FileUpload
-							className="size-7 text-muted-foreground/50"
-							aria-hidden="true"
-						/>
+						<Icons.FileUpload className="size-7 text-muted-foreground/50" aria-hidden="true" />
 					</div>
 					<div className="space-y-px">
 						<Skeleton className="h-4 w-48" />

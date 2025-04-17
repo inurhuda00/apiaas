@@ -1,12 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import {
-	comparePasswords,
-	deleteSession,
-	hashPassword,
-	setSession,
-} from "@/lib/auth/session";
+import { comparePasswords, deleteSession, hashPassword, setSession } from "@/lib/auth/session";
 import {
 	signInSchema,
 	updatePasswordSchema,
@@ -77,101 +72,83 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 		redirect("/overview");
 	} catch (error) {
 		return {
-			error:
-				error instanceof Error
-					? error.message
-					: "Something went wrong. Please try again.",
+			error: error instanceof Error ? error.message : "Something went wrong. Please try again.",
 			email,
 		};
 	}
 });
 
-export const forgotPassword = validatedAction(
-	forgotPasswordSchema,
-	async (data, formData) => {
-		const { email } = data;
+export const forgotPassword = validatedAction(forgotPasswordSchema, async (data, formData) => {
+	const { email } = data;
 
-		const loggedUser = await getUserByEmail(email);
+	const loggedUser = await getUserByEmail(email);
 
-		if (!loggedUser) {
-			return {
-				error: "Invalid email or password. Please try again.",
-				email,
-			};
-		}
-
+	if (!loggedUser) {
 		return {
-			success: "A password reset link has been sent to your email address.",
+			error: "Invalid email or password. Please try again.",
 			email,
 		};
-	},
-);
+	}
+
+	return {
+		success: "A password reset link has been sent to your email address.",
+		email,
+	};
+});
 
 export const signOut = validatedActionWithUser(signOutSchema, async () => {
 	await deleteSession();
 	redirect("/");
 });
 
-export const updatePassword = validatedActionWithUser(
-	updatePasswordSchema,
-	async (data, _, { email }) => {
-		const { currentPassword, newPassword } = data;
+export const updatePassword = validatedActionWithUser(updatePasswordSchema, async (data, _, { email }) => {
+	const { currentPassword, newPassword } = data;
 
-		const user = await getUserByEmail(email);
+	const user = await getUserByEmail(email);
 
-		if (!user) {
-			return { error: "User not found." };
-		}
+	if (!user) {
+		return { error: "User not found." };
+	}
 
-		const isPasswordValid = await comparePasswords(
-			currentPassword,
-			user.password,
-		);
+	const isPasswordValid = await comparePasswords(currentPassword, user.password);
 
-		if (!isPasswordValid) {
-			return { error: "Current password is incorrect." };
-		}
+	if (!isPasswordValid) {
+		return { error: "Current password is incorrect." };
+	}
 
-		if (currentPassword === newPassword) {
-			return {
-				error: "New password must be different from the current password.",
-			};
-		}
+	if (currentPassword === newPassword) {
+		return {
+			error: "New password must be different from the current password.",
+		};
+	}
 
-		const newpassword = await hashPassword(newPassword);
-		await updateUserPassword(user.id, newpassword);
+	const newpassword = await hashPassword(newPassword);
+	await updateUserPassword(user.id, newpassword);
 
-		return { success: "Password updated successfully." };
-	},
-);
+	return { success: "Password updated successfully." };
+});
 
-export const deleteAccount = validatedActionWithUser(
-	deleteAccountSchema,
-	async (data, _, { email }) => {
-		const { password } = data;
+export const deleteAccount = validatedActionWithUser(deleteAccountSchema, async (data, _, { email }) => {
+	const { password } = data;
 
-		const user = await getUserByEmail(email);
+	const user = await getUserByEmail(email);
 
-		if (!user) {
-			return { error: "User not found." };
-		}
+	if (!user) {
+		return { error: "User not found." };
+	}
 
-		const isPasswordValid = await comparePasswords(password, user.password);
-		if (!isPasswordValid) {
-			return { error: "Incorrect password. Account deletion failed." };
-		}
+	const isPasswordValid = await comparePasswords(password, user.password);
+	if (!isPasswordValid) {
+		return { error: "Incorrect password. Account deletion failed." };
+	}
 
-		await softDeleteUser(user.id);
-		await deleteSession();
-		redirect("/sign-in");
-	},
-);
+	await softDeleteUser(user.id);
+	await deleteSession();
+	redirect("/sign-in");
+});
 
-export const updateAccount = validatedActionWithUser(
-	updateAccountSchema,
-	async (data, _, user) => {
-		const { name } = data;
-		await updateUserAccount(user.id, { name });
-		return { success: "Account updated successfully." };
-	},
-);
+export const updateAccount = validatedActionWithUser(updateAccountSchema, async (data, _, user) => {
+	const { name } = data;
+	await updateUserAccount(user.id, { name });
+	return { success: "Account updated successfully." };
+});

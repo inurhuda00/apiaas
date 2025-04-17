@@ -10,12 +10,7 @@ interface PaginationProps {
 	searchParams?: Record<string, string | string[] | undefined>;
 }
 
-export function Pagination({
-	pageCount,
-	currentPage,
-	baseUrl,
-	searchParams = {},
-}: PaginationProps) {
+export function Pagination({ pageCount, currentPage, baseUrl, searchParams = {} }: PaginationProps) {
 	// Don't render pagination if there's only one page
 	if (pageCount <= 1) return null;
 
@@ -90,10 +85,7 @@ export function Pagination({
 				asChild={currentPage > 1}
 			>
 				{currentPage > 1 ? (
-					<Link
-						href={createPageUrl(currentPage - 1)}
-						aria-label="Previous page"
-					>
+					<Link href={createPageUrl(currentPage - 1)} aria-label="Previous page">
 						<Icons.ChevronLeft className="h-4 w-4" />
 					</Link>
 				) : (
@@ -122,11 +114,7 @@ export function Pagination({
 						className="w-9 h-9"
 						asChild={page !== currentPage}
 					>
-						{page !== currentPage ? (
-							<Link href={createPageUrl(page)}>{page}</Link>
-						) : (
-							<span>{page}</span>
-						)}
+						{page !== currentPage ? <Link href={createPageUrl(page)}>{page}</Link> : <span>{page}</span>}
 					</Button>
 				);
 			})}
@@ -135,9 +123,7 @@ export function Pagination({
 			<Button
 				variant="outline"
 				size="icon"
-				className={cn(
-					currentPage >= pageCount ? "opacity-50 cursor-not-allowed" : "",
-				)}
+				className={cn(currentPage >= pageCount ? "opacity-50 cursor-not-allowed" : "")}
 				asChild={currentPage < pageCount}
 			>
 				{currentPage < pageCount ? (

@@ -1,9 +1,6 @@
 import dynamic from "next/dynamic";
 import { ProductCardSkeleton } from "./skeletons/product-grid-skeleton";
-import {
-	DataControlsSkeleton,
-	PaginateSkeleton,
-} from "./skeletons/data-controls-skeleton";
+import { DataControlsSkeleton, PaginateSkeleton } from "./skeletons/data-controls-skeleton";
 import { FileUploaderSkeleton } from "./skeletons/file-uploader-skeleton";
 
 export const DynamicProductCard = dynamic(

@@ -12,9 +12,7 @@ export const AuthCard = forwardRef<HTMLDivElement, AuthCardProps>(
 		return (
 			<div ref={ref} className={className}>
 				<div className="mb-6">
-					<h1 className="text-2xl font-bold tracking-tight text-gray-900">
-						{title}
-					</h1>
+					<h1 className="text-2xl font-bold tracking-tight text-gray-900">{title}</h1>
 					{subtitle && <p className="mt-2 text-sm text-gray-600">{subtitle}</p>}
 				</div>
 				{children}

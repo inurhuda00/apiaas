@@ -17,10 +17,7 @@ export function SignInForm() {
 	const redirect = searchParams.get("redirect");
 	const priceId = searchParams.get("priceId");
 	const inviteId = searchParams.get("inviteId");
-	const [state, formAction, pending] = useActionState<ActionState, FormData>(
-		signIn,
-		{},
-	);
+	const [state, formAction, pending] = useActionState<ActionState, FormData>(signIn, {});
 	return (
 		<Form action={formAction} className="space-y-4">
 			<input type="hidden" name="redirect" value={redirect || ""} />
@@ -42,10 +39,7 @@ export function SignInForm() {
 			<div>
 				<div className="flex items-center justify-between">
 					<Label htmlFor="password">Password</Label>
-					<Link
-						href="/forgot-password"
-						className="text-xs font-medium text-orange-600 hover:text-orange-500"
-					>
+					<Link href="/forgot-password" className="text-xs font-medium text-orange-600 hover:text-orange-500">
 						Forgot password?
 					</Link>
 				</div>
@@ -59,9 +53,7 @@ export function SignInForm() {
 				/>
 			</div>
 
-			{state.error && (
-				<div className="text-sm text-red-500 font-medium">{state.error}</div>
-			)}
+			{state.error && <div className="text-sm text-red-500 font-medium">{state.error}</div>}
 
 			<SubmitButton pending={pending}>Sign in</SubmitButton>
 		</Form>

@@ -1,8 +1,5 @@
-import type {
-	ExtendedColumnSort,
-	ExtendedColumnFilter,
-} from "@/lib/utils/parsers";
-import type{ ComponentType } from "react";
+import type { ExtendedColumnSort, ExtendedColumnFilter } from "@/lib/utils/parsers";
+import type { ComponentType } from "react";
 import type { IconBaseProps } from "react-icons/lib";
 
 export type SearchStateResult<T> = {
@@ -28,7 +25,7 @@ export type SortOption = {
 	desc: boolean;
 	label: string;
 	group?: string;
-	icon?: ComponentType<IconBaseProps>
+	icon?: ComponentType<IconBaseProps>;
 };
 
 export type FilterBadge = {

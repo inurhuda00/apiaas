@@ -2,12 +2,7 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { eq, and, gt } from "drizzle-orm";
-import {
-	signAccessToken,
-	signRefreshToken,
-	verifyToken,
-	REFRESH_TOKEN_EXPIRY,
-} from "@apiaas/auth";
+import { signAccessToken, signRefreshToken, verifyToken, REFRESH_TOKEN_EXPIRY } from "@apiaas/auth";
 import { comparePasswords } from "@apiaas/auth";
 import { database } from "@apiaas/db";
 import { users, refreshTokens, type NewRefreshToken } from "@apiaas/db/schema";
@@ -80,15 +75,9 @@ authRoute.post(
 				},
 			};
 
-			const accessToken = await signAccessToken(
-				sessionPayload,
-				c.env.AUTH_SECRET,
-			);
+			const accessToken = await signAccessToken(sessionPayload, c.env.AUTH_SECRET);
 
-			const refreshToken = await signRefreshToken(
-				sessionPayload,
-				c.env.AUTH_SECRET,
-			);
+			const refreshToken = await signRefreshToken(sessionPayload, c.env.AUTH_SECRET);
 
 			const newRefreshToken: NewRefreshToken = {
 				token: refreshToken,
@@ -139,10 +128,7 @@ authRoute.post("/refresh", async (c) => {
 			return c.json({ success: false, error: "Refresh token not found" }, 401);
 		}
 
-		const decodedPayload = await verifyToken(
-			currentRefreshToken,
-			c.env.AUTH_SECRET,
-		);
+		const decodedPayload = await verifyToken(currentRefreshToken, c.env.AUTH_SECRET);
 		if (!decodedPayload || !decodedPayload.user?.id) {
 			deleteCookie(c, "refreshToken", { path: "/api/auth" });
 			return c.json({ success: false, error: "Invalid refresh token" }, 401);
@@ -159,10 +145,7 @@ authRoute.post("/refresh", async (c) => {
 
 		if (!storedToken) {
 			deleteCookie(c, "refreshToken", { path: "/api/auth" });
-			return c.json(
-				{ success: false, error: "Invalid or expired refresh token" },
-				401,
-			);
+			return c.json({ success: false, error: "Invalid or expired refresh token" }, 401);
 		}
 
 		await db.delete(refreshTokens).where(eq(refreshTokens.id, storedToken.id));
@@ -170,10 +153,7 @@ authRoute.post("/refresh", async (c) => {
 		const newSessionPayload = {
 			user: { id: decodedPayload.user.id, role: decodedPayload.user.role },
 		};
-		const newRefreshTokenValue = await signRefreshToken(
-			newSessionPayload,
-			c.env.AUTH_SECRET,
-		);
+		const newRefreshTokenValue = await signRefreshToken(newSessionPayload, c.env.AUTH_SECRET);
 
 		await db.insert(refreshTokens).values({
 			token: newRefreshTokenValue,
@@ -189,10 +169,7 @@ authRoute.post("/refresh", async (c) => {
 			secure: c.env.NODE_ENV === "production",
 		});
 
-		const newAccessToken = await signAccessToken(
-			newSessionPayload,
-			c.env.AUTH_SECRET,
-		);
+		const newAccessToken = await signAccessToken(newSessionPayload, c.env.AUTH_SECRET);
 
 		return c.json({ success: true, data: { accessToken: newAccessToken } });
 	} catch (error) {
@@ -201,8 +178,7 @@ authRoute.post("/refresh", async (c) => {
 		return c.json(
 			{
 				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to refresh token",
+				error: error instanceof Error ? error.message : "Failed to refresh token",
 			},
 			500,
 		);
@@ -215,9 +191,7 @@ authRoute.post("/logout", async (c) => {
 
 		if (currentRefreshToken) {
 			const db = database(c.env.DATABASE_URL);
-			await db
-				.delete(refreshTokens)
-				.where(eq(refreshTokens.token, currentRefreshToken));
+			await db.delete(refreshTokens).where(eq(refreshTokens.token, currentRefreshToken));
 		}
 
 		deleteCookie(c, "refreshToken", {
@@ -276,8 +250,7 @@ authRoute.get("/me", AuthMiddleware(), async (c) => {
 		return c.json(
 			{
 				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to get user data",
+				error: error instanceof Error ? error.message : "Failed to get user data",
 			},
 			500,
 		);

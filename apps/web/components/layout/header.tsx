@@ -35,21 +35,13 @@ export function Header() {
 							<NavigationMenu className="-mr-3">
 								<NavigationMenuList>
 									<NavigationMenuItem>
-										<NavigationMenuTrigger className="border">
-											Categories
-										</NavigationMenuTrigger>
+										<NavigationMenuTrigger className="border">Categories</NavigationMenuTrigger>
 										<NavigationMenuContent>
 											<ul className="py-1">
-												<Link
-													href="/3dx"
-													className={buttonVariants({ variant: "link" })}
-												>
+												<Link href="/3dx" className={buttonVariants({ variant: "link" })}>
 													3DX
 												</Link>
-												<Link
-													href="/joydoodle"
-													className={buttonVariants({ variant: "link" })}
-												>
+												<Link href="/joydoodle" className={buttonVariants({ variant: "link" })}>
 													Joydoodle
 												</Link>
 											</ul>
@@ -57,25 +49,16 @@ export function Header() {
 									</NavigationMenuItem>
 								</NavigationMenuList>
 							</NavigationMenu>
-							<Link
-								href="/3dx"
-								className={cn(buttonVariants({ variant: "link" }), "px-0")}
-							>
+							<Link href="/3dx" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
 								Affiliate
 								<Badge variant="tag" className="ml-2">
 									40%
 								</Badge>
 							</Link>
-							<Link
-								href="/3dx"
-								className={cn(buttonVariants({ variant: "link" }), "px-0")}
-							>
+							<Link href="/3dx" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
 								Request
 							</Link>
-							<Link
-								href="/3dx"
-								className={cn(buttonVariants({ variant: "link" }), "px-0")}
-							>
+							<Link href="/3dx" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
 								Changelog
 							</Link>
 						</nav>

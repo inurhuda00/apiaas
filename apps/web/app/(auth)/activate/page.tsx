@@ -27,11 +27,7 @@ export default function ActivatePage() {
 						<Suspense>
 							<ActivateForm />
 						</Suspense>
-						<AuthFooter
-							text="Already have an account?"
-							linkText="Sign in"
-							linkHref="/sign-in"
-						/>
+						<AuthFooter text="Already have an account?" linkText="Sign in" linkHref="/sign-in" />
 					</AuthCard>
 				</div>
 			</div>

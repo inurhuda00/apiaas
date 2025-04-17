@@ -4,12 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
-import type {
-	FilterOption,
-	SortOption,
-	DataControlsResult,
-	FilterBadge,
-} from "@/lib/hooks/useDataControls";
+import type { FilterOption, SortOption, DataControlsResult, FilterBadge } from "@/lib/hooks/useDataControls";
 
 interface DataControlsProps<T> {
 	controls: DataControlsResult<T>;
@@ -31,14 +26,7 @@ export function DataControls<T>({
 	sortOptions,
 	searchPlaceholder = "Search...",
 }: DataControlsProps<T>) {
-	const {
-		filterStates,
-		sortStates,
-		getFilterUrl,
-		getSortUrl,
-		getClearUrl,
-		activeFilters,
-	} = controls;
+	const { filterStates, sortStates, getFilterUrl, getSortUrl, getClearUrl, activeFilters } = controls;
 
 	// Group sort options
 	const groupedSortOptions = sortOptions.reduce(
@@ -58,21 +46,8 @@ export function DataControls<T>({
 					{/* Filter Buttons */}
 					<div className="flex flex-wrap gap-2">
 						{filterOptions.map((option) => (
-							<Button
-								key={option.key}
-								asChild
-								variant={filterStates[option.key] ? "default" : "outline"}
-								size="sm"
-							>
-								<Link
-									href={getFilterUrl(
-										option.field,
-										option.operator,
-										option.value,
-									)}
-									scroll={false}
-									prefetch={true}
-								>
+							<Button key={option.key} asChild variant={filterStates[option.key] ? "default" : "outline"} size="sm">
+								<Link href={getFilterUrl(option.field, option.operator, option.value)} scroll={false} prefetch={true}>
 									{option.label} {option.count ? `(${option.count})` : ""}
 								</Link>
 							</Button>
@@ -96,15 +71,8 @@ export function DataControls<T>({
 											return (
 												<Link
 													key={option.key}
-													href={getSortUrl(
-														option.column as keyof T,
-														option.desc,
-													)}
-													className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 w-full text-left ${
-														sortStates[option.key]
-															? "bg-gray-100 font-medium"
-															: ""
-													}`}
+													href={getSortUrl(option.column as keyof T, option.desc)}
+													className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 w-full text-left ${sortStates[option.key] ? "bg-gray-100 font-medium" : ""}`}
 													scroll={false}
 													prefetch={true}
 												>
@@ -123,30 +91,15 @@ export function DataControls<T>({
 
 			{/* Active Filters */}
 			<div className="flex flex-wrap items-center gap-2">
-				<span className="text-xs text-muted-foreground font-medium">
-					filters:
-				</span>
+				<span className="text-xs text-muted-foreground font-medium">filters:</span>
 
 				{activeFilters.map((filter: FilterBadge) => (
-					<Badge
-						key={filter.id}
-						variant="secondary"
-						className="pl-2 pr-1 h-6 gap-1 font-normal"
-					>
+					<Badge key={filter.id} variant="secondary" className="pl-2 pr-1 h-6 gap-1 font-normal">
 						<span className="font-medium">
-							{filter.type === "search"
-								? "Search:"
-								: filter.type === "filter"
-									? "Filter:"
-									: "Sort:"}
+							{filter.type === "search" ? "Search:" : filter.type === "filter" ? "Filter:" : "Sort:"}
 						</span>{" "}
 						{filter.label}
-						<Button
-							asChild
-							variant="ghost"
-							size="icon"
-							className="h-4 w-4 ml-1 hover:bg-secondary/80"
-						>
+						<Button asChild variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-secondary/80">
 							<Link href={filter.clearHref} scroll={false} prefetch={true}>
 								<Icons.X className="h-3 w-3" />
 							</Link>
@@ -154,12 +107,7 @@ export function DataControls<T>({
 					</Badge>
 				))}
 
-				<Button
-					asChild
-					variant="link"
-					size="sm"
-					className="ml-auto h-6 p-0 text-xs text-primary"
-				>
+				<Button asChild variant="link" size="sm" className="ml-auto h-6 p-0 text-xs text-primary">
 					<Link href={getClearUrl()} scroll={false} prefetch={true}>
 						Clear all
 					</Link>
@@ -169,12 +117,7 @@ export function DataControls<T>({
 	);
 }
 
-export function Paginate({
-	pageCount,
-	currentPage,
-	baseUrl,
-	searchParams = {},
-}: PaginationProps) {
+export function Paginate({ pageCount, currentPage, baseUrl, searchParams = {} }: PaginationProps) {
 	// Don't render pagination if there's only one page
 	if (pageCount <= 1) return null;
 
@@ -242,18 +185,9 @@ export function Paginate({
 	return (
 		<div className="flex items-center justify-center space-x-2 mt-8">
 			{/* Previous button */}
-			<Button
-				variant="outline"
-				size="icon"
-				disabled={currentPage <= 1}
-				asChild={currentPage > 1}
-			>
+			<Button variant="outline" size="icon" disabled={currentPage <= 1} asChild={currentPage > 1}>
 				{currentPage > 1 ? (
-					<Link
-						href={createPageUrl(currentPage - 1)}
-						aria-label="Previous page"
-						prefetch={true}
-					>
+					<Link href={createPageUrl(currentPage - 1)} aria-label="Previous page" prefetch={true}>
 						<Icons.ChevronLeft className="h-4 w-4" />
 					</Link>
 				) : (
@@ -297,18 +231,12 @@ export function Paginate({
 			<Button
 				variant="outline"
 				size="icon"
-				className={cn(
-					currentPage >= pageCount ? "opacity-50 cursor-not-allowed" : "",
-				)}
+				className={cn(currentPage >= pageCount ? "opacity-50 cursor-not-allowed" : "")}
 				disabled={currentPage >= pageCount}
 				asChild={currentPage < pageCount}
 			>
 				{currentPage < pageCount ? (
-					<Link
-						href={createPageUrl(currentPage + 1)}
-						aria-label="Next page"
-						prefetch={true}
-					>
+					<Link href={createPageUrl(currentPage + 1)} aria-label="Next page" prefetch={true}>
 						<Icons.ChevronRight className="h-4 w-4" />
 					</Link>
 				) : (

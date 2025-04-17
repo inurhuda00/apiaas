@@ -9,10 +9,7 @@ import { cn } from "@/lib/utils/cn";
 import Form from "next/form";
 
 export function ForgotPasswordForm() {
-	const [state, formAction, pending] = useActionState<ActionState, FormData>(
-		forgotPassword,
-		{},
-	);
+	const [state, formAction, pending] = useActionState<ActionState, FormData>(forgotPassword, {});
 
 	return (
 		<Form action={formAction} className="space-y-4">
@@ -29,18 +26,13 @@ export function ForgotPasswordForm() {
 				/>
 			</div>
 
-			{state.error && (
-				<div className="text-sm text-red-500 font-medium">{state.error}</div>
-			)}
+			{state.error && <div className="text-sm text-red-500 font-medium">{state.error}</div>}
 
 			{state.success && !pending && (
 				<>
+					<div className="text-sm text-green-500 font-medium">{state.success}</div>
 					<div className="text-sm text-green-500 font-medium">
-						{state.success}
-					</div>
-					<div className="text-sm text-green-500 font-medium">
-						If you don't see the email, check your spam folder or request
-						another link below.
+						If you don't see the email, check your spam folder or request another link below.
 					</div>
 				</>
 			)}

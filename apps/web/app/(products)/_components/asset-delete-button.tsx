@@ -22,18 +22,8 @@ export function AssetDeleteButton({ assetId }: AssetDeleteButtonProps) {
 	};
 
 	return (
-		<Button
-			variant="outline"
-			size="sm"
-			className="flex-1"
-			onClick={handleDelete}
-			disabled={isDeleting}
-		>
-			{isDeleting ? (
-				<Icons.Spinner className="h-4 w-4 animate-spin mr-2" />
-			) : (
-				<Icons.Face className="h-4 w-4 mr-2" />
-			)}
+		<Button variant="outline" size="sm" className="flex-1" onClick={handleDelete} disabled={isDeleting}>
+			{isDeleting ? <Icons.Spinner className="h-4 w-4 animate-spin mr-2" /> : <Icons.Face className="h-4 w-4 mr-2" />}
 			Delete
 		</Button>
 	);

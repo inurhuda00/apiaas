@@ -1,11 +1,6 @@
 import type { Context } from "hono";
 
-export const getBucketObject = async (
-	c: Context,
-	productId: string,
-	path: string,
-	filename: string,
-) => {
+export const getBucketObject = async (c: Context, productId: string, path: string, filename: string) => {
 	const key = `products/${productId}/${path}/${filename}`;
 	return await c.env.BUCKET.get(key);
 };
@@ -26,29 +21,21 @@ export const uploadToBucket = async (
 ) => {
 	const uniqueFilename = generateUniqueFilename(file.name);
 
-	await c.env.BUCKET.put(
-		`products/${productId}/${path}/${uniqueFilename}`,
-		file,
-		{
-			httpMetadata: {
-				contentType: file.type,
-			},
-			customMetadata: {
-				...metadata,
-				originalName: file.name,
-				uploadedAt: new Date().toISOString(),
-			},
+	await c.env.BUCKET.put(`products/${productId}/${path}/${uniqueFilename}`, file, {
+		httpMetadata: {
+			contentType: file.type,
 		},
-	);
+		customMetadata: {
+			...metadata,
+			originalName: file.name,
+			uploadedAt: new Date().toISOString(),
+		},
+	});
 
 	return uniqueFilename;
 };
 
-export const listBucketObjects = async (
-	c: Context,
-	productId: string,
-	path: string,
-) => {
+export const listBucketObjects = async (c: Context, productId: string, path: string) => {
 	if (!productId) {
 		return c.json(
 			{
@@ -63,12 +50,7 @@ export const listBucketObjects = async (
 	return await c.env.BUCKET.list({ prefix });
 };
 
-export const deleteBucketObject = async (
-	c: Context,
-	productId: string,
-	path: string,
-	filename: string,
-) => {
+export const deleteBucketObject = async (c: Context, productId: string, path: string, filename: string) => {
 	if (!productId || !filename) {
 		return c.json(
 			{
@@ -96,11 +78,7 @@ export const deleteBucketObject = async (
  * @param path Path (media or files)
  * @returns True if all files were deleted successfully
  */
-export const deleteBucketProductFiles = async (
-	c: Context,
-	productId: string,
-	path: string,
-): Promise<boolean> => {
+export const deleteBucketProductFiles = async (c: Context, productId: string, path: string): Promise<boolean> => {
 	if (!productId) {
 		return false;
 	}

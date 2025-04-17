@@ -11,10 +11,7 @@ const extractBearerToken = (c: Context): string | null => {
 };
 
 export function AuthMiddleware() {
-	return async (
-		c: Context<{ Bindings: Env; Variables: Variables }>,
-		next: Next,
-	) => {
+	return async (c: Context<{ Bindings: Env; Variables: Variables }>, next: Next) => {
 		// Extract token
 		const token = extractBearerToken(c);
 
@@ -58,10 +55,7 @@ export function AuthMiddleware() {
 }
 
 export function AuthRoleMiddleware(allowedRoles: string[]) {
-	return async (
-		c: Context<{ Bindings: Env; Variables: Variables }>,
-		next: Next,
-	) => {
+	return async (c: Context<{ Bindings: Env; Variables: Variables }>, next: Next) => {
 		const token = extractBearerToken(c);
 
 		if (!token) {

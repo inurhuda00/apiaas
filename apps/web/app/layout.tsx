@@ -32,12 +32,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${manrope.className}`} suppressHydrationWarning>
 			<body className="min-h-[100dvh] bg-background text-foreground flex flex-col antialiased">
-				<ThemeProvider
-					enableSystem
-					attribute="class"
-					defaultTheme="light"
-					themes={["light", "dark"]}
-				>
+				<ThemeProvider enableSystem attribute="class" defaultTheme="light" themes={["light", "dark"]}>
 					<NextTopLoader
 						initialPosition={0.08}
 						crawlSpeed={200}

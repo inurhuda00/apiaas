@@ -2,10 +2,7 @@ import { transformZodError } from "@apiaas/utils";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 
-export const createValidator = (
-	schema: z.ZodSchema,
-	type: "json" | "form" | "param" | "query" = "json",
-) => {
+export const createValidator = (schema: z.ZodSchema, type: "json" | "form" | "param" | "query" = "json") => {
 	return zValidator(type, schema, (result, c) => {
 		if (!result.success) {
 			const error = transformZodError(result.error);
@@ -23,24 +20,14 @@ export const mediaUploadSchema = z.object({
 	productId: z.string().min(1, { message: "Product ID is required" }),
 	file: z.instanceof(File, { message: "File is required" }).refine(
 		(file) => {
-			const allowedMimeTypes = [
-				"image/jpeg",
-				"image/png",
-				"image/gif",
-				"image/webp",
-				"image/svg+xml",
-			];
+			const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
 			return allowedMimeTypes.includes(file.type);
 		},
 		{
-			message:
-				"Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG images are allowed.",
+			message: "Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG images are allowed.",
 		},
 	),
-	isPrimary: z.preprocess(
-		(val) => val === "true" || val === true,
-		z.boolean().optional().default(false),
-	),
+	isPrimary: z.preprocess((val) => val === "true" || val === true, z.boolean().optional().default(false)),
 });
 
 export const fileUploadSchema = z.object({
@@ -58,8 +45,7 @@ export const fileUploadSchema = z.object({
 			return allowedFileTypes.includes(file.type);
 		},
 		{
-			message:
-				"Invalid file type. Only PDF, ZIP, SVG, and vector files are allowed.",
+			message: "Invalid file type. Only PDF, ZIP, SVG, and vector files are allowed.",
 		},
 	),
 });
@@ -70,4 +56,8 @@ export const productIdSchema = z.object({
 
 export const filenameSchema = z.object({
 	filename: z.string().min(1, { message: "Filename is required" }),
+});
+
+export const AuthorizationBeaconSchema = z.object({
+	_authorization: z.string().min(1, { message: "Authorization is required" }),
 });

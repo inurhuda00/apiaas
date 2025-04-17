@@ -16,10 +16,7 @@ type ActionState = {
 export function SettingsGeneralForm() {
 	const { userPromise } = useUser();
 	const user = use(userPromise);
-	const [state, formAction, pending] = useActionState<ActionState, FormData>(
-		updateAccount,
-		{ error: "", success: "" },
-	);
+	const [state, formAction, pending] = useActionState<ActionState, FormData>(updateAccount, { error: "", success: "" });
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -43,12 +40,7 @@ export function SettingsGeneralForm() {
 				<form className="space-y-4" onSubmit={handleSubmit}>
 					<div>
 						<Label htmlFor="name">Name</Label>
-						<Input
-							id="name"
-							name="name"
-							placeholder="Enter your name"
-							defaultValue={user?.name || ""}
-						/>
+						<Input id="name" name="name" placeholder="Enter your name" defaultValue={user?.name || ""} />
 					</div>
 					<div>
 						<Label htmlFor="email">Email</Label>
@@ -62,9 +54,7 @@ export function SettingsGeneralForm() {
 						/>
 					</div>
 					{state.error && <p className="text-red-500 text-sm">{state.error}</p>}
-					{state.success && (
-						<p className="text-green-500 text-sm">{state.success}</p>
-					)}
+					{state.success && <p className="text-green-500 text-sm">{state.success}</p>}
 					<SubmitButton pending={pending}>Save Changes</SubmitButton>
 				</form>
 			</CardContent>

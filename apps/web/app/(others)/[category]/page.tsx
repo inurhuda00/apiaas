@@ -5,11 +5,7 @@ import { searchParamsCache } from "@/lib/utils/parsers";
 import type { Product } from "@apiaas/db/schema";
 import type { SearchParams } from "next/dist/server/request/search-params";
 import { useDataControls } from "@/lib/hooks/useDataControls";
-import {
-	DynamicDataControls,
-	DynamicPaginate,
-	DynamicProductCard,
-} from "@/components/lazy-components";
+import { DynamicDataControls, DynamicPaginate, DynamicProductCard } from "@/components/lazy-components";
 import { unstable_cache as cache } from "next/cache";
 import { generateSearchCacheKey } from "@/lib/utils/generate-cache-key";
 import { ProductGridSkeleton } from "@/components/skeletons/product-grid-skeleton";
@@ -113,24 +109,15 @@ async function CategoryPage(props: PageProps) {
 	];
 
 	// Use the DataControls hook
-	const controls = useDataControls<Product>(
-		search,
-		`/${category.slug}`,
-		filterOptions,
-		sortOptions,
-	);
+	const controls = useDataControls<Product>(search, `/${category.slug}`, filterOptions, sortOptions);
 
 	return (
 		<div className="flex-grow py-8 md:py-12">
 			<MaxWidthWrapper>
 				{/* Category Header */}
 				<div className="mb-8 md:mb-10">
-					<h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-3">
-						{category.name}
-					</h1>
-					<p className="text-gray-600 max-w-3xl text-sm md:text-base">
-						{category.description}
-					</p>
+					<h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-3">{category.name}</h1>
+					<p className="text-gray-600 max-w-3xl text-sm md:text-base">{category.description}</p>
 				</div>
 
 				{/* Data Controls */}
