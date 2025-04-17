@@ -27,17 +27,13 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
 
 			{product.locked && (
 				<div className="absolute top-4 right-4">
-					<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1">
-						PRO
-					</span>
+					<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1">PRO</span>
 				</div>
 			)}
 
 			<div className="flex items-center justify-between p-4 border-t">
 				<div className="w-full">
-					<h3 className="font-medium text-card-foreground text-sm truncate whitespace-nowrap">
-						{product.name}
-					</h3>
+					<h3 className="font-medium text-card-foreground text-sm truncate whitespace-nowrap">{product.name}</h3>
 				</div>
 			</div>
 		</div>

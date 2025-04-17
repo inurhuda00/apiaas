@@ -2,10 +2,7 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { timing } from "hono/timing";
 import { cors } from "hono/cors";
-import {
-	DurableObjectRateLimiter,
-	DurableObjectStore,
-} from "@hono-rate-limiter/cloudflare";
+import { DurableObjectRateLimiter, DurableObjectStore } from "@hono-rate-limiter/cloudflare";
 import type { Env } from "../types";
 import waitlistRoute from "./routes/waitlist";
 import imageRoute from "./routes/image";
@@ -28,12 +25,7 @@ app.use(
 			"https://www.mondive.xyz",
 			"https://api.mondive.xyz",
 		],
-		allowHeaders: [
-			"content-type",
-			"authorization",
-			"x-requested-with",
-			"x-forwarded-for",
-		],
+		allowHeaders: ["content-type", "authorization", "x-requested-with", "x-forwarded-for"],
 		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		credentials: true,
 		exposeHeaders: ["content-length", "content-type"],

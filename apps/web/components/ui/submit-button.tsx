@@ -13,15 +13,8 @@ export function SubmitButton({
 	icon?: React.ReactNode;
 } & ButtonProps) {
 	return (
-		<Button
-			type="submit"
-			disabled={pending}
-			{...props}
-			className={cn(props.className, "relative")}
-		>
-			{icon && (
-				<span className={cn("mr-2", { "opacity-0": pending })}>{icon}</span>
-			)}
+		<Button type="submit" disabled={pending} {...props} className={cn(props.className, "relative")}>
+			{icon && <span className={cn("mr-2", { "opacity-0": pending })}>{icon}</span>}
 			<span className={cn({ "opacity-0": pending })}>{children}</span>
 
 			{pending && (

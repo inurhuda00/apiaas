@@ -16,10 +16,7 @@ export function SignUpForm() {
 	const redirect = searchParams.get("redirect");
 	const priceId = searchParams.get("priceId");
 	const inviteId = searchParams.get("inviteId");
-	const [state, formAction, pending] = useActionState<ActionState, FormData>(
-		signUp,
-		{ error: "" },
-	);
+	const [state, formAction, pending] = useActionState<ActionState, FormData>(signUp, { error: "" });
 
 	return (
 		<Form action={formAction} className="space-y-4">
@@ -28,43 +25,21 @@ export function SignUpForm() {
 			<input type="hidden" name="inviteId" value={inviteId || ""} />
 			<div>
 				<Label htmlFor="name">Full name</Label>
-				<Input
-					id="name"
-					name="name"
-					type="text"
-					autoComplete="name"
-					className="mt-1"
-				/>
+				<Input id="name" name="name" type="text" autoComplete="name" className="mt-1" />
 			</div>
 
 			<div>
 				<Label htmlFor="email">Email address</Label>
-				<Input
-					id="email"
-					name="email"
-					type="email"
-					autoComplete="email"
-					className="mt-1"
-				/>
+				<Input id="email" name="email" type="email" autoComplete="email" className="mt-1" />
 			</div>
 
 			<div>
 				<Label htmlFor="password">Password</Label>
-				<Input
-					id="password"
-					name="password"
-					type="password"
-					autoComplete="new-password"
-					className="mt-1"
-				/>
-				<p className="mt-1 text-xs text-gray-500">
-					Must be at least 8 characters
-				</p>
+				<Input id="password" name="password" type="password" autoComplete="new-password" className="mt-1" />
+				<p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
 			</div>
 
-			{state.error && (
-				<div className="text-sm text-red-500 font-medium">{state.error}</div>
-			)}
+			{state.error && <div className="text-sm text-red-500 font-medium">{state.error}</div>}
 
 			<SubmitButton pending={pending}>Create account</SubmitButton>
 		</Form>

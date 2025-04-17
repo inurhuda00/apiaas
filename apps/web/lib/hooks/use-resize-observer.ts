@@ -1,8 +1,6 @@
 import { type RefObject, useEffect, useState, useCallback } from "react";
 
-export function useResizeObserver<T extends Element>(
-	elementRef: RefObject<T | null>,
-): ResizeObserverEntry | undefined {
+export function useResizeObserver<T extends Element>(elementRef: RefObject<T | null>): ResizeObserverEntry | undefined {
 	const [entry, setEntry] = useState<ResizeObserverEntry>();
 
 	const updateEntry = useCallback(([entry]: ResizeObserverEntry[]): void => {

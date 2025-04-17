@@ -5,13 +5,7 @@ import * as React from "react";
 import { CommandList } from "cmdk";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "./button";
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-} from "./command";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./command";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Icons } from "./icons";
 
@@ -58,16 +52,12 @@ export function ComboboxDropdown<T extends ComboboxItem>({
 	className,
 }: Props<T>) {
 	const [open, setOpen] = React.useState(false);
-	const [internalSelectedItem, setInternalSelectedItem] = React.useState<
-		T | undefined
-	>();
+	const [internalSelectedItem, setInternalSelectedItem] = React.useState<T | undefined>();
 	const [inputValue, setInputValue] = React.useState("");
 
 	const selectedItem = incomingSelectedItem ?? internalSelectedItem;
 
-	const filteredItems = items.filter((item) =>
-		item.label.toLowerCase().includes(inputValue.toLowerCase()),
-	);
+	const filteredItems = items.filter((item) => item.label.toLowerCase().includes(inputValue.toLowerCase()));
 
 	const showCreate = onCreate && Boolean(inputValue) && !filteredItems.length;
 
@@ -108,12 +98,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
 									renderListItem({ isChecked, item })
 								) : (
 									<>
-										<Icons.Check
-											className={cn(
-												"mr-2 h-4 w-4",
-												isChecked ? "opacity-100" : "opacity-0",
-											)}
-										/>
+										<Icons.Check className={cn("mr-2 h-4 w-4", isChecked ? "opacity-100" : "opacity-0")} />
 										{item.label}
 									</>
 								)}
@@ -152,11 +137,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
 	return (
 		<Popover open={open} onOpenChange={setOpen} modal>
 			<PopoverTrigger asChild disabled={disabled} className="w-full">
-				<Button
-					variant="outline"
-					aria-expanded={open}
-					className="w-full justify-between relative"
-				>
+				<Button variant="outline" aria-expanded={open} className="w-full justify-between relative">
 					<span className="truncate text-ellipsis pr-3">
 						{selectedItem
 							? renderSelectedItem?.(selectedItem) || (

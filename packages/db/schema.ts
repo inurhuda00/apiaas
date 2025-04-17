@@ -137,9 +137,7 @@ export const refreshTokens = pgTable("refresh_tokens", {
 
 export const waitlist = pgTable("waitlist", {
 	email: varchar("email", { length: 512 }).primaryKey(),
-	createdAt: timestamp("created_at", { withTimezone: true })
-		.notNull()
-		.defaultNow(),
+	createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const productsRelations = relations(products, ({ one, many }) => ({

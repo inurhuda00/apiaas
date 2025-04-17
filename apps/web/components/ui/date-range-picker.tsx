@@ -16,21 +16,12 @@ type Props = {
 	disabled?: boolean;
 };
 
-export function DateRangePicker({
-	className,
-	range,
-	disabled,
-	onSelect,
-	placeholder,
-}: Props) {
+export function DateRangePicker({ className, range, disabled, onSelect, placeholder }: Props) {
 	return (
 		<div className={cn("grid gap-2", className)}>
 			<Popover>
 				<PopoverTrigger asChild disabled={disabled}>
-					<Button
-						variant="outline"
-						className={cn("justify-start text-left font-medium space-x-2")}
-					>
+					<Button variant="outline" className={cn("justify-start text-left font-medium space-x-2")}>
 						<span>{placeholder}</span>
 						<Icons.ChevronDown />
 					</Button>

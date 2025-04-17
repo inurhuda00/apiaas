@@ -19,10 +19,7 @@ export default function ForgotPasswordPage() {
 							<span className="text-xl font-bold">Funnnit</span>
 						</Link>
 					</div>
-					<AuthCard
-						title="Reset Password"
-						subtitle="Enter your email to receive a password reset link"
-					>
+					<AuthCard title="Reset Password" subtitle="Enter your email to receive a password reset link">
 						<Suspense>
 							<ForgotPasswordForm />
 						</Suspense>

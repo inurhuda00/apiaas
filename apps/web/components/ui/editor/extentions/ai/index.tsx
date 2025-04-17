@@ -12,14 +12,12 @@ const selectors = [
 	{
 		name: "Grammar",
 		icon: Icons.Spellcheck,
-		instructions:
-			"Fix grammar: Rectify any grammatical errors while preserving the original meaning.",
+		instructions: "Fix grammar: Rectify any grammatical errors while preserving the original meaning.",
 	},
 	{
 		name: "Improve",
 		icon: Icons.WrapText,
-		instructions:
-			"Improve text: Refine the text to improve clarity and professionalism.",
+		instructions: "Improve text: Refine the text to improve clarity and professionalism.",
 	},
 	{
 		name: "Condense",
@@ -54,11 +52,7 @@ export function AIMenu({ onOpenChange, editor }: AIMenuProps) {
 	}, [isTypingPrompt]);
 
 	const handleGenerate = async (instructions: string) => {
-		const selectedText = editor?.state.doc.textBetween(
-			editor?.state.selection?.from,
-			editor?.state.selection?.to,
-			"",
-		);
+		const selectedText = editor?.state.doc.textBetween(editor?.state.selection?.from, editor?.state.selection?.to, "");
 
 		if (!selectedText) {
 			return;
@@ -80,11 +74,7 @@ export function AIMenu({ onOpenChange, editor }: AIMenuProps) {
 
 	return (
 		<div ref={ref} className="flex whitespace-nowrap divide-x">
-			<motion.div
-				initial={{ opacity: 0, y: 10 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.2 }}
-			>
+			<motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
 				{isTypingPrompt ? (
 					<div className="relative">
 						<input
@@ -105,10 +95,7 @@ export function AIMenu({ onOpenChange, editor }: AIMenuProps) {
 						</kbd>
 					</div>
 				) : (
-					<BubbleMenuButton
-						action={() => setIsTypingPrompt(true)}
-						isActive={false}
-					>
+					<BubbleMenuButton action={() => setIsTypingPrompt(true)} isActive={false}>
 						<div className="flex items-center space-x-1">
 							<Icons.AIOutline className="size-3" />
 							<span className="text-[11px] font-mono">Ask AI</span>
@@ -125,10 +112,7 @@ export function AIMenu({ onOpenChange, editor }: AIMenuProps) {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.2, delay: (index + 1) * 0.05 }}
 					>
-						<BubbleMenuButton
-							action={() => handleGenerate(selector.instructions)}
-							isActive={false}
-						>
+						<BubbleMenuButton action={() => handleGenerate(selector.instructions)} isActive={false}>
 							<div className="flex items-center space-x-1">
 								<selector.icon className="size-3" />
 								<span>{selector.name}</span>

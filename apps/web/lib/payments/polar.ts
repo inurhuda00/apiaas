@@ -11,13 +11,7 @@ export const WORKSPACE_ID = env.POLAR_WORKSPACE_ID;
 
 export async function validateLicenseKey(key: string) {}
 
-export const licenseStatusSchema = z.enum([
-	"active",
-	"expired",
-	"invalid",
-	"revoked",
-	"inactive",
-]);
+export const licenseStatusSchema = z.enum(["active", "expired", "invalid", "revoked", "inactive"]);
 
 export type LicenseStatus = z.infer<typeof licenseStatusSchema>;
 
@@ -31,9 +25,7 @@ export const licenseValidationResponseSchema = z.object({
 	error: z.string().optional(),
 });
 
-export type LicenseValidationResponse = z.infer<
-	typeof licenseValidationResponseSchema
->;
+export type LicenseValidationResponse = z.infer<typeof licenseValidationResponseSchema>;
 
 export function getCustomerPortalUrl() {}
 

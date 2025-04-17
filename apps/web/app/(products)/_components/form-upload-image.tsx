@@ -1,31 +1,12 @@
 "use client";
 
-import {
-	useState,
-	useCallback,
-	use,
-	useRef,
-	useActionState,
-	startTransition,
-	useEffect,
-} from "react";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
+import { useState, useCallback, use, useRef, useActionState, startTransition, useEffect } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { env } from "@/env";
@@ -33,7 +14,7 @@ import { useSession } from "@/components/providers/session";
 import type { ActionState } from "@/actions/middleware";
 import { updateProduct } from "@/actions/products";
 import { DynamicFileUploader } from "@/components/lazy-components";
-import { usePathname } from "next/navigation";
+import { useUnsavedChangesGuard } from "@/lib/hooks/use-unsaved-changes-guard";
 
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -52,7 +33,7 @@ interface MediaItem {
 	filename: string;
 	size: number;
 	type: string;
-	isPrimary: boolean;
+	sort: number;
 }
 
 interface FileItem {
@@ -61,6 +42,8 @@ interface FileItem {
 	size: number;
 	type: string;
 }
+
+type UploadItemType = "media" | "file";
 
 interface FileUploadState {
 	mediaFiles: File[];
@@ -78,68 +61,52 @@ async function uploadWithProgress<T>(
 	token?: string | null,
 ): Promise<T> {
 	try {
-		const response = await axios.post<{
-			data: T;
-		}>(`${API_BASE_URL}${url}`, formData, {
-			withCredentials: true,
-			headers: {
-				"Content-Type": "multipart/form-data",
-				Authorization: `Bearer ${token}`,
-			},
-			onUploadProgress: (progressEvent) => {
-				const total = progressEvent.total || 0;
-				if (total <= 0) return;
+		const headers: Record<string, string> = { "Content-Type": "multipart/form-data" };
+		if (token) headers.Authorization = `Bearer ${token}`;
 
-				const percentCompleted = Math.round(
-					(progressEvent.loaded * 100) / total,
-				);
-				onProgress(percentCompleted);
+		const response = await axios.post<{ data: T }>(`${API_BASE_URL}${url}`, formData, {
+			withCredentials: true,
+			headers,
+			onUploadProgress: ({ loaded, total = 0 }) => {
+				if (total <= 0) return;
+				onProgress(Math.round((loaded * 100) / total));
 			},
 		});
+
 		return response.data.data;
 	} catch (error) {
-		if (axios.isAxiosError(error) && error.response) {
-			const apiError =
-				error.response.data?.error ||
-				`Request failed with status ${error.response.status}`;
-			throw new Error(apiError);
-		}
+		const message =
+			axios.isAxiosError(error) && error.response
+				? error.response.data?.error || `Request failed with status ${error.response.status}`
+				: error instanceof Error
+					? error.message
+					: "An unknown error occurred during upload";
 
-		throw new Error(
-			error instanceof Error
-				? error.message
-				: "An unknown error occurred during upload",
-		);
+		throw new Error(message);
 	}
 }
 
 const productService = {
-	async createProduct(
-		data: { name: string },
-		token?: string | null,
-	): Promise<ProductData> {
+	async createProduct(data: { name: string }, token?: string | null): Promise<ProductData> {
 		try {
-			const response = await axios.post<{
-				data: ProductData;
-			}>(`${API_BASE_URL}/v1/product/create`, data, {
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (token) headers.Authorization = `Bearer ${token}`;
+
+			const response = await axios.post<{ data: ProductData }>(`${API_BASE_URL}/v1/product/create`, data, {
+				headers,
 				withCredentials: true,
 			});
 
 			return response.data.data;
 		} catch (error) {
-			if (axios.isAxiosError(error) && error.response) {
-				const apiError =
-					error.response.data?.error ||
-					`Request failed with status ${error.response.status}`;
-				throw new Error(apiError);
-			}
-			throw new Error(
-				error instanceof Error ? error.message : "An unknown error occurred",
-			);
+			const message =
+				axios.isAxiosError(error) && error.response
+					? error.response.data?.error || `Request failed with status ${error.response.status}`
+					: error instanceof Error
+						? error.message
+						: "An unknown error occurred";
+
+			throw new Error(message);
 		}
 	},
 
@@ -147,20 +114,15 @@ const productService = {
 		productId: string,
 		file: File,
 		onProgress: (progress: number) => void,
-		isPrimary = false,
+		sort: number,
 		token?: string | null,
 	): Promise<MediaItem> {
 		const formData = new FormData();
 		formData.append("productId", productId);
 		formData.append("file", file);
-		formData.append("isPrimary", isPrimary.toString());
+		formData.append("sort", sort.toString());
 
-		return uploadWithProgress<MediaItem>(
-			"/v1/product/media",
-			formData,
-			onProgress,
-			token,
-		);
+		return uploadWithProgress<MediaItem>("/v1/product/media", formData, onProgress, token);
 	},
 
 	async uploadFile(
@@ -173,38 +135,13 @@ const productService = {
 		formData.append("productId", productId);
 		formData.append("file", file);
 
-		return uploadWithProgress<FileItem>(
-			"/v1/product/files",
-			formData,
-			onProgress,
-			token,
-		);
-	},
-
-	async deleteProduct(productId: string, token?: string | null): Promise<void> {
-		if (!productId) return;
-
-		try {
-			await axios.delete(`${API_BASE_URL}/v1/product/${productId}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				withCredentials: true,
-			});
-			console.log(
-				`Product ${productId} and its associated files deleted successfully`,
-			);
-		} catch (error) {
-			console.error("Failed to delete product:", error);
-			// Continue silently as this is cleanup code
-		}
+		return uploadWithProgress<FileItem>("/v1/product/files", formData, onProgress, token);
 	},
 };
 
 export function UploadImageForm() {
 	const { sessionPromise } = useSession();
 	const sessionToken = use(sessionPromise);
-	const pathname = usePathname();
 
 	const uploadStateRef = useRef<FileUploadState>({
 		mediaFiles: [],
@@ -216,93 +153,41 @@ export function UploadImageForm() {
 	});
 
 	const productIdRef = useRef<string>("");
-	const prevPathRef = useRef<string>(pathname);
-
-	const [state, formAction, pending] = useActionState<ActionState, FormData>(
-		updateProduct,
-		{},
-	);
-
 	const [progresses, setProgresses] = useState<Record<string, number>>({});
+	const [state, formAction, pending] = useActionState<ActionState, FormData>(updateProduct, {});
 
-	// Function to clean up resources
-	const cleanupResources = useCallback(async () => {
-		if (
-			productIdRef.current &&
-			(uploadStateRef.current.mediaFiles.length > 0 ||
-				uploadStateRef.current.files.length > 0)
-		) {
-			try {
-				// Delete the product and all associated files through the API
-				await productService.deleteProduct(productIdRef.current, sessionToken);
+	const hasUnsavedContent =
+		!!productIdRef.current && (uploadStateRef.current.mediaFiles.length > 0 || uploadStateRef.current.files.length > 0);
 
-				// Clear local state
-				uploadStateRef.current.mediaFiles = [];
-				uploadStateRef.current.files = [];
-				uploadStateRef.current.uploadedMediaItems = [];
-				uploadStateRef.current.uploadedFileItems = [];
-				uploadStateRef.current.progresses = {};
-				uploadStateRef.current.pendingUploads = new Set();
-				productIdRef.current = "";
-				setProgresses({});
-			} catch (error) {
-				console.error("Error during cleanup:", error);
-			}
+	useUnsavedChangesGuard({
+		shouldBlock: hasUnsavedContent,
+		sendBeaconData: () =>
+			hasUnsavedContent
+				? {
+						url: `${API_BASE_URL}/v1/product/${productIdRef.current}/cleanup`,
+						data: { productId: productIdRef.current },
+						token: sessionToken,
+					}
+				: null,
+	});
+
+	const isItemAlreadyUploaded = useCallback((file: File, type: UploadItemType): boolean => {
+		if (type === "media") {
+			return uploadStateRef.current.uploadedMediaItems.some(
+				(item) => item.filename === file.name || (item.size === file.size && item.type === file.type),
+			);
 		}
-	}, [sessionToken]);
 
-	// Check for page navigation using the pathname
-	useEffect(() => {
-		if (prevPathRef.current !== pathname && prevPathRef.current) {
-			cleanupResources();
-		}
-		prevPathRef.current = pathname;
-	}, [pathname, cleanupResources]);
-
-	// Handle beforeunload event
-	useEffect(() => {
-		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			if (
-				productIdRef.current &&
-				(uploadStateRef.current.mediaFiles.length > 0 ||
-					uploadStateRef.current.files.length > 0)
-			) {
-				// Show confirmation dialog
-				e.preventDefault();
-				e.returnValue = "";
-				return "";
-			}
-		};
-
-		window.addEventListener("beforeunload", handleBeforeUnload);
-
-		return () => {
-			window.removeEventListener("beforeunload", handleBeforeUnload);
-
-			// Cleanup on component unmount
-			cleanupResources();
-		};
-	}, [cleanupResources]);
-
-	const isMediaFileAlreadyUploaded = useCallback((file: File): boolean => {
-		return uploadStateRef.current.uploadedMediaItems.some((item) => {
-			const nameMatch = item.filename === file.name;
-			const sizeTypeMatch = item.size === file.size && item.type === file.type;
-			return nameMatch || sizeTypeMatch;
-		});
-	}, []);
-
-	const isFileAlreadyUploaded = useCallback((file: File): boolean => {
-		return uploadStateRef.current.uploadedFileItems.some((item) => {
-			const nameMatch = item.originalName === file.name;
-			const sizeTypeMatch = item.size === file.size && item.type === file.type;
-			return (nameMatch && item.size === file.size) || sizeTypeMatch;
-		});
+		return uploadStateRef.current.uploadedFileItems.some(
+			(item) =>
+				(item.originalName === file.name && item.size === file.size) ||
+				(item.size === file.size && item.type === file.type),
+		);
 	}, []);
 
 	const identifyNewFiles = useCallback(
-		(newFiles: File[], currentFiles: File[]): File[] => {
-			return newFiles.filter(
+		(newFiles: File[], currentFiles: File[]): File[] =>
+			newFiles.filter(
 				(newFile) =>
 					!currentFiles.some(
 						(currentFile) =>
@@ -311,33 +196,22 @@ export function UploadImageForm() {
 							currentFile.type === newFile.type &&
 							currentFile.lastModified === newFile.lastModified,
 					),
-			);
-		},
+			),
 		[],
 	);
 
 	const updateProgress = useCallback((fileName: string, progress: number) => {
 		uploadStateRef.current.progresses[fileName] = progress;
-		setProgresses((prev) => ({
-			...prev,
-			[fileName]: progress,
-		}));
+		setProgresses((prev) => ({ ...prev, [fileName]: progress }));
 	}, []);
 
-	const createTemporaryProduct = async (): Promise<string> => {
-		if (productIdRef.current) {
-			return productIdRef.current;
-		}
+	const createTemporaryProduct = useCallback(async (): Promise<string> => {
+		if (productIdRef.current) return productIdRef.current;
 
 		try {
-			const tempProduct = await productService.createProduct(
-				{ name: "Temporary Product" },
-				sessionToken,
-			);
-
-			productIdRef.current = tempProduct.id;
-
-			return tempProduct.id;
+			const { id } = await productService.createProduct({ name: "Temporary Product" }, sessionToken);
+			productIdRef.current = id;
+			return id;
 		} catch (error) {
 			toast({
 				title: "Error",
@@ -346,101 +220,81 @@ export function UploadImageForm() {
 			});
 			throw error;
 		}
-	};
+	}, [sessionToken]);
 
-	async function handleImageUpload(file: File): Promise<void> {
-		if (uploadStateRef.current.pendingUploads.has(file.name)) {
-			return;
-		}
+	const uploadFile = useCallback(
+		async (file: File, type: UploadItemType): Promise<void> => {
+			if (uploadStateRef.current.pendingUploads.has(file.name) || isItemAlreadyUploaded(file, type)) return;
 
-		if (isMediaFileAlreadyUploaded(file)) {
-			return;
-		}
-
-		try {
 			uploadStateRef.current.pendingUploads.add(file.name);
-
-			const productId = await createTemporaryProduct();
-
 			uploadStateRef.current.progresses[file.name] = 0;
+			try {
+				const productId = await createTemporaryProduct();
 
-			const isPrimary = uploadStateRef.current.uploadedMediaItems.length === 0;
+				if (type === "media") {
+					const sort = uploadStateRef.current.uploadedMediaItems.length;
+					const mediaItem = await productService.uploadMedia(
+						productId,
+						file,
+						(progress) => updateProgress(file.name, progress),
+						sort,
+						sessionToken,
+					);
+					uploadStateRef.current.uploadedMediaItems.push(mediaItem);
+				} else {
+					const fileItem = await productService.uploadFile(
+						productId,
+						file,
+						(progress) => updateProgress(file.name, progress),
+						sessionToken,
+					);
+					uploadStateRef.current.uploadedFileItems.push(fileItem);
+				}
+			} catch (error) {
+				toast({
+					title: "Upload Error",
+					description: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
+					variant: "destructive",
+				});
+			} finally {
+				uploadStateRef.current.pendingUploads.delete(file.name);
+			}
+		},
+		[createTemporaryProduct, isItemAlreadyUploaded, sessionToken, updateProgress],
+	);
 
-			const mediaItem = await productService.uploadMedia(
-				productId,
-				file,
-				(progress) => updateProgress(file.name, progress),
-				isPrimary,
-				sessionToken,
+	const handleFileChange = useCallback(
+		(newFiles: File[], type: UploadItemType) => {
+			const files = newFiles as File[];
+			const stateKey = type === "media" ? "mediaFiles" : "files";
+
+			const addedFiles = identifyNewFiles(files, uploadStateRef.current[stateKey]);
+			uploadStateRef.current[stateKey] = files;
+
+			const filesToUpload = addedFiles.filter(
+				(file) => !isItemAlreadyUploaded(file, type) && !uploadStateRef.current.pendingUploads.has(file.name),
 			);
 
-			uploadStateRef.current.uploadedMediaItems.push(mediaItem);
+			for (const file of filesToUpload) {
+				uploadFile(file, type);
+			}
+		},
+		[identifyNewFiles, isItemAlreadyUploaded, uploadFile],
+	);
 
-			uploadStateRef.current.pendingUploads.delete(file.name);
-		} catch (error) {
-			uploadStateRef.current.pendingUploads.delete(file.name);
-
-			toast({
-				title: "Upload Error",
-				description: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
-				variant: "destructive",
-			});
-		}
-	}
-
-	async function handleFileUpload(file: File): Promise<void> {
-		if (uploadStateRef.current.pendingUploads.has(file.name)) {
-			return;
-		}
-
-		if (isFileAlreadyUploaded(file)) {
-			return;
-		}
-
-		try {
-			uploadStateRef.current.pendingUploads.add(file.name);
-			const productId = await createTemporaryProduct();
-
-			uploadStateRef.current.progresses[file.name] = 0;
-
-			const fileItem = await productService.uploadFile(
-				productId,
-				file,
-				(progress) => updateProgress(file.name, progress),
-				sessionToken,
-			);
-
-			uploadStateRef.current.uploadedFileItems.push(fileItem);
-
-			uploadStateRef.current.pendingUploads.delete(file.name);
-		} catch (error) {
-			uploadStateRef.current.pendingUploads.delete(file.name);
-			toast({
-				title: "Upload Error",
-				description: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
-				variant: "destructive",
-			});
-		}
-	}
-
-	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		const formData = new FormData(event.currentTarget);
-		formData.append("productId", productIdRef.current);
-
-		startTransition(() => {
-			formAction(formData);
-		});
-	}
+	const handleSubmit = useCallback(
+		(event: React.FormEvent<HTMLFormElement>) => {
+			event.preventDefault();
+			const formData = new FormData(event.currentTarget);
+			formData.append("productId", productIdRef.current);
+			startTransition(() => formAction(formData));
+		},
+		[formAction],
+	);
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Accordion
-				type="single"
-				collapsible
-				defaultValue="general"
-				className="mb-6"
-			>
+			<Accordion type="single" collapsible defaultValue="general" className="mb-6">
 				<AccordionItem value="general" className="border bg-card rounded-md">
 					<AccordionTrigger className="px-4 py-3">
 						<span className="text-base font-medium">General</span>
@@ -460,9 +314,7 @@ export function UploadImageForm() {
 									placeholder="Product name"
 									className="mt-1"
 								/>
-								<p className="text-sm text-muted-foreground mt-1">
-									Give your product a short and clear name
-								</p>
+								<p className="text-sm text-muted-foreground mt-1">Give your product a short and clear name</p>
 							</div>
 
 							<div>
@@ -476,21 +328,14 @@ export function UploadImageForm() {
 									className="mt-1"
 									placeholder="Describe your product"
 								/>
-								<p className="text-sm text-muted-foreground mt-1">
-									Give your product a short and clear description
-								</p>
+								<p className="text-sm text-muted-foreground mt-1">Give your product a short and clear description</p>
 							</div>
 						</div>
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>
 
-			<Accordion
-				type="single"
-				collapsible
-				defaultValue="media"
-				className="mb-6"
-			>
+			<Accordion type="single" collapsible defaultValue="media" className="mb-6">
 				<AccordionItem value="media" className="border bg-card rounded-md">
 					<AccordionTrigger className="px-4 py-3">
 						<span className="text-base font-medium">Media</span>
@@ -503,43 +348,17 @@ export function UploadImageForm() {
 							multiple={true}
 							value={uploadStateRef.current.mediaFiles}
 							progresses={progresses}
-							onValueChange={(newFiles: File[]) => {
-								const files = newFiles as File[];
-
-								const addedFiles = identifyNewFiles(
-									files,
-									uploadStateRef.current.mediaFiles,
-								);
-
-								uploadStateRef.current.mediaFiles = files;
-
-								const filesToUpload = addedFiles.filter(
-									(file) =>
-										!isMediaFileAlreadyUploaded(file) &&
-										!uploadStateRef.current.pendingUploads.has(file.name),
-								);
-
-								if (filesToUpload.length > 0) {
-									for (const file of filesToUpload) {
-										handleImageUpload(file);
-									}
-								}
-							}}
+							onValueChange={(newFiles) => handleFileChange(newFiles as File[], "media")}
 						/>
 						<p className="text-sm text-muted-foreground mt-4">
-							Add up to 10 images to your product. Used to represent your
-							product during checkout, in email, social sharing and more.
+							Add up to 10 images to your product. Used to represent your product during checkout, in email, social
+							sharing and more.
 						</p>
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>
 
-			<Accordion
-				type="single"
-				collapsible
-				defaultValue="pricing"
-				className="mb-6"
-			>
+			<Accordion type="single" collapsible defaultValue="pricing" className="mb-6">
 				<AccordionItem value="pricing" className="border bg-card rounded-md">
 					<AccordionTrigger className="px-4 py-3">
 						<span className="text-base font-medium">Pricing</span>
@@ -565,13 +384,7 @@ export function UploadImageForm() {
 										onKeyDown={(e) => {
 											if (
 												!/^[0-9]$/.test(e.key) &&
-												![
-													"Backspace",
-													"Delete",
-													"ArrowLeft",
-													"ArrowRight",
-													"Tab",
-												].includes(e.key) &&
+												!["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key) &&
 												!e.ctrlKey
 											) {
 												e.preventDefault();
@@ -591,12 +404,8 @@ export function UploadImageForm() {
 										<SelectValue placeholder="Select a category" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="digital-goods">
-											Digital goods or services (excluding ebooks)
-										</SelectItem>
-										<SelectItem value="physical-goods">
-											Physical goods
-										</SelectItem>
+										<SelectItem value="digital-goods">Digital goods or services (excluding ebooks)</SelectItem>
+										<SelectItem value="physical-goods">Physical goods</SelectItem>
 										<SelectItem value="services">Services</SelectItem>
 									</SelectContent>
 								</Select>
@@ -606,12 +415,7 @@ export function UploadImageForm() {
 				</AccordionItem>
 			</Accordion>
 
-			<Accordion
-				type="single"
-				collapsible
-				defaultValue="files"
-				className="mb-6"
-			>
+			<Accordion type="single" collapsible defaultValue="files" className="mb-6">
 				<AccordionItem value="files" className="border bg-card rounded-md">
 					<AccordionTrigger className="px-4 py-3">
 						<span className="text-base font-medium">Files</span>
@@ -623,34 +427,12 @@ export function UploadImageForm() {
 							multiple={true}
 							value={uploadStateRef.current.files}
 							progresses={progresses}
-							onValueChange={(newFiles: File[]) => {
-								const files = newFiles as File[];
-
-								const addedFiles = identifyNewFiles(
-									files,
-									uploadStateRef.current.files,
-								);
-
-								uploadStateRef.current.files = files;
-
-								const filesToUpload = addedFiles.filter(
-									(file) =>
-										!isFileAlreadyUploaded(file) &&
-										!uploadStateRef.current.pendingUploads.has(file.name),
-								);
-
-								if (filesToUpload.length > 0) {
-									for (const file of filesToUpload) {
-										handleFileUpload(file);
-									}
-								}
-							}}
+							onValueChange={(newFiles) => handleFileChange(newFiles as File[], "file")}
 							scrollableArea={true}
 						/>
 						<p className="text-sm text-muted-foreground mt-4">
-							Upload an unlimited number of files to your product. Your
-							customers will be given access to them after purchase. Unlimited
-							files, 5GB total limit.
+							Upload an unlimited number of files to your product. Your customers will be given access to them after
+							purchase. Unlimited files, 5GB total limit.
 						</p>
 					</AccordionContent>
 				</AccordionItem>
@@ -660,15 +442,13 @@ export function UploadImageForm() {
 				<SubmitButton pending={pending}>Create Product</SubmitButton>
 			</div>
 
-			<div className="mt-4">
-				{state.error && (
-					<div className="text-red-500 text-sm">{state.error}</div>
-				)}
+			{(state.error || state.success) && (
+				<div className="mt-4">
+					{state.error && <div className="text-red-500 text-sm">{state.error}</div>}
 
-				{state.success && (
-					<div className="text-green-500 text-sm">{state.success}</div>
-				)}
-			</div>
+					{state.success && <div className="text-green-500 text-sm">{state.success}</div>}
+				</div>
+			)}
 		</form>
 	);
 }

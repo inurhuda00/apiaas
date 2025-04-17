@@ -86,9 +86,7 @@ export async function getAuthenticatedUser() {
 		const user = await getUserById(refreshData.user.id);
 		if (!user) return null;
 
-		console.info(
-			`User authenticated via refresh token: ${refreshData.user.id}`,
-		);
+		console.info(`User authenticated via refresh token: ${refreshData.user.id}`);
 
 		const session: SessionData = {
 			user: {

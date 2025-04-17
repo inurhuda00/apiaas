@@ -1,12 +1,5 @@
 import { db } from ".";
-import {
-	users,
-	categories,
-	products,
-	images,
-	tags,
-	productTags,
-} from "@apiaas/db/schema";
+import { users, categories, products, images, tags, productTags } from "@apiaas/db/schema";
 import { hashPassword } from "@/lib/auth/session";
 
 async function seed() {
@@ -108,8 +101,7 @@ async function seed() {
 		{
 			slug: "cat-with-tongue-out-0xiw3",
 			name: "Cat With Tongue Out",
-			description:
-				"A cute cartoon cat with its tongue sticking out, perfect for playful designs.",
+			description: "A cute cartoon cat with its tongue sticking out, perfect for playful designs.",
 			locked: false,
 			categoryId: categoryMap.get("joydoodle"),
 			ownerId: admin.id,
@@ -120,8 +112,7 @@ async function seed() {
 		{
 			slug: "cartoon-leopard-with-open-mouth-0xw73",
 			name: "Cartoon Leopard with Open Mouth",
-			description:
-				"A colorful cartoon leopard with an open mouth, great for children's content.",
+			description: "A colorful cartoon leopard with an open mouth, great for children's content.",
 			locked: true,
 			categoryId: categoryMap.get("joydoodle"),
 			ownerId: admin.id,
@@ -132,8 +123,7 @@ async function seed() {
 		{
 			slug: "snarling-wolf-head-0xn7j",
 			name: "Snarling Wolf Head",
-			description:
-				"An expressive snarling wolf head illustration, perfect for mascots or branding.",
+			description: "An expressive snarling wolf head illustration, perfect for mascots or branding.",
 			locked: true,
 			categoryId: categoryMap.get("joydoodle"),
 			ownerId: admin.id,
@@ -155,8 +145,7 @@ async function seed() {
 		{
 			slug: "quirky-striped-bunny-0xqb3",
 			name: "Quirky Striped Bunny",
-			description:
-				"A cute purple bunny with striped pattern, perfect for children's content.",
+			description: "A cute purple bunny with striped pattern, perfect for children's content.",
 			locked: true,
 			categoryId: categoryMap.get("joydoodle"),
 			ownerId: admin.id,
@@ -167,8 +156,7 @@ async function seed() {
 		{
 			slug: "cyberpunk-skull-illustration-0xa1b",
 			name: "Cyberpunk Skull Illustration",
-			description:
-				"A colorful cyberpunk style skull illustration with orange tones.",
+			description: "A colorful cyberpunk style skull illustration with orange tones.",
 			locked: true,
 			categoryId: categoryMap.get("joydoodle"),
 			ownerId: admin.id,
@@ -179,8 +167,7 @@ async function seed() {
 		{
 			slug: "vibrant-3d-game-controller-0xwq0",
 			name: "Vibrant 3D Game Controller",
-			description:
-				"A colorful 3D game controller, perfect for gaming content and interfaces.",
+			description: "A colorful 3D game controller, perfect for gaming content and interfaces.",
 			locked: true,
 			categoryId: categoryMap.get("3dx"),
 			ownerId: admin.id,
@@ -191,8 +178,7 @@ async function seed() {
 		{
 			slug: "colorful-3d-succulent-0xx2b",
 			name: "Colorful 3D Succulent",
-			description:
-				"A vibrant 3D succulent plant, ideal for nature-themed designs and decorative elements.",
+			description: "A vibrant 3D succulent plant, ideal for nature-themed designs and decorative elements.",
 			locked: true,
 			categoryId: categoryMap.get("3dx"),
 			ownerId: admin.id,
@@ -203,8 +189,7 @@ async function seed() {
 		{
 			slug: "playful-3d-toilet-icon-0x0uk",
 			name: "Playful 3D Toilet Icon",
-			description:
-				"A cute 3D toilet illustration, perfect for bathroom signage or household-related content.",
+			description: "A cute 3D toilet illustration, perfect for bathroom signage or household-related content.",
 			locked: true,
 			categoryId: categoryMap.get("3dx"),
 			ownerId: admin.id,
@@ -237,8 +222,7 @@ async function seed() {
 		{
 			slug: "stunning-red-gemstone-0xck5",
 			name: "Stunning Red Gemstone",
-			description:
-				"A beautiful 3D rendering of a red gemstone with realistic light reflections.",
+			description: "A beautiful 3D rendering of a red gemstone with realistic light reflections.",
 			locked: true,
 			categoryId: categoryMap.get("3dx"),
 			ownerId: admin.id,

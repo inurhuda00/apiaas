@@ -83,8 +83,7 @@ export default async function UpgradePage() {
 				<div className="text-center mb-12">
 					<h1 className="text-4xl font-bold mb-4">Premium Access</h1>
 					<p className="text-xl text-gray-600 max-w-2xl mx-auto">
-						Get unlimited access to our entire collection with a lifetime
-						license
+						Get unlimited access to our entire collection with a lifetime license
 					</p>
 				</div>
 
@@ -142,9 +141,7 @@ export default async function UpgradePage() {
 								</div>
 								<div>
 									<div className="font-medium">Join our creator community</div>
-									<div className="text-sm text-gray-500">
-										Get inspired by fellow creators
-									</div>
+									<div className="text-sm text-gray-500">Get inspired by fellow creators</div>
 								</div>
 							</div>
 						</div>
@@ -162,35 +159,25 @@ export default async function UpgradePage() {
 									<span className="text-5xl font-bold">$24</span>
 									<span className="text-gray-500 ml-2 mb-1">.99</span>
 								</div>
-								<p className="text-sm text-gray-600 mt-1">
-									One-time payment, lifetime access
-								</p>
+								<p className="text-sm text-gray-600 mt-1">One-time payment, lifetime access</p>
 							</div>
 							<div>
 								<Link
 									href={`/api/checkout?productId=${env.PRODUCT_ID}`}
-									className={cn(
-										buttonVariants(),
-										"w-full bg-orange-500 hover:bg-orange-600 h-12 text-base",
-									)}
+									className={cn(buttonVariants(), "w-full bg-orange-500 hover:bg-orange-600 h-12 text-base")}
 								>
 									Get Premium Access
 								</Link>
-								<p className="text-xs text-center mt-3 text-gray-500">
-									Secure payment powered by Polar.sh
-								</p>
+								<p className="text-xs text-center mt-3 text-gray-500">Secure payment powered by Polar.sh</p>
 							</div>
 
 							<div className="pt-4 border-t mt-6">
 								<div className="flex items-center">
 									<Icons.Info className="h-5 w-5 text-gray-400 mr-2" />
-									<h4 className="font-medium text-sm">
-										100% Satisfaction Guaranteed
-									</h4>
+									<h4 className="font-medium text-sm">100% Satisfaction Guaranteed</h4>
 								</div>
 								<p className="text-xs text-gray-600 mt-1">
-									Try risk-free with our 30-day money-back guarantee. No
-									questions asked.
+									Try risk-free with our 30-day money-back guarantee. No questions asked.
 								</p>
 							</div>
 						</div>
@@ -213,10 +200,7 @@ export default async function UpgradePage() {
 				<div className="text-center">
 					<p className="text-sm text-gray-500">
 						Have more questions?{" "}
-						<a
-							href="mailto:support@funnnit.com"
-							className="text-orange-600 hover:text-orange-500"
-						>
+						<a href="mailto:support@funnnit.com" className="text-orange-600 hover:text-orange-500">
 							Contact our support team
 						</a>
 					</p>

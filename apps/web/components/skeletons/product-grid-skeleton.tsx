@@ -6,9 +6,7 @@ type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked"> & {
 	images: Pick<ImageType, "id" | "url" | "productId" | "isPrimary">[];
 };
 
-export function ProductGrid({
-	products,
-}: { products: ProductWithRelations[] }) {
+export function ProductGrid({ products }: { products: ProductWithRelations[] }) {
 	return (
 		<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
 			{products.map((product) => (

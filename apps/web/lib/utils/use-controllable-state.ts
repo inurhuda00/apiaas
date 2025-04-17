@@ -1,20 +1,10 @@
-import {
-	type Dispatch,
-	type SetStateAction,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * A custom hook that converts a callback to a ref to avoid triggering re-renders when passed as a
  * prop or avoid re-executing effects when passed as a dependency
  */
-function useCallbackRef<T extends (...args: never[]) => unknown>(
-	callback: T | undefined,
-): T {
+function useCallbackRef<T extends (...args: never[]) => unknown>(callback: T | undefined): T {
 	const callbackRef = useRef(callback);
 
 	useEffect(() => {
@@ -34,11 +24,7 @@ type UseControllableStateParams<T> = {
 
 type SetStateFn<T> = (prevState?: T) => T;
 
-function useControllableState<T>({
-	prop,
-	defaultProp,
-	onChange = () => {},
-}: UseControllableStateParams<T>) {
+function useControllableState<T>({ prop, defaultProp, onChange = () => {} }: UseControllableStateParams<T>) {
 	const [uncontrolledProp, setUncontrolledProp] = useUncontrolledState({
 		defaultProp,
 		onChange,
@@ -51,8 +37,7 @@ function useControllableState<T>({
 		(nextValue) => {
 			if (isControlled) {
 				const setter = nextValue as SetStateFn<T>;
-				const value =
-					typeof nextValue === "function" ? setter(prop) : nextValue;
+				const value = typeof nextValue === "function" ? setter(prop) : nextValue;
 				if (value !== prop) handleChange(value as T);
 			} else {
 				setUncontrolledProp(nextValue);
@@ -64,10 +49,7 @@ function useControllableState<T>({
 	return [value, setValue] as const;
 }
 
-function useUncontrolledState<T>({
-	defaultProp,
-	onChange,
-}: Omit<UseControllableStateParams<T>, "prop">) {
+function useUncontrolledState<T>({ defaultProp, onChange }: Omit<UseControllableStateParams<T>, "prop">) {
 	const uncontrolledState = useState<T | undefined>(defaultProp);
 	const [value] = uncontrolledState;
 	const prevValueRef = useRef(value);

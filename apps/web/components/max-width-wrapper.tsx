@@ -6,14 +6,5 @@ interface MaxWidthWrapperProps {
 }
 
 export function MaxWidthWrapper({ className, children }: MaxWidthWrapperProps) {
-	return (
-		<section
-			className={cn(
-				"mx-auto w-full max-w-screen-xl px-2.5 md:px-32",
-				className,
-			)}
-		>
-			{children}
-		</section>
-	);
+	return <section className={cn("mx-auto w-full max-w-screen-xl px-2.5 md:px-32", className)}>{children}</section>;
 }

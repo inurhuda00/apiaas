@@ -3,12 +3,7 @@
 import { Command as CommandPrimitive } from "cmdk";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
-import {
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from "./command";
+import { CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
 import { Icons } from "./icons";
 
 export type Option = Record<"id" | "name", string> & Record<string, string>;
@@ -99,9 +94,7 @@ export const Combobox = ({
 	return (
 		<CommandPrimitive className="w-full">
 			<div className="flex items-center w-full relative">
-				{showIcon && (
-					<Icons.Search className="w-[18px] h-[18px] absolute left-4 pointer-events-none" />
-				)}
+				{showIcon && <Icons.Search className="w-[18px] h-[18px] absolute left-4 pointer-events-none" />}
 
 				<CommandInput
 					ref={inputRef}
@@ -115,23 +108,15 @@ export const Combobox = ({
 					autoFocus={autoFocus}
 				/>
 
-				{isLoading && (
-					<Icons.Spinner className="w-[16px] h-[16px] absolute right-2 animate-spin text-dark-gray" />
-				)}
+				{isLoading && <Icons.Spinner className="w-[16px] h-[16px] absolute right-2 animate-spin text-dark-gray" />}
 
 				{!isLoading && selected && onRemove && (
-					<Icons.Close
-						className="w-[18px] h-[18px] absolute right-2"
-						onClick={handleOnRemove}
-					/>
+					<Icons.Close className="w-[18px] h-[18px] absolute right-2" onClick={handleOnRemove} />
 				)}
 			</div>
 
 			<div className="relative w-full">
-				<CommandList
-					className="w-full outline-none animate-in fade-in-0 zoom-in-95"
-					hidden={!isOpen}
-				>
+				<CommandList className="w-full outline-none animate-in fade-in-0 zoom-in-95" hidden={!isOpen}>
 					{inputValue?.length > 0 && (
 						<CommandGroup
 							className={cn(
@@ -156,26 +141,19 @@ export const Combobox = ({
 								);
 							})}
 
-							{onCreate &&
-								!options?.find(
-									(o) => o.name.toLowerCase() === inputValue.toLowerCase(),
-								) && (
-									<CommandItem
-										key={inputValue}
-										value={inputValue}
-										onSelect={() => onCreate(inputValue)}
-										onMouseDown={(event) => {
-											event.preventDefault();
-											event.stopPropagation();
-										}}
-									>
-										{CreateComponent ? (
-											<CreateComponent value={inputValue} />
-										) : (
-											`Create "${inputValue}"`
-										)}
-									</CommandItem>
-								)}
+							{onCreate && !options?.find((o) => o.name.toLowerCase() === inputValue.toLowerCase()) && (
+								<CommandItem
+									key={inputValue}
+									value={inputValue}
+									onSelect={() => onCreate(inputValue)}
+									onMouseDown={(event) => {
+										event.preventDefault();
+										event.stopPropagation();
+									}}
+								>
+									{CreateComponent ? <CreateComponent value={inputValue} /> : `Create "${inputValue}"`}
+								</CommandItem>
+							)}
 						</CommandGroup>
 					)}
 				</CommandList>

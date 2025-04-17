@@ -9,11 +9,7 @@ type Props = {
 
 export function AskAI({ onSelect }: Props) {
 	return (
-		<BubbleMenuButton
-			action={onSelect}
-			isActive={false}
-			className="flex space-x-2 items-center"
-		>
+		<BubbleMenuButton action={onSelect} isActive={false} className="flex space-x-2 items-center">
 			<Icons.ChatBubble className="size-4" />
 		</BubbleMenuButton>
 	);

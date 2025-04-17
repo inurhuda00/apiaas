@@ -24,12 +24,7 @@ export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
 		const url = formatUrlWithProtocol(value);
 
 		if (url) {
-			editor
-				.chain()
-				.focus()
-				.extendMarkRange("link")
-				.setLink({ href: url })
-				.run();
+			editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
 
 			setOpen(false);
 		}
@@ -40,11 +35,7 @@ export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
 			<PopoverTrigger asChild>
 				<div>
 					<BubbleMenuButton isActive={isActive} action={() => setOpen(true)}>
-						{linkValue ? (
-							<Icons.LinkOff className="size-4" />
-						) : (
-							<Icons.AddLink className="size-4" />
-						)}
+						{linkValue ? <Icons.LinkOff className="size-4" /> : <Icons.AddLink className="size-4" />}
 					</BubbleMenuButton>
 				</div>
 			</PopoverTrigger>
@@ -81,12 +72,7 @@ export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
 							<Icons.Delete className="size-4" />
 						</Button>
 					) : (
-						<Button
-							size="icon"
-							className="size-7"
-							type="button"
-							onClick={handleSubmit}
-						>
+						<Button size="icon" className="size-7" type="button" onClick={handleSubmit}>
 							<Icons.Check className="size-4" />
 						</Button>
 					)}

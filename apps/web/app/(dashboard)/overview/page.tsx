@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Fragment, use } from "react";
@@ -20,9 +14,7 @@ export default function OverviewPage() {
 
 	return (
 		<Fragment>
-			<h1 className="text-lg lg:text-2xl font-medium text-primary mb-6">
-				Overview
-			</h1>
+			<h1 className="text-lg lg:text-2xl font-medium text-primary mb-6">Overview</h1>
 			<div className="md:flex items-start gap-6 grid">
 				<Navigation />
 				<main className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -33,15 +25,11 @@ export default function OverviewPage() {
 									<Icons.FileUpload className="h-5 w-5 text-green-500" />
 									Upload Asset
 								</CardTitle>
-								<CardDescription>
-									Your most recent product upload
-								</CardDescription>
+								<CardDescription>Your most recent product upload</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<p className="text-sm text-gray-500">Total assets: 3</p>
-								<p className="text-sm text-gray-500">
-									Recent Upload At: 05/08/2020
-								</p>
+								<p className="text-sm text-gray-500">Recent Upload At: 05/08/2020</p>
 								<Button asChild className="mt-4" variant="outline">
 									<Link href="/upload">Upload New</Link>
 								</Button>
@@ -72,20 +60,12 @@ export default function OverviewPage() {
 								<Icons.ExternalLink className="h-5 w-5 text-orange-500" />
 								Customer Portal
 							</CardTitle>
-							<CardDescription>
-								Quick access to customer resources
-							</CardDescription>
+							<CardDescription>Quick access to customer resources</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<p className="text-sm text-gray-500">
-								Access your customer portal for billing, support, and more
-							</p>
+							<p className="text-sm text-gray-500">Access your customer portal for billing, support, and more</p>
 							{["free"].includes(user?.role || "") ? (
-								<Button
-									asChild
-									variant="default"
-									className="text-sm font-medium mt-4"
-								>
+								<Button asChild variant="default" className="text-sm font-medium mt-4">
 									<Link href="/upgrade">Unlimited Access</Link>
 								</Button>
 							) : (

@@ -12,9 +12,7 @@ export async function getCustomerId(userId: number) {
 			customerId: users.customerId,
 		})
 		.from(users)
-		.where(
-			and(eq(users.id, sql.placeholder("userId")), isNull(users.deletedAt)),
-		)
+		.where(and(eq(users.id, sql.placeholder("userId")), isNull(users.deletedAt)))
 		.limit(1)
 		.prepare("get_customer_id");
 
@@ -93,9 +91,7 @@ export async function getUserById(id: number) {
 			role: users.role,
 		})
 		.from(users)
-		.where(
-			and(eq(users.id, sql.placeholder("userId")), isNull(users.deletedAt)),
-		)
+		.where(and(eq(users.id, sql.placeholder("userId")), isNull(users.deletedAt)))
 		.limit(1)
 		.prepare("get_user_by_id");
 
@@ -120,9 +116,7 @@ export async function getUserByEmail(email: string) {
 			password: users.password,
 		})
 		.from(users)
-		.where(
-			and(eq(users.email, sql.placeholder("email")), isNull(users.deletedAt)),
-		)
+		.where(and(eq(users.email, sql.placeholder("email")), isNull(users.deletedAt)))
 		.limit(1)
 		.prepare("get_user_by_email");
 
@@ -162,10 +156,7 @@ export async function softDeleteUser(userId: number) {
 	});
 }
 
-export async function updateUserAccount(
-	userId: number,
-	data: Pick<NewUser, "name">,
-) {
+export async function updateUserAccount(userId: number, data: Pick<NewUser, "name">) {
 	const query = db
 		.update(users)
 		.set({ name: data.name })

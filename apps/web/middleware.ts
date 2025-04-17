@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import {
-	ACCESS_TOKEN_EXPIRY,
-	type SessionData,
-	signAccessToken,
-	verifyToken,
-} from "@apiaas/auth";
+import { ACCESS_TOKEN_EXPIRY, type SessionData, signAccessToken, verifyToken } from "@apiaas/auth";
 import { env } from "./env";
 
 const ACCESS_TOKEN_NAME = "session";
@@ -27,18 +22,13 @@ export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	console.info(`Middleware processing request for: ${pathname}`);
 
-	const { user: loggedInUser, response: authResponse } =
-		await getAuthenticatedUser(request.cookies);
+	const { user: loggedInUser, response: authResponse } = await getAuthenticatedUser(request.cookies);
 	const response = authResponse || NextResponse.next();
 
 	// Redirect authenticated users away from sign-in page
 	if (loggedInUser && signInRoutes.has(pathname)) {
-		console.info(
-			`Redirecting authenticated user from ${pathname} to /overview`,
-		);
-		const redirectResponse = NextResponse.redirect(
-			new URL("/overview", request.url),
-		);
+		console.info(`Redirecting authenticated user from ${pathname} to /overview`);
+		const redirectResponse = NextResponse.redirect(new URL("/overview", request.url));
 
 		// Copy cookies from auth response if present
 		if (authResponse) {
@@ -54,9 +44,7 @@ export async function middleware(request: NextRequest) {
 		console.info(`Checking access to protected route: ${pathname}`);
 		if (!loggedInUser) {
 			console.warn(`Access denied to ${pathname}, redirecting to sign-in`);
-			const redirectResponse = NextResponse.redirect(
-				new URL("/sign-in", request.url),
-			);
+			const redirectResponse = NextResponse.redirect(new URL("/sign-in", request.url));
 			clearAuthTokens(redirectResponse.cookies);
 			return redirectResponse;
 		}
@@ -67,9 +55,7 @@ export async function middleware(request: NextRequest) {
 	return response;
 }
 
-async function getAuthenticatedUser(
-	cookieStore: NextRequest["cookies"],
-): Promise<{
+async function getAuthenticatedUser(cookieStore: NextRequest["cookies"]): Promise<{
 	user: SessionData["user"] | null;
 	response: NextResponse | null;
 }> {
@@ -158,9 +144,7 @@ async function getAuthenticatedUser(
 	}
 }
 
-function clearAuthTokens(
-	cookieStore: NextRequest["cookies"] | NextResponse["cookies"],
-) {
+function clearAuthTokens(cookieStore: NextRequest["cookies"] | NextResponse["cookies"]) {
 	cookieStore.delete(ACCESS_TOKEN_NAME);
 	cookieStore.delete(REFRESH_TOKEN_NAME);
 }

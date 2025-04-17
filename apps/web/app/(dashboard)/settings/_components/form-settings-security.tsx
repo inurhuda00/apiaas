@@ -15,14 +15,9 @@ type ActionState = {
 };
 
 export function SettingPasswordForm() {
-	const [state, action, pending] = useActionState<ActionState, FormData>(
-		updatePassword,
-		{ error: "", success: "" },
-	);
+	const [state, action, pending] = useActionState<ActionState, FormData>(updatePassword, { error: "", success: "" });
 
-	const handlePasswordSubmit = async (
-		event: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handlePasswordSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		// If you call the Server Action directly, it will automatically
 		// reset the form. We don't want that here, because we want to keep the
@@ -45,34 +40,18 @@ export function SettingPasswordForm() {
 				<form className="space-y-4" onSubmit={handlePasswordSubmit}>
 					<div>
 						<Label htmlFor="current-password">Current Password</Label>
-						<Input
-							id="current-password"
-							name="currentPassword"
-							type="password"
-							autoComplete="current-password"
-						/>
+						<Input id="current-password" name="currentPassword" type="password" autoComplete="current-password" />
 					</div>
 					<div>
 						<Label htmlFor="new-password">New Password</Label>
-						<Input
-							id="new-password"
-							name="newPassword"
-							type="password"
-							autoComplete="new-password"
-						/>
+						<Input id="new-password" name="newPassword" type="password" autoComplete="new-password" />
 					</div>
 					<div>
 						<Label htmlFor="confirm-password">Confirm New Password</Label>
-						<Input
-							id="confirm-password"
-							name="confirmPassword"
-							type="password"
-						/>
+						<Input id="confirm-password" name="confirmPassword" type="password" />
 					</div>
 					{state.error && <p className="text-red-500 text-xs">{state.error}</p>}
-					{state.success && (
-						<p className="text-green-500 text-sm">{state.success}</p>
-					)}
+					{state.success && <p className="text-green-500 text-sm">{state.success}</p>}
 					<SubmitButton pending={pending}>Update Password</SubmitButton>
 				</form>
 			</CardContent>
@@ -81,14 +60,9 @@ export function SettingPasswordForm() {
 }
 
 export function SettingsDeleteForm() {
-	const [state, formAction, pending] = useActionState<ActionState, FormData>(
-		deleteAccount,
-		{ error: "", success: "" },
-	);
+	const [state, formAction, pending] = useActionState<ActionState, FormData>(deleteAccount, { error: "", success: "" });
 
-	const handleDeleteSubmit = async (
-		event: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handleDeleteSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		startTransition(() => {
 			formAction(new FormData(event.currentTarget));
@@ -100,19 +74,11 @@ export function SettingsDeleteForm() {
 				<CardTitle>Delete Account</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<p className="text-sm text-gray-500 mb-4">
-					Account deletion is non-reversable. Please proceed with caution.
-				</p>
+				<p className="text-sm text-gray-500 mb-4">Account deletion is non-reversable. Please proceed with caution.</p>
 				<form onSubmit={handleDeleteSubmit} className="space-y-4">
 					<div>
 						<Label htmlFor="delete-password">Confirm Password</Label>
-						<Input
-							id="delete-password"
-							name="password"
-							type="password"
-							minLength={8}
-							maxLength={100}
-						/>
+						<Input id="delete-password" name="password" type="password" minLength={8} maxLength={100} />
 					</div>
 					{state.error && <p className="text-red-500 text-xs">{state.error}</p>}
 					<SubmitButton pending={pending}>Delete Account</SubmitButton>

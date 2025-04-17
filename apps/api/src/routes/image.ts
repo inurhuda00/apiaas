@@ -24,18 +24,10 @@ const generateUniqueFilename = (originalName: string) => {
 };
 
 const validateMimeType = (file: File) => {
-	const allowedMimeTypes = [
-		"image/jpeg",
-		"image/png",
-		"image/gif",
-		"image/webp",
-		"image/svg+xml",
-	];
+	const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
 
 	if (!allowedMimeTypes.includes(file.type)) {
-		throw new Error(
-			`Invalid file type. Allowed types: ${allowedMimeTypes.join(", ")}`,
-		);
+		throw new Error(`Invalid file type. Allowed types: ${allowedMimeTypes.join(", ")}`);
 	}
 };
 
@@ -100,8 +92,7 @@ imageRoute.post(
 			return c.json(
 				{
 					success: false,
-					error:
-						error instanceof Error ? error.message : "Failed to upload image",
+					error: error instanceof Error ? error.message : "Failed to upload image",
 				},
 				500,
 			);
@@ -219,8 +210,7 @@ imageRoute.delete("/:filename", async (c) => {
 		return c.json(
 			{
 				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to delete image",
+				error: error instanceof Error ? error.message : "Failed to delete image",
 			},
 			500,
 		);

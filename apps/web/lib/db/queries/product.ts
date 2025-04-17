@@ -12,35 +12,16 @@ import {
 	type Image,
 	type NewProduct,
 } from "@apiaas/db/schema";
-import {
-	and,
-	eq,
-	ilike,
-	sql,
-	asc,
-	desc,
-	exists,
-	ne,
-	type SQL,
-} from "drizzle-orm";
-import type {
-	ExtendedColumnSort,
-	ExtendedColumnFilter,
-} from "@/lib/utils/parsers";
+import { and, eq, ilike, sql, asc, desc, exists, ne, type SQL } from "drizzle-orm";
+import type { ExtendedColumnSort, ExtendedColumnFilter } from "@/lib/utils/parsers";
 import { slugify } from "@apiaas/utils";
 
-export type ProductWithRelations = Pick<
-	Product,
-	"id" | "name" | "slug" | "locked" | "createdAt"
-> & {
+export type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked" | "createdAt"> & {
 	category: Pick<Category, "id" | "slug" | "name">;
 	images: Pick<Image, "id" | "url" | "productId" | "isPrimary">[];
 };
 
-export type CategoryWithProducts = Pick<
-	Category,
-	"id" | "name" | "slug" | "description"
-> & {
+export type CategoryWithProducts = Pick<Category, "id" | "name" | "slug" | "description"> & {
 	productCount: number;
 	freeProductCount: number;
 	premiumProductCount: number;
@@ -112,8 +93,7 @@ export async function getProductsByCategoryWithFilters(
 			if (!filter?.field || !filter?.operator) continue;
 
 			const column = products[filter.field as keyof typeof products];
-			if (!column || typeof column !== "object" || !("table" in column))
-				continue;
+			if (!column || typeof column !== "object" || !("table" in column)) continue;
 
 			// Get the column type from the schema
 			const columnType = getColumnType(column);
@@ -126,10 +106,7 @@ export async function getProductsByCategoryWithFilters(
 					continue;
 				}
 				conditions.push(eq(column, filter.value));
-			} else if (
-				filter.operator === "contains" &&
-				typeof filter.value === "string"
-			) {
+			} else if (filter.operator === "contains" && typeof filter.value === "string") {
 				conditions.push(ilike(column, `%${filter.value}%`));
 			} else if (filter.operator === "in" && Array.isArray(filter.value)) {
 				conditions.push(sql`${column} = ANY(${filter.value}::text[])`);
@@ -147,8 +124,7 @@ export async function getProductsByCategoryWithFilters(
 			.filter((s) => s?.column && typeof s.column === "string")
 			.map((s) => {
 				const column = products[s.column as keyof typeof products];
-				if (!column || typeof column !== "object" || !("table" in column))
-					return null;
+				if (!column || typeof column !== "object" || !("table" in column)) return null;
 				return s.desc ? desc(column) : asc(column);
 			})
 			.filter(Boolean) as SQL<unknown>[];
@@ -299,10 +275,7 @@ export async function getProductsByCategory(categorySlug: string) {
 	return result;
 }
 
-export async function getProductBySlug(
-	categorySlug: string,
-	productSlug: string,
-) {
+export async function getProductBySlug(categorySlug: string, productSlug: string) {
 	const productQuery = db.query.products
 		.findFirst({
 			columns: {
@@ -319,12 +292,7 @@ export async function getProductBySlug(
 					db
 						.select()
 						.from(categories)
-						.where(
-							and(
-								eq(categories.slug, sql.placeholder("categorySlug")),
-								eq(categories.id, products.categoryId),
-							),
-						),
+						.where(and(eq(categories.slug, sql.placeholder("categorySlug")), eq(categories.id, products.categoryId))),
 				),
 			),
 			extras: {
@@ -374,11 +342,7 @@ export async function getProductBySlug(
 	});
 }
 
-export async function getRelatedProducts(
-	categoryId: number,
-	currentProductId: number,
-	limit = 4,
-) {
+export async function getRelatedProducts(categoryId: number, currentProductId: number, limit = 4) {
 	const relatedProductsQuery = db
 		.select({
 			id: products.id,
@@ -389,15 +353,9 @@ export async function getRelatedProducts(
 		})
 		.from(products)
 		.where(
-			and(
-				eq(products.categoryId, sql.placeholder("categoryId")),
-				ne(products.id, sql.placeholder("currentProductId")),
-			),
+			and(eq(products.categoryId, sql.placeholder("categoryId")), ne(products.id, sql.placeholder("currentProductId"))),
 		)
-		.leftJoin(
-			images,
-			and(eq(images.productId, products.id), eq(images.isPrimary, true)),
-		)
+		.leftJoin(images, and(eq(images.productId, products.id), eq(images.isPrimary, true)))
 		.limit(sql.placeholder("limit"))
 		.prepare("get_related_products");
 
