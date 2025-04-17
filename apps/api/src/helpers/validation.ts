@@ -23,13 +23,7 @@ export const mediaUploadSchema = z.object({
 	productId: z.string().min(1, { message: "Product ID is required" }),
 	file: z.instanceof(File, { message: "File is required" }).refine(
 		(file) => {
-			const allowedMimeTypes = [
-				"image/jpeg",
-				"image/png",
-				"image/gif",
-				"image/webp",
-				"image/svg+xml",
-			];
+			const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 			return allowedMimeTypes.includes(file.type);
 		},
 		{
@@ -48,6 +42,11 @@ export const fileUploadSchema = z.object({
 	file: z.instanceof(File, { message: "File is required" }).refine(
 		(file) => {
 			const allowedFileTypes = [
+				"image/jpeg",
+				"image/png",
+				"image/gif",
+				"image/webp",
+				"image/svg+xml",
 				"application/pdf",
 				"application/zip",
 				"image/svg+xml",
