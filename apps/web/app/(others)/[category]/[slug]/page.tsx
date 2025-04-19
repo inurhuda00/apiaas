@@ -7,6 +7,7 @@ import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import { Badge } from "@/components/ui/badge";
 import { unstable_cache as cache } from "next/cache";
 import { Icons } from "@/components/ui/icons";
+import ProductButton from "../_components/product-button";
 interface PageProps {
 	params: Promise<{
 		category: string;
@@ -90,11 +91,11 @@ export default async function ProductPage({ params }: PageProps) {
 														className="object-contain p-2 md:p-3 transition-transform group-hover:scale-105"
 													/>
 												) : null}
-												{product.locked && (
+												{product.locked ? (
 													<Badge variant="tag" className="absolute top-1 right-1">
 														pro
 													</Badge>
-												)}
+												) : null}
 											</div>
 											<h4 className="text-xs mt-1 truncate">{product.name}</h4>
 										</Link>
@@ -133,39 +134,7 @@ export default async function ProductPage({ params }: PageProps) {
 								</div>
 							</div>
 
-							{!product.locked ? (
-								<div className="space-y-2 md:space-y-4">
-									<Button
-										className="w-full flex items-center justify-center gap-2 h-10 md:h-12 bg-black text-white hover:bg-gray-800 text-sm md:text-base"
-										type="button"
-									>
-										<Icons.Download />
-										Download Free Asset
-									</Button>
-									<p className="text-xs text-center text-gray-500">No login required. Free to use with attribution.</p>
-								</div>
-							) : (
-								<div className="space-y-3 md:space-y-4">
-									<div className="p-4 md:p-5 bg-gray-50  border">
-										<div className="flex items-center gap-2 mb-3 md:mb-4">
-											<Icons.Security className="text-gray-400" />
-											<h3 className="font-medium text-sm">Premium Asset</h3>
-										</div>
-										<Link href="/upgrade">
-											<Button
-												className="w-full bg-black text-white hover:bg-gray-800 text-sm md:text-base"
-												type="button"
-											>
-												Get Unlimited Access
-											</Button>
-										</Link>
-										<div className="mt-2 md:mt-3 text-center">
-											<p className="text-xs md:text-sm text-gray-600">Lifetime license • One-time payment</p>
-											<p className="text-xs text-gray-500 mt-1">Includes all premium assets</p>
-										</div>
-									</div>
-								</div>
-							)}
+							<ProductButton product={product} />
 
 							<div className="mt-6 md:mt-8 border-t pt-4 md:pt-6">
 								<h2 className="font-medium mb-2 md:mb-3 text-xs md:text-sm">License Information</h2>

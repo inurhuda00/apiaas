@@ -4,19 +4,12 @@ import { Button } from "@/components/ui/button";
 import { getProductsByCategoryWithFilters } from "@/lib/db/queries/product";
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import { ProductCard } from "@/components/product-card";
-import { unstable_cache as cache } from "next/cache";
 
 export default async function HomePage() {
-	const categoryCache = cache(
-		async () =>
-			await getProductsByCategoryWithFilters("joydoodle", {
-				page: 1,
-				perPage: 6,
-			}),
-		["category", "joydoodle", "1", "6"],
-	);
-
-	const category = await categoryCache();
+	const category = await getProductsByCategoryWithFilters("joydoodle", {
+		page: 1,
+		perPage: 6,
+	});
 
 	return (
 		<div className="flex-grow">

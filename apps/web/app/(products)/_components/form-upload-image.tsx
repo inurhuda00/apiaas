@@ -286,6 +286,7 @@ export function UploadImageForm() {
 		(event: React.FormEvent<HTMLFormElement>) => {
 			event.preventDefault();
 			const formData = new FormData(event.currentTarget);
+			formData.delete("images");
 			formData.append("productId", productIdRef.current);
 			startTransition(() => formAction(formData));
 		},
@@ -399,14 +400,13 @@ export function UploadImageForm() {
 								<Label htmlFor="category" className="font-medium">
 									Category <span className="text-red-500">*</span>
 								</Label>
-								<Select defaultValue={state.category}>
+								<Select  defaultValue={state.category}>
 									<SelectTrigger className="mt-1">
 										<SelectValue placeholder="Select a category" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="digital-goods">Digital goods or services (excluding ebooks)</SelectItem>
-										<SelectItem value="physical-goods">Physical goods</SelectItem>
-										<SelectItem value="services">Services</SelectItem>
+										<SelectItem value="1">Digital goods or services (excluding ebooks)</SelectItem>
+										<SelectItem value="2">Physical goods</SelectItem>
 									</SelectContent>
 								</Select>
 							</div>

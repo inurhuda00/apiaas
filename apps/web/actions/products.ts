@@ -12,11 +12,9 @@ export const updateProduct = validatedActionWithUser(UpdateProductSchema, async 
 			error: "You are not authorized to create products",
 		};
 	}
-	console.log(formData);
-
 	const { productId, categoryId, locked, price, ...rest } = data;
 
-	const existingProduct = await getProductById(productId);
+	const existingProduct = await getProductById(Number(productId));
 
 	if (!existingProduct) {
 		return {
@@ -25,7 +23,7 @@ export const updateProduct = validatedActionWithUser(UpdateProductSchema, async 
 		};
 	}
 
-	const category = await getCategoryById(categoryId);
+	const category = await getCategoryById(Number(categoryId));
 
 	if (!category) {
 		return {

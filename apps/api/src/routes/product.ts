@@ -306,15 +306,24 @@ productRoute.post(
 
 			const file = await getBucketObject(c, productId, "files", filename);
 
-			c.header("Content-Type", file.type);
-			c.header("Content-Disposition", `attachment; filename="${filename}"`);
-			c.header("Content-Length", file.size.toString());
-			c.header("Content-Transfer-Encoding", "binary");
-			c.header("Cache-Control", "no-cache, no-store, must-revalidate");
-			c.header("Pragma", "no-cache");
-			c.header("Expires", "0");
+			if (!file) {
+				throw new Error("File not found");
+			}
 
-			return c.body(file.body);
+			const headers = new Headers();
+			file.writeHttpMetadata(headers);
+			headers.set("etag", file.httpEtag);
+			headers.set("Content-Type", file.httpMetadata?.contentType || "application/octet-stream");
+			headers.set("Content-Disposition", `attachment; filename="${filename}"`);
+			headers.set("Content-Length", file.size.toString());
+			headers.set("Content-Transfer-Encoding", "binary");
+			headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+			headers.set("Pragma", "no-cache");
+			headers.set("Expires", "0");
+
+			return new Response(file.body, {
+				headers,
+			});
 		} catch (error) {
 			return handleError(c, error, "Failed to download file");
 		}
