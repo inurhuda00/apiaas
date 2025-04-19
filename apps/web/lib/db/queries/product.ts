@@ -276,7 +276,7 @@ export async function getProductsByCategory(categorySlug: string) {
 }
 
 export async function getProductBySlug(categorySlug: string, productSlug: string) {
-	const productQuery = db.query.products
+	const result = await db.query.products
 		.findFirst({
 			columns: {
 				id: true,
@@ -287,12 +287,12 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 				updatedAt: true,
 			},
 			where: and(
-				eq(products.slug, sql.placeholder("productSlug")),
+				eq(products.slug, productSlug),
 				exists(
 					db
 						.select()
 						.from(categories)
-						.where(and(eq(categories.slug, sql.placeholder("categorySlug")), eq(categories.id, products.categoryId))),
+						.where(and(eq(categories.slug, categorySlug), eq(categories.id, products.categoryId))),
 				),
 			),
 			extras: {
@@ -333,13 +333,8 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 					},
 				},
 			},
-		})
-		.prepare("get_product");
-
-	return productQuery.execute({
-		productSlug,
-		categorySlug,
-	});
+		});
+	return result;
 }
 
 export async function getRelatedProducts(categoryId: number, currentProductId: number, limit = 4) {
