@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { AuthRoleMiddleware } from "../middleware/auth";
+import { AuthRoleMiddleware, extractBearerToken } from "../middleware/auth";
 import type { Env, Variables } from "@/types";
 import { database } from "@apiaas/db";
 import { createProduct, generateProductSlug, getProduct, deleteProduct } from "../db/queries/product";
@@ -19,7 +19,6 @@ import { deleteBucketObject, getBucketObject, uploadToBucket, deleteBucketProduc
 import { listBucketObjects } from "../helpers/bucket";
 import { verifyToken } from "@apiaas/auth";
 
-// Helper function to generate dynamic asset URLs
 function getAssetUrl(c: { env: Env }, type: 'media' | 'files', productId: string, filename: string): string {
 	const assetDomain = c.env.ASSET_DOMAIN || 'assets.mondive.xyz';
 	return `https://${assetDomain}/products/${productId}/${type}/${filename}`;
@@ -99,6 +98,63 @@ productRoute.post(
 			});
 		} catch (error) {
 			return handleError(c, error, "Failed to delete product");
+		}
+	},
+);
+
+productRoute.post(
+	"/files/download/:productId/:filename",
+	createValidator(productIdSchema, "param"),
+	createValidator(filenameSchema, "param"),
+	async (c) => {
+		try {
+			const productId = c.req.param("productId");
+			const filename = c.req.param("filename");
+
+			const db = database(c.env.DATABASE_URL);
+			const product = await getProduct(db, productId);
+
+			if (!product) {
+				throw new Error("Product not found");
+			}
+
+			if (product.locked) {
+				const token = extractBearerToken(c);
+				
+				if (!token) {
+					return c.json({ success: false, error: "Authentication required" }, 401);
+				}
+				
+				const isValid = await verifyToken(c.env.AUTH_SECRET, token);
+				
+				if (!isValid) {
+					return c.json({ success: false, error: "Invalid token" }, 401);
+				}
+				
+			}
+
+			const file = await getBucketObject(c, productId, "files", filename);
+
+			if (!file) {
+				throw new Error("File not found");
+			}
+
+			const headers = new Headers();
+			file.writeHttpMetadata(headers);
+			headers.set("etag", file.httpEtag);
+			headers.set("Content-Type", file.httpMetadata?.contentType || "application/octet-stream");
+			headers.set("Content-Disposition", `attachment; filename="${filename}"`);
+			headers.set("Content-Length", file.size.toString());
+			headers.set("Content-Transfer-Encoding", "binary");
+			headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+			headers.set("Pragma", "no-cache");
+			headers.set("Expires", "0");
+
+			return new Response(file.body, {
+				headers,
+			});
+		} catch (error) {
+			return handleError(c, error, "Failed to download file");
 		}
 	},
 );
@@ -398,48 +454,6 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 		return handleError(c, error, "Failed to get files");
 	}
 });
-
-productRoute.post(
-	"/files/download/:productId/:filename",
-	createValidator(productIdSchema, "param"),
-	createValidator(filenameSchema, "param"),
-	async (c) => {
-		try {
-			const productId = c.req.param("productId");
-			const filename = c.req.param("filename");
-
-			const db = database(c.env.DATABASE_URL);
-			const product = await getProduct(db, productId);
-
-			if (!product) {
-				throw new Error("Product not found");
-			}
-
-			const file = await getBucketObject(c, productId, "files", filename);
-
-			if (!file) {
-				throw new Error("File not found");
-			}
-
-			const headers = new Headers();
-			file.writeHttpMetadata(headers);
-			headers.set("etag", file.httpEtag);
-			headers.set("Content-Type", file.httpMetadata?.contentType || "application/octet-stream");
-			headers.set("Content-Disposition", `attachment; filename="${filename}"`);
-			headers.set("Content-Length", file.size.toString());
-			headers.set("Content-Transfer-Encoding", "binary");
-			headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-			headers.set("Pragma", "no-cache");
-			headers.set("Expires", "0");
-
-			return new Response(file.body, {
-				headers,
-			});
-		} catch (error) {
-			return handleError(c, error, "Failed to download file");
-		}
-	},
-);
 
 productRoute.delete(
 	"/media/:productId/:filename",

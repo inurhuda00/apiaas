@@ -2,7 +2,7 @@ import { verifyToken } from "@apiaas/auth";
 import type { Context, Next } from "hono";
 import type { Env, Variables } from "@/types";
 
-const extractBearerToken = (c: Context): string | null => {
+export const extractBearerToken = (c: Context): string | null => {
 	const authHeader = c.req.header("Authorization");
 	if (!authHeader || !authHeader.startsWith("Bearer ")) {
 		return null;
@@ -12,7 +12,6 @@ const extractBearerToken = (c: Context): string | null => {
 
 export function AuthMiddleware() {
 	return async (c: Context<{ Bindings: Env; Variables: Variables }>, next: Next) => {
-		// Extract token
 		const token = extractBearerToken(c);
 
 		if (!token) {
@@ -28,7 +27,6 @@ export function AuthMiddleware() {
 		try {
 			const session = await verifyToken(token, c.env.AUTH_SECRET);
 
-			// Check if session is null (invalid token)
 			if (!session) {
 				return c.json(
 					{
@@ -39,7 +37,6 @@ export function AuthMiddleware() {
 				);
 			}
 
-			// Add user data to context for use in route handlers
 			c.set("user", session.user);
 			await next();
 		} catch (error) {
