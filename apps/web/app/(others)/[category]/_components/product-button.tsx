@@ -41,7 +41,7 @@ const productService = {
 
 export default function ProductButton({
 	product,
-}: { product: Pick<Product, "id" | "locked"> & { files: { name: string }[] } }) {
+}: { product: Pick<Product, "id" | "locked"> & { files: { fileName: string }[] } }) {
 	const { userPromise } = useUser();
 	const { sessionPromise } = useSession();
 	const user = use(userPromise);
@@ -51,7 +51,7 @@ export default function ProductButton({
 	const handeDownload = () => {
 		if (!canDownload) return;
 
-		productService.downloadFile(String(product.id), product.files[0].name, token);
+		productService.downloadFile(String(product.id), product.files[0].fileName, token);
 	};
 
 	return canDownload ? (

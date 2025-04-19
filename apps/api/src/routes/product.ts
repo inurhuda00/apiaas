@@ -35,8 +35,6 @@ productRoute.post(
 			const productId = c.req.param("productId");
 			const { _authorization } = c.req.valid("json");
 
-			console.log("HELOOWW", productId, _authorization);
-
 			const token = _authorization;
 
 			if (!token) {
@@ -120,7 +118,6 @@ productRoute.post(
 
 			if (product.locked) {
 				const token = extractBearerToken(c);
-				console.log("TOKEN", token);
 
 				if (!token) {
 					return c.json({ success: false, error: "Authentication required" }, 401);
