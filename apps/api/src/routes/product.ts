@@ -100,7 +100,7 @@ productRoute.post(
 	},
 );
 
-productRoute.post(
+productRoute.get(
 	"/files/download/:productId/:filename",
 	createValidator(productIdSchema, "param"),
 	createValidator(filenameSchema, "param"),

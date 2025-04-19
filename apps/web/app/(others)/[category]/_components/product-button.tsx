@@ -1,69 +1,37 @@
 "use client";
 import { useUser } from "@/components/providers/auth";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
 import { env } from "@/env";
 import type { Product } from "@apiaas/db/schema";
 import Link from "next/link";
 import { use } from "react";
-import axios from "axios";
-import { useSession } from "@/components/providers/session";
+import { cn } from "@/lib/utils/cn";
 
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
-
-const productService = {
-	async downloadFile(productId: string, filename: string, token?: string | null) {
-		try {
-			const headers: Record<string, string> = {};
-			if (token) headers.Authorization = `Bearer ${token}`;
-
-			const response = await axios.post(
-				`${API_BASE_URL}/v1/product/files/download/${productId}/${filename}`,
-				{},
-				{
-					headers,
-					withCredentials: true,
-				},
-			);
-			return response.data;
-		} catch (error) {
-			const message =
-				axios.isAxiosError(error) && error.response
-					? error.response.data?.error || `Request failed with status ${error.response.status}`
-					: error instanceof Error
-						? error.message
-						: "An unknown error occurred during download";
-
-			throw new Error(message);
-		}
-	},
-};
 
 export default function ProductButton({
 	product,
 }: { product: Pick<Product, "id" | "locked"> & { files: { fileName: string }[] } }) {
 	const { userPromise } = useUser();
-	const { sessionPromise } = useSession();
 	const user = use(userPromise);
-	const token = use(sessionPromise);
 
 	const canDownload = !product.locked || (user && ["pro", "admin"].includes(user.role));
-	const handeDownload = () => {
-		if (!canDownload) return;
-
-		productService.downloadFile(String(product.id), product.files[0].fileName, token);
-	};
-
+	
 	return canDownload ? (
 		<div className="space-y-2 md:space-y-4">
-			<Button
-				onClick={handeDownload}
+			<Link
+				href={`${API_BASE_URL}/v1/product/files/download/${product.id}/${product.files[0].fileName}`}
 				type="button"
-				className="w-full flex items-center justify-center gap-2 h-10 md:h-12 bg-black text-white hover:bg-gray-800 text-sm md:text-base"
+				className={cn(
+					buttonVariants({ variant: "default" }),
+					"w-full flex items-center justify-center gap-2 h-10 md:h-12 bg-black text-white hover:bg-gray-800 text-sm md:text-base",
+					product.locked && "bg-gray-500 hover:bg-gray-500",
+				)}
 			>
 				<Icons.Download />
 				Download {!product.locked ? "Free" : "Premium"} Asset
-			</Button>
+			</Link>
 			<p className="text-xs text-center text-gray-500">
 				{!product.locked
 					? "No login required. Free to use with attribution."
