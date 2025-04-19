@@ -140,6 +140,7 @@ export default async function ProductPage({ params }: PageProps) {
 								product={{
 									id: product.id,
 									locked: product.locked,
+									files: product.files,
 								}}
 							/>
 
