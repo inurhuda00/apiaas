@@ -22,7 +22,8 @@ export default function ProductButton({
 		<div className="space-y-2 md:space-y-4">
 			<Link
 				href={`${API_BASE_URL}/v1/product/files/download/${product.id}/${product.files[0].fileName}`}
-				type="button"
+				target="_blank"
+				rel="noopener noreferrer"
 				className={cn(
 					buttonVariants({ variant: "default" }),
 					"w-full flex items-center justify-center gap-2 h-10 md:h-12 bg-black text-white hover:bg-gray-800 text-sm md:text-base",

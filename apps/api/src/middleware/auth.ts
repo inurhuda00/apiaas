@@ -4,14 +4,14 @@ import type { Env, Variables } from "@/types";
 import { getCookie } from "hono/cookie";
 
 export const extractBearerToken = (c: Context): string | null => {
-	const authHeader = c.req.header("Authorization");
-	if (authHeader?.startsWith("Bearer ")) {
-		return authHeader.replace("Bearer ", "");
-	}
-
 	const cookieToken = getCookie(c, ACCESS_TOKEN_NAME);
 	if (cookieToken) {
 		return cookieToken;
+	}
+
+	const authHeader = c.req.header("Authorization");
+	if (authHeader?.startsWith("Bearer ")) {
+		return authHeader.replace("Bearer ", "");
 	}
 
 	return null;
