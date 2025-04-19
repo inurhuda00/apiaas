@@ -81,12 +81,9 @@ export async function getProductsByCategoryWithFilters(
 	const offset = (page - 1) * perPage;
 
 	// 2. Build query conditions
-	const conditions: SQL<unknown>[] = [exists(
-		db
-			.select({ id: files.id })
-			.from(files)
-			.where(eq(files.productId, products.id)),
-	)];
+	const conditions: SQL<unknown>[] = [
+		exists(db.select({ id: files.id }).from(files).where(eq(files.productId, products.id))),
+	];
 
 	// Add name filter (most common search case)
 	if (name) {
@@ -235,12 +232,7 @@ export async function getProductsByCategory(categorySlug: string) {
 		.findFirst({
 			where: and(
 				eq(categories.slug, sql.placeholder("categorySlug")),
-				exists(
-					db
-						.select({ id: files.id })
-						.from(files)
-						.where(eq(files.productId, products.id)),
-				),
+				exists(db.select({ id: files.id }).from(files).where(eq(files.productId, products.id))),
 			),
 			extras: {
 				productCount: sql<number>`(
@@ -307,12 +299,7 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 					.from(categories)
 					.where(and(eq(categories.slug, categorySlug), eq(categories.id, products.categoryId))),
 			),
-			exists(
-				db
-					.select({ id: files.id })
-					.from(files)
-					.where(eq(files.productId, products.id))
-			),
+			exists(db.select({ id: files.id }).from(files).where(eq(files.productId, products.id))),
 		),
 		extras: {
 			tags: sql<{ id: number; name: string; slug: string }[]>`
