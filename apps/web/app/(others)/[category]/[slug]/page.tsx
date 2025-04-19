@@ -6,7 +6,7 @@ import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import { Badge } from "@/components/ui/badge";
 import { Icons } from "@/components/ui/icons";
 import ProductButton from "../_components/product-button";
-import { cache } from "react";
+
 interface PageProps {
 	params: Promise<{
 		category: string;

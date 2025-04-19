@@ -18,14 +18,15 @@ export default function ProductButton({
 	const user = use(userPromise);
 
 	const loggedIn = user !== null;
-
-	const member = !product.locked && (loggedIn && ["pro", "admin"].includes(user.role));
-
-	const guest = !product.locked && !loggedIn;
+	const isPro = loggedIn && ["pro", "admin"].includes(user.role);
+	
+	const canDownload = !product.locked || isPro;
+	
+	const showUpgrade = loggedIn && product.locked && !isPro;
 
 	return (
 		<Fragment>
-			{member && (
+			{canDownload && (
 				<div className="space-y-2 md:space-y-4 mt-4">
 					<div className="p-4 md:p-5 bg-gray-50 border">
 						<Link
@@ -38,44 +39,50 @@ export default function ProductButton({
 							)}
 						>
 							<Icons.Download className="mr-2" />
-							Download Premium Asset
+							Download {isPro ? "Premium" : "Free"} Asset
 						</Link>
 						<div className="mt-2 md:mt-3 text-center">
-							<p className="text-xs md:text-sm text-gray-600">Pro member access. Unlimited usage rights.</p>
+							<p className="text-xs md:text-sm text-gray-600">
+								{isPro ? "Pro member access. Unlimited usage rights." : "Lifetime license • One-time payment"}
+							</p>
+							{!isPro && <p className="text-xs text-gray-500 mt-1">Free asset download</p>}
 						</div>
 					</div>
 				</div>
 			)}
 
-			{!loggedIn && (
+			{showUpgrade && (
 				<div className="space-y-3 md:space-y-4 mt-4">
 					<div className="p-4 md:p-5 bg-gray-50 border">
-						{guest ? (
-							<Fragment>
-								<div className="flex items-center gap-2 mb-3 md:mb-4">
-									<Icons.Security className="text-gray-400" />
-									<h3 className="font-medium text-sm">Premium Asset</h3>
-								</div>
-								<Link href="/upgrade">
-									<Button className="w-full bg-black text-white hover:bg-gray-800 text-sm md:text-base" type="button">
-										Get Unlimited Access
-									</Button>
-								</Link>
-							</Fragment>
-						) : (
-							<Link
-								href={`${API_BASE_URL}/v1/product/files/download/${product.id}/${product.files[0]?.fileName}`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className={cn(
-									buttonVariants({ variant: "default" }),
-									"w-full bg-black text-white hover:bg-gray-800 text-sm md:text-base",
-								)}
-							>
-								<Icons.Download className="mr-2" />
-								Download Free Asset
-							</Link>
-						)}
+						<div className="flex items-center gap-2 mb-3 md:mb-4">
+							<Icons.Security className="text-gray-400" />
+							<h3 className="font-medium text-sm">Premium Asset</h3>
+						</div>
+						<Link href="/upgrade">
+							<Button className="w-full bg-black text-white hover:bg-gray-800 text-sm md:text-base" type="button">
+								Get Unlimited Access
+							</Button>
+						</Link>
+						<div className="mt-2 md:mt-3 text-center">
+							<p className="text-xs md:text-sm text-gray-600">Lifetime license • One-time payment</p>
+							<p className="text-xs text-gray-500 mt-1">Includes all premium assets</p>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{!loggedIn && product.locked && (
+				<div className="space-y-3 md:space-y-4 mt-4">
+					<div className="p-4 md:p-5 bg-gray-50 border">
+						<div className="flex items-center gap-2 mb-3 md:mb-4">
+							<Icons.Security className="text-gray-400" />
+							<h3 className="font-medium text-sm">Premium Asset</h3>
+						</div>
+						<Link href="/upgrade">
+							<Button className="w-full bg-black text-white hover:bg-gray-800 text-sm md:text-base" type="button">
+								Get Unlimited Access
+							</Button>
+						</Link>
 						<div className="mt-2 md:mt-3 text-center">
 							<p className="text-xs md:text-sm text-gray-600">Lifetime license • One-time payment</p>
 							<p className="text-xs text-gray-500 mt-1">Includes all premium assets</p>
