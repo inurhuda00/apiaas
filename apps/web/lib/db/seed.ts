@@ -2,7 +2,7 @@ import { db } from ".";
 import { users, categories, products, images, tags, productTags } from "@apiaas/db/schema";
 import { hashPassword } from "@/lib/auth/session";
 
-async function seed() {
+export default async function seed() {
 	console.log("Starting seed process...");
 
 	// Create admin user
