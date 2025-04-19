@@ -8,7 +8,8 @@ export type Env = {
 	AUTH_SECRET: string;
 	NODE_ENV?: "development" | "production";
 	ASSET_DOMAIN?: string;
-
+	SESSION_DOMAIN?: string;
+	
 	HYPERDRIVE: Hyperdrive;
 	AI: Ai;
 	EMAIL_LIMITER: {

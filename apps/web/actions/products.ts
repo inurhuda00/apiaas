@@ -4,6 +4,7 @@ import { generateProductSlug, getProductById, syncProduct } from "@/lib/db/queri
 import { validatedActionWithUser } from "./middleware";
 import { UpdateProductSchema } from "./products.validation";
 import { getCategoryById } from "@/lib/db/queries/category";
+import { redirect } from "next/navigation";
 
 export const updateProduct = validatedActionWithUser(UpdateProductSchema, async (data, formData, user) => {
 	if (!user.role.includes("admin")) {
@@ -43,7 +44,5 @@ export const updateProduct = validatedActionWithUser(UpdateProductSchema, async 
 		slug,
 	});
 
-	return {
-		...updatedProduct,
-	};
+	return redirect("/files");
 });

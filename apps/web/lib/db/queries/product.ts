@@ -11,6 +11,7 @@ import {
 	type Category,
 	type Image,
 	type NewProduct,
+	files,
 } from "@apiaas/db/schema";
 import { and, eq, ilike, sql, asc, desc, exists, ne, type SQL } from "drizzle-orm";
 import type { ExtendedColumnSort, ExtendedColumnFilter } from "@/lib/utils/parsers";
@@ -80,7 +81,12 @@ export async function getProductsByCategoryWithFilters(
 	const offset = (page - 1) * perPage;
 
 	// 2. Build query conditions
-	const conditions: SQL<unknown>[] = [];
+	const conditions: SQL<unknown>[] = [exists(
+		db
+			.select({ id: files.id })
+			.from(files)
+			.where(eq(files.productId, products.id)),
+	)];
 
 	// Add name filter (most common search case)
 	if (name) {
@@ -227,7 +233,15 @@ export async function getProductsByCategoryWithFilters(
 export async function getProductsByCategory(categorySlug: string) {
 	const query = db.query.categories
 		.findFirst({
-			where: eq(categories.slug, sql.placeholder("categorySlug")),
+			where: and(
+				eq(categories.slug, sql.placeholder("categorySlug")),
+				exists(
+					db
+						.select({ id: files.id })
+						.from(files)
+						.where(eq(files.productId, products.id)),
+				),
+			),
 			extras: {
 				productCount: sql<number>`(
 				SELECT COUNT(*) 
@@ -289,9 +303,15 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 			eq(products.slug, productSlug),
 			exists(
 				db
-					.select()
+					.select({ id: categories.id })
 					.from(categories)
 					.where(and(eq(categories.slug, categorySlug), eq(categories.id, products.categoryId))),
+			),
+			exists(
+				db
+					.select({ id: files.id })
+					.from(files)
+					.where(eq(files.productId, products.id))
 			),
 		),
 		extras: {

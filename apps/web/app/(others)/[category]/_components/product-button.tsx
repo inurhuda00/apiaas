@@ -20,19 +20,31 @@ export default function ProductButton({
 
 	return canDownload ? (
 		<div className="space-y-2 md:space-y-4">
-			<Link
-				href={`${API_BASE_URL}/v1/product/files/download/${product.id}/${product.files[0].fileName}`}
-				target="_blank"
-				rel="noopener noreferrer"
-				className={cn(
-					buttonVariants({ variant: "default" }),
-					"w-full flex items-center justify-center gap-2 h-10 md:h-12 bg-black text-white hover:bg-gray-800 text-sm md:text-base",
-					product.locked && "bg-gray-500 hover:bg-gray-500",
-				)}
-			>
-				<Icons.Download />
-				Download {!product.locked ? "Free" : "Premium"} Asset
-			</Link>
+			{product.locked ? (
+				<Link
+					href="/upgrade"
+					className={cn(
+						buttonVariants({ variant: "default" }),
+						"w-full flex items-center justify-center gap-2 h-10 md:h-12 bg-gray-500 hover:bg-gray-500 text-white text-sm md:text-base"
+					)}
+				>
+					<Icons.Download />
+					Download Premium Asset
+				</Link>
+			) : (
+				<Link
+					href={`${API_BASE_URL}/v1/product/files/download/${product.id}/${product.files[0].fileName}`}
+					target="_blank"
+					rel="noopener noreferrer"
+					className={cn(
+						buttonVariants({ variant: "default" }),
+						"w-full flex items-center justify-center gap-2 h-10 md:h-12 bg-black text-white hover:bg-gray-800 text-sm md:text-base"
+					)}
+				>
+					<Icons.Download />
+					Download Free Asset
+				</Link>
+			)}
 			<p className="text-xs text-center text-gray-500">
 				{!product.locked
 					? "No login required. Free to use with attribution."
@@ -41,7 +53,7 @@ export default function ProductButton({
 		</div>
 	) : (
 		<div className="space-y-3 md:space-y-4">
-			<div className="p-4 md:p-5 bg-gray-50  border">
+			<div className="p-4 md:p-5 bg-gray-50 border">
 				<div className="flex items-center gap-2 mb-3 md:mb-4">
 					<Icons.Security className="text-gray-400" />
 					<h3 className="font-medium text-sm">Premium Asset</h3>

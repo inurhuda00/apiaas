@@ -101,7 +101,7 @@ authRoute.post(
 				path: "/",
 				sameSite: "Lax",
 				secure: c.env.NODE_ENV === "production",
-				domain: ".mondive.xyz",
+				domain: c.env.SESSION_DOMAIN,
 			});
 
 			setCookie(c, ACCESS_TOKEN_NAME, accessToken, {
@@ -110,7 +110,7 @@ authRoute.post(
 				path: "/",
 				sameSite: "Lax",
 				secure: c.env.NODE_ENV === "production",
-				domain: ".mondive.xyz",
+				domain: c.env.SESSION_DOMAIN,
 			});
 
 			return c.json({
@@ -185,7 +185,7 @@ authRoute.post("/refresh", async (c) => {
 			path: "/",
 			sameSite: "Lax",
 			secure: c.env.NODE_ENV === "production",
-			domain: ".mondive.xyz",
+			domain: c.env.SESSION_DOMAIN,
 		});
 
 		const newAccessToken = await signAccessToken(newSessionPayload, c.env.AUTH_SECRET);
@@ -218,7 +218,7 @@ authRoute.post("/logout", async (c) => {
 			path: "/",
 			sameSite: "Lax",
 			secure: c.env.NODE_ENV === "production",
-			domain: ".mondive.xyz",
+			domain: c.env.SESSION_DOMAIN,
 		});
 
 		return c.json({ success: true, message: "Logged out successfully" });
