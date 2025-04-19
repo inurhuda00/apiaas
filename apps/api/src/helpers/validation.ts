@@ -27,7 +27,7 @@ export const mediaUploadSchema = z.object({
 			message: "Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG images are allowed.",
 		},
 	),
-	isPrimary: z.preprocess((val) => val === "true" || val === true, z.boolean().optional().default(false)),
+	sort: z.preprocess((val) => Number.parseInt(val as string) || 0, z.number().optional().default(0)),
 });
 
 export const fileUploadSchema = z.object({

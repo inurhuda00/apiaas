@@ -56,7 +56,7 @@ export const images = pgTable("images", {
 		.notNull()
 		.references(() => products.id),
 	url: text("url").notNull(),
-	isPrimary: boolean("is_primary").notNull().default(false),
+	sort: integer("sort").notNull().default(0),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

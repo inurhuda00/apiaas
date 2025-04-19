@@ -3,7 +3,7 @@ import type { Product, Category, Image as ImageType } from "@apiaas/db/schema";
 
 type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked"> & {
 	category: Pick<Category, "id" | "slug" | "name">;
-	images: Pick<ImageType, "id" | "url" | "productId" | "isPrimary">[];
+	images: Pick<ImageType, "id" | "url" | "productId" | "sort">[];
 };
 
 export function ProductGrid({ products }: { products: ProductWithRelations[] }) {

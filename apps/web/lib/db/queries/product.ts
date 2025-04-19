@@ -18,7 +18,7 @@ import { slugify } from "@apiaas/utils";
 
 export type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked" | "createdAt"> & {
 	category: Pick<Category, "id" | "slug" | "name">;
-	images: Pick<Image, "id" | "url" | "productId" | "isPrimary">[];
+	images: Pick<Image, "id" | "url" | "productId" | "sort">[];
 };
 
 export type CategoryWithProducts = Pick<Category, "id" | "name" | "slug" | "description"> & {
@@ -200,7 +200,7 @@ export async function getProductsByCategoryWithFilters(
 						id: true,
 						url: true,
 						productId: true,
-						isPrimary: true,
+						sort: true,
 					},
 				},
 			},
@@ -262,7 +262,7 @@ export async function getProductsByCategory(categorySlug: string) {
 								id: true,
 								url: true,
 								productId: true,
-								isPrimary: true,
+								sort: true,
 							},
 						},
 					},
@@ -321,7 +321,7 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 				images: {
 					columns: {
 						id: true,
-						isPrimary: true,
+						sort: true,
 						url: true,
 					},
 				},
@@ -350,7 +350,7 @@ export async function getRelatedProducts(categoryId: number, currentProductId: n
 		.where(
 			and(eq(products.categoryId, sql.placeholder("categoryId")), ne(products.id, sql.placeholder("currentProductId"))),
 		)
-		.leftJoin(images, and(eq(images.productId, products.id), eq(images.isPrimary, true)))
+		.leftJoin(images, and(eq(images.productId, products.id), eq(images.sort, 0)))
 		.limit(sql.placeholder("limit"))
 		.prepare("get_related_products");
 

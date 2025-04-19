@@ -7,6 +7,7 @@ export type Env = {
 	RESEND_API_KEY: string;
 	AUTH_SECRET: string;
 	NODE_ENV?: "development" | "production";
+	ASSET_DOMAIN?: string;
 
 	HYPERDRIVE: Hyperdrive;
 	AI: Ai;

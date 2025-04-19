@@ -41,7 +41,7 @@ async function seed() {
 
 	// Get category IDs
 	const categoryEntries = await db.select().from(categories);
-	const categoryMap = new Map(categoryEntries.map((cat) => [cat.slug, cat.id]));
+	const categoryMap = new Map(categoryEntries.map((cat: typeof categories.$inferSelect) => [cat.slug, cat.id]));
 
 	// Create tags
 	const tagNames = [
@@ -94,7 +94,7 @@ async function seed() {
 
 	// Get tag IDs
 	const tagEntries = await db.select().from(tags);
-	const tagMap = new Map(tagEntries.map((tag) => [tag.name, tag.id]));
+	const tagMap = new Map(tagEntries.map((tag: typeof tags.$inferSelect) => [tag.name, tag.id]));
 
 	// Product data
 	const productData = [
@@ -253,7 +253,7 @@ async function seed() {
 		await db.insert(images).values({
 			productId,
 			url: item.imageUrl,
-			isPrimary: true,
+			sort: 0,
 		});
 
 		for (const tagName of item.tags) {

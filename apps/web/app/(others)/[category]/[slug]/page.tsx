@@ -24,7 +24,9 @@ export default async function ProductPage({ params }: PageProps) {
 
 	if (!product) notFound();
 
-	const thumbnail = product.images.find((image) => image.isPrimary);
+	// Get the first image based on sort order
+	const images = [...product.images].sort((a, b) => a.sort - b.sort);
+	const thumbnail = images.length > 0 ? images[0] : null;
 
 	const relatedProductsCache = cache(
 		async () => await getRelatedProducts(product.category.id, product.id, 4),

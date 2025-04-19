@@ -155,6 +155,9 @@ export function UploadImageForm() {
 	const productIdRef = useRef<string>("");
 	const [progresses, setProgresses] = useState<Record<string, number>>({});
 	const [state, formAction, pending] = useActionState<ActionState, FormData>(updateProduct, {});
+	
+	// Add a ref for the uploadFile function to break the circular dependency
+	const uploadFileRef = useRef<(file: File, type: UploadItemType) => Promise<void>>(null as unknown as (file: File, type: UploadItemType) => Promise<void>);
 
 	const hasUnsavedContent =
 		!!productIdRef.current && (uploadStateRef.current.mediaFiles.length > 0 || uploadStateRef.current.files.length > 0);
@@ -222,6 +225,28 @@ export function UploadImageForm() {
 		}
 	}, [sessionToken]);
 
+	// Define handleFileChange first but without uploadFile dependency
+	const handleFileChange = useCallback(
+		(newFiles: File[], type: UploadItemType) => {
+			const files = newFiles as File[];
+			const stateKey = type === "media" ? "mediaFiles" : "files";
+
+			const addedFiles = identifyNewFiles(files, uploadStateRef.current[stateKey]);
+			uploadStateRef.current[stateKey] = files;
+
+			const filesToUpload = addedFiles.filter(
+				(file) => !isItemAlreadyUploaded(file, type) && !uploadStateRef.current.pendingUploads.has(file.name),
+			);
+
+			// Use uploadFileRef.current instead of uploadFile
+			for (const file of filesToUpload) {
+				uploadFileRef.current?.(file, type);
+			}
+		},
+		[identifyNewFiles, isItemAlreadyUploaded],
+	);
+
+	// Define uploadFile with handleFileChange dependency
 	const uploadFile = useCallback(
 		async (file: File, type: UploadItemType): Promise<void> => {
 			if (uploadStateRef.current.pendingUploads.has(file.name) || isItemAlreadyUploaded(file, type)) return;
@@ -256,31 +281,25 @@ export function UploadImageForm() {
 					description: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
 					variant: "destructive",
 				});
+				
+				// Remove the failed file from state
+				const stateKey = type === "media" ? "mediaFiles" : "files";
+				const updatedFiles = uploadStateRef.current[stateKey].filter(f => f.name !== file.name);
+				uploadStateRef.current[stateKey] = updatedFiles;
+				
+				// Update the state through the handleFileChange function
+				handleFileChange(updatedFiles, type);
 			} finally {
 				uploadStateRef.current.pendingUploads.delete(file.name);
 			}
 		},
-		[createTemporaryProduct, isItemAlreadyUploaded, sessionToken, updateProgress],
+		[createTemporaryProduct, isItemAlreadyUploaded, sessionToken, updateProgress, handleFileChange],
 	);
 
-	const handleFileChange = useCallback(
-		(newFiles: File[], type: UploadItemType) => {
-			const files = newFiles as File[];
-			const stateKey = type === "media" ? "mediaFiles" : "files";
-
-			const addedFiles = identifyNewFiles(files, uploadStateRef.current[stateKey]);
-			uploadStateRef.current[stateKey] = files;
-
-			const filesToUpload = addedFiles.filter(
-				(file) => !isItemAlreadyUploaded(file, type) && !uploadStateRef.current.pendingUploads.has(file.name),
-			);
-
-			for (const file of filesToUpload) {
-				uploadFile(file, type);
-			}
-		},
-		[identifyNewFiles, isItemAlreadyUploaded, uploadFile],
-	);
+	// Update the ref to the latest uploadFile function
+	useEffect(() => {
+		uploadFileRef.current = uploadFile;
+	}, [uploadFile]);
 
 	const handleSubmit = useCallback(
 		(event: React.FormEvent<HTMLFormElement>) => {
@@ -400,7 +419,7 @@ export function UploadImageForm() {
 								<Label htmlFor="category" className="font-medium">
 									Category <span className="text-red-500">*</span>
 								</Label>
-								<Select  defaultValue={state.category}>
+								<Select name="categoryId" defaultValue={state.category}>
 									<SelectTrigger className="mt-1">
 										<SelectValue placeholder="Select a category" />
 									</SelectTrigger>

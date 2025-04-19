@@ -4,11 +4,14 @@ import type { Product, Category, Image as ImageType } from "@apiaas/db/schema";
 
 type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked"> & {
 	category: Pick<Category, "id" | "slug" | "name">;
-	images: Pick<ImageType, "id" | "url" | "productId" | "isPrimary">[];
+	images: Pick<ImageType, "id" | "url" | "productId" | "sort">[];
 };
 
 export function ProductCard({ product }: { product: ProductWithRelations }) {
-	const thumbnail = product.images.find((image) => image.isPrimary);
+	// Get the first image by sort order (lowest sort value)
+	const thumbnail = product.images.length > 0 
+		? [...product.images].sort((a, b) => a.sort - b.sort)[0]
+		: null;
 
 	return (
 		<div className="group relative overflow-hidden border bg-card">
