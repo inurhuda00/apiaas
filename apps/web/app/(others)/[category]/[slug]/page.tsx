@@ -1,13 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { getProductBySlug, getRelatedProducts } from "@/lib/db/queries/product";
 import { notFound } from "next/navigation";
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import { Badge } from "@/components/ui/badge";
-import { unstable_cache as cache } from "next/cache";
 import { Icons } from "@/components/ui/icons";
 import ProductButton from "../_components/product-button";
+import { cache } from "react";
 interface PageProps {
 	params: Promise<{
 		category: string;
@@ -18,21 +17,14 @@ interface PageProps {
 export default async function ProductPage({ params }: PageProps) {
 	const { category, slug } = await params;
 
-	const productCache = cache(async () => await getProductBySlug(category, slug), ["product", category, slug]);
-
-	const product = await productCache();
+	const product = await getProductBySlug(category, slug);
 
 	if (!product) notFound();
 
-	// Get the first image based on sort order
 	const images = [...product.images].sort((a, b) => a.sort - b.sort);
 	const thumbnail = images.length > 0 ? images[0] : null;
 
-	const relatedProductsCache = cache(
-		async () => await getRelatedProducts(product.category.id, product.id, 4),
-		["related", String(product.category.id), String(product.id)],
-	);
-	const relatedProducts = await relatedProductsCache();
+	const relatedProducts = await getRelatedProducts(product.category.id, product.id, 4);
 
 	return (
 		<div className="flex-grow py-6 md:py-12">

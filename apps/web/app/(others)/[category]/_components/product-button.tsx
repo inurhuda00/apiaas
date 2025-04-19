@@ -17,7 +17,7 @@ export default function ProductButton({
 	const user = use(userPromise);
 
 	const canDownload = !product.locked || (user && ["pro", "admin"].includes(user.role));
-	
+
 	return canDownload ? (
 		<div className="space-y-2 md:space-y-4">
 			<Link

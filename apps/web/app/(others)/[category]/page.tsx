@@ -6,8 +6,6 @@ import type { Product } from "@apiaas/db/schema";
 import type { SearchParams } from "next/dist/server/request/search-params";
 import { useDataControls } from "@/lib/hooks/useDataControls";
 import { DynamicDataControls, DynamicPaginate, DynamicProductCard } from "@/components/lazy-components";
-import { unstable_cache as cache } from "next/cache";
-import { generateSearchCacheKey } from "@/lib/utils/generate-cache-key";
 import { ProductGridSkeleton } from "@/components/skeletons/product-grid-skeleton";
 import { Suspense } from "react";
 import { Icons } from "@/components/ui/icons";
@@ -33,12 +31,7 @@ async function CategoryPage(props: PageProps) {
 		ITEMS_PER_PAGE,
 	).parse(searchParams);
 
-	const categoryCache = cache(
-		async () => await getProductsByCategoryWithFilters(param, search),
-		["category", param, generateSearchCacheKey(search)],
-	);
-
-	const category = await categoryCache();
+	const category = await getProductsByCategoryWithFilters(param, search);
 
 	if (!category) notFound();
 
