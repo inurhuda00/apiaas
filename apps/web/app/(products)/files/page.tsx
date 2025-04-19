@@ -20,19 +20,20 @@ export const metadata = {
 };
 
 interface PageProps {
-	searchParams: SearchParams;
+	searchParams: Promise<SearchParams>;
 }
 
 const ITEMS_PER_PAGE = 12;
 
-export default async function FilesPage({ searchParams }: PageProps) {
+export default async function FilesPage(props: PageProps) {
+	const searchParams = await props.searchParams;
 	const user = await getAuthenticatedUser();
 
 	if (!user) {
 		redirect("/sign-in");
 	}
 
-	const search = searchParamsCache(
+	const search = searchParamsCache<File>(
 		{
 			column: "createdAt" as keyof File,
 			desc: true,
@@ -78,7 +79,7 @@ export default async function FilesPage({ searchParams }: PageProps) {
 				}
 			};
 		},
-		["user-files", user.id, generateSearchCacheKey(search)]
+		["user-files", String(user.id), generateSearchCacheKey(search)]
 	);
 
 	const { files: userFiles, pagination } = await filesCacheFunction();
