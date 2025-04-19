@@ -36,7 +36,7 @@ export const updateProduct = validatedActionWithUser(UpdateProductSchema, async 
 
 	const updatedProduct = await syncProduct(existingProduct.id, {
 		...rest,
-		categoryId: categoryId,
+		categoryId: Number(categoryId),
 		ownerId: user.id,
 		locked: locked ?? true,
 		price: price ?? 0,

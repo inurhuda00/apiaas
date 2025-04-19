@@ -8,6 +8,7 @@ import Link from "next/link";
 import { use } from "react";
 import axios from "axios";
 import { useSession } from "@/components/providers/session";
+
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
 const productService = {
@@ -38,7 +39,7 @@ const productService = {
 	},
 };
 
-export default function ProductButton({ product }: { product: Product }) {
+export default function ProductButton({ product }: { product: Pick<Product, 'id' | 'locked'> }) {
 	const { userPromise } = useUser();
 	const { sessionPromise } = useSession();
 	const user = use(userPromise);

@@ -134,7 +134,12 @@ export default async function ProductPage({ params }: PageProps) {
 								</div>
 							</div>
 
-							<ProductButton product={product} />
+							<ProductButton
+								product={{
+									id: product.id,
+									locked: product.locked,
+								}}
+							/>
 
 							<div className="mt-6 md:mt-8 border-t pt-4 md:pt-6">
 								<h2 className="font-medium mb-2 md:mb-3 text-xs md:text-sm">License Information</h2>
