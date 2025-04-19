@@ -15,10 +15,12 @@ export const env = createEnv({
 	},
 	client: {
 		NEXT_PUBLIC_BACKEND_URL: z.string(),
+		NEXT_PUBLIC_ASSETS_URL: z.string(),
 	},
 	runtimeEnv: {
-		NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
 		APP_URL: process.env.APP_URL,
+		NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
+		NEXT_PUBLIC_ASSETS_URL: process.env.NEXT_PUBLIC_ASSETS_URL,
 		DATABASE_URL: process.env.DATABASE_URL,
 		POLAR_ACCESS_TOKEN: process.env.POLAR_ACCESS_TOKEN,
 		POLAR_WEBHOOK_SECRET: process.env.POLAR_WEBHOOK_SECRET,

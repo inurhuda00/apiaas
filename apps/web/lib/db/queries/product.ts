@@ -315,6 +315,7 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 			with: {
 				files: {
 					columns: {
+						name: true,
 						extension: true,
 					},
 				},

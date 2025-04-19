@@ -39,20 +39,17 @@ const productService = {
 	},
 };
 
-export default function ProductButton({ product }: { product: Pick<Product, 'id' | 'locked'> }) {
+export default function ProductButton({ product }: { product: Pick<Product, 'id' | 'locked'> & { files: { name: string }[] } }) {
 	const { userPromise } = useUser();
 	const { sessionPromise } = useSession();
 	const user = use(userPromise);
 	const token = use(sessionPromise);
 
 	const canDownload = !product.locked || (user && ["pro", "admin"].includes(user.role));
-
-	console.log(product);
-
 	const handeDownload = () => {
 		if (!canDownload) return;
 
-		productService.downloadFile(String(product.id), "hihi.png", token);
+		productService.downloadFile(String(product.id), product.files[0].name, token);
 	};
 
 	return canDownload ? (

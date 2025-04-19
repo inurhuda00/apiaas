@@ -1,3 +1,5 @@
+import { env } from "./env";
+
 interface ImageLoaderParams {
 	src: string;
 	width: number;
@@ -5,5 +7,7 @@ interface ImageLoaderParams {
 }
 
 export default function imageLoader({ src, width, quality = 80 }: ImageLoaderParams): string {
-	return `https://midday.ai/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
+	// Use environment variable for the assets URL
+	const baseUrl = env.NEXT_PUBLIC_ASSETS_URL || '';
+	return `${baseUrl}/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
 }

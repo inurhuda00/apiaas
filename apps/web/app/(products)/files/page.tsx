@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { files, type File } from "@apiaas/db/schema";
-import { desc, eq, and, sql, type SQL } from "drizzle-orm";
+import { products, type Product } from "@apiaas/db/schema";
+import { desc, and, sql, type SQL } from "drizzle-orm";
 import { formatDistanceToNow } from "date-fns";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +10,6 @@ import Link from "next/link";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { Pagination } from "@/components/pagination";
 import { searchParamsCache } from "@/lib/utils/parsers";
-import { unstable_cache as cache } from "next/cache";
-import { generateSearchCacheKey } from "@/lib/utils/generate-cache-key";
 import type { SearchParams } from "next/dist/server/request/search-params";
 
 export const metadata = {
@@ -33,9 +31,9 @@ export default async function FilesPage(props: PageProps) {
 		redirect("/sign-in");
 	}
 
-	const search = searchParamsCache<File>(
+	const search = searchParamsCache<Product>(
 		{
-			column: "createdAt" as keyof File,
+			column: "createdAt" as keyof Product,
 			desc: true,
 		},
 		ITEMS_PER_PAGE
@@ -44,45 +42,48 @@ export default async function FilesPage(props: PageProps) {
 	const { page, perPage, name } = search;
 	const offset = (page - 1) * perPage;
 
-	// Build conditions for file search
-	const conditions: SQL<unknown>[] = [eq(files.productId, user.id)];
+	// Build conditions for product search
+	const conditions: SQL<unknown>[] = [];
 	
 	// Add name filter if provided
 	if (name) {
-		conditions.push(sql`${files.name} ILIKE ${`%${name}%`}`);
+		conditions.push(sql`${products.name} ILIKE ${`%${name}%`}`);
 	}
 
 	// Use cache for better performance
-	const filesCacheFunction = cache(
-		async () => {
-			// Get total count of user files with filters applied
-			const totalCountResult = await db
-				.select({ count: sql<number>`count(*)` })
-				.from(files)
-				.where(and(...conditions))
-				.then((rows: { count: number }[]) => rows[0]?.count ?? 0);
+	const productsCacheFunction = async () => {
+		// Get total count of user products with filters applied
+		const totalCountResult = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(products)
+			.where(and(...conditions))
+			.then((rows: { count: number }[]) => rows[0]?.count ?? 0);
 
-			// Get paginated files
-			const userFiles = await db.query.files.findMany({
-				where: and(...conditions),
-				orderBy: desc(files.createdAt),
-				limit: perPage,
-				offset,
-			});
+		const userProducts = await db.query.products.findMany({
+			where: and(...conditions),
+			orderBy: desc(products.createdAt),
+			limit: perPage,
+			offset,
+			with: {
+				owner: true,
+				images: true,
+				files: true,
+				category: true,
+			}
+		});
 
-			return {
-				files: userFiles,
-				pagination: {
-					total: Number(totalCountResult),
-					perPage,
-					page,
-				}
-			};
-		},
-		["user-files", String(user.id), generateSearchCacheKey(search)]
-	);
+		return {
+			products: userProducts,
+			pagination: {
+				total: Number(totalCountResult),
+				perPage,
+				page,
+			}
+		};
+	};
 
-	const { files: userFiles, pagination } = await filesCacheFunction();
+	const { products: userProducts, pagination } = await productsCacheFunction();
+
 	const totalPages = Math.ceil(pagination.total / perPage);
 
 	const isImage = (fileType: string) => fileType.startsWith("image/");
@@ -91,8 +92,8 @@ export default async function FilesPage(props: PageProps) {
 		<main>
 			<div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
 				<div>
-					<h1 className="text-3xl font-bold">My Files</h1>
-					<p className="text-muted-foreground mt-1">Manage your uploaded files</p>
+					<h1 className="text-3xl font-bold">My Products and Files</h1>
+					<p className="text-muted-foreground mt-1">Manage your products and uploaded files</p>
 				</div>
 				<Link href="/upload" className={buttonVariants()}>
 					<Icons.FileUpload className="h-4 w-4 mr-2" />
@@ -108,42 +109,48 @@ export default async function FilesPage(props: PageProps) {
 						type="search"
 						name="name"
 						defaultValue={name ?? ""}
-						placeholder="Search files..."
+						placeholder="Search products..."
 						className="pl-10 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
 					/>
 				</form>
 			</div>
 
-			{userFiles.length === 0 ? (
+			{userProducts.length === 0 ? (
 				<Card>
 					<CardHeader>
-						<CardTitle>No files found</CardTitle>
-						<CardDescription>You haven't uploaded any files yet</CardDescription>
+						<CardTitle>No products found</CardTitle>
+						<CardDescription>You haven't created any products yet</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<p className="text-center py-8 text-muted-foreground">Get started by uploading your first file</p>
+						<p className="text-center py-8 text-muted-foreground">Get started by creating your first product</p>
 					</CardContent>
 				</Card>
 			) : (
 				<>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-						{userFiles.map((file: File) => (
-							<Card key={file.id} className="overflow-hidden flex flex-col">
-								<div className="aspect-video bg-muted relative">
-									{isImage(file.mimeType) ? (
-										<img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+					<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+						{userProducts.map((product) => (
+							<Card key={product.id} className="overflow-hidden flex flex-col">
+								<div className="aspect-square bg-muted relative">
+									{product.images && product.images.length > 0 ? (
+										<div className="w-full h-full relative overflow-hidden">
+											<img 
+												src={product.images[0].url} 
+												alt={product.name} 
+												className="w-full h-full object-contain" 
+											/>
+										</div>
 									) : (
 										<div className="flex items-center justify-center h-full">
-											<Icons.Description className="h-16 w-16 text-muted-foreground opacity-30" />
+											<Icons.Inventory className="h-16 w-16 text-muted-foreground opacity-30" />
 										</div>
 									)}
 								</div>
 								<CardHeader className="pb-2">
-									<CardTitle className="text-lg truncate" title={file.name}>
-										{file.name}
+									<CardTitle className="text-lg truncate" title={product.name}>
+										{product.name}
 									</CardTitle>
 									<CardDescription>
-										{formatDistanceToNow(new Date(file.createdAt), {
+										{formatDistanceToNow(new Date(product.createdAt), {
 											addSuffix: true,
 										})}
 									</CardDescription>
@@ -151,30 +158,20 @@ export default async function FilesPage(props: PageProps) {
 								<CardContent className="pb-4 pt-0 flex-grow">
 									<div className="text-xs text-muted-foreground mt-auto">
 										<p className="flex items-center gap-1">
-											<Icons.Image className="h-3 w-3" />
+											<Icons.Description className="h-3 w-3" />
 											<span>
-												{file.fileName} ({(file.fileSize / 1024).toFixed(0)} KB)
+												{product.files ? product.files.length : 0} Files
 											</span>
 										</p>
-										{file.width && file.height && (
-											<p className="mt-1">
-												{file.width} x {file.height}px
-											</p>
-										)}
 									</div>
 								</CardContent>
 								<div className="px-6 pb-4 pt-0">
 									<div className="flex space-x-2">
 										<Button asChild variant="outline" size="sm" className="flex-1">
-											<a
-												href={file.url}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="flex items-center justify-center"
-											>
-												<Icons.FileDownload className="h-4 w-4 mr-2" />
-												Download
-											</a>
+											<Link href={`/${product.category.slug}/${product.slug}`} className="flex items-center justify-center">
+												<Icons.ExternalLink className="h-4 w-4 mr-2" />
+												View Product
+											</Link>
 										</Button>
 									</div>
 								</div>
