@@ -36,7 +36,7 @@ export default async function FilesPage(props: PageProps) {
 			column: "createdAt" as keyof Product,
 			desc: true,
 		},
-		ITEMS_PER_PAGE
+		ITEMS_PER_PAGE,
 	).parse(searchParams);
 
 	const { page, perPage, name } = search;
@@ -44,7 +44,7 @@ export default async function FilesPage(props: PageProps) {
 
 	// Build conditions for product search
 	const conditions: SQL<unknown>[] = [];
-	
+
 	// Add name filter if provided
 	if (name) {
 		conditions.push(sql`${products.name} ILIKE ${`%${name}%`}`);
@@ -69,7 +69,7 @@ export default async function FilesPage(props: PageProps) {
 				images: true,
 				files: true,
 				category: true,
-			}
+			},
 		});
 
 		return {
@@ -78,7 +78,7 @@ export default async function FilesPage(props: PageProps) {
 				total: Number(totalCountResult),
 				perPage,
 				page,
-			}
+			},
 		};
 	};
 
@@ -133,11 +133,7 @@ export default async function FilesPage(props: PageProps) {
 								<div className="aspect-square bg-muted relative">
 									{product.images && product.images.length > 0 ? (
 										<div className="w-full h-full relative overflow-hidden">
-											<img 
-												src={product.images[0].url} 
-												alt={product.name} 
-												className="w-full h-full object-contain" 
-											/>
+											<img src={product.images[0].url} alt={product.name} className="w-full h-full object-contain" />
 										</div>
 									) : (
 										<div className="flex items-center justify-center h-full">
@@ -159,16 +155,17 @@ export default async function FilesPage(props: PageProps) {
 									<div className="text-xs text-muted-foreground mt-auto">
 										<p className="flex items-center gap-1">
 											<Icons.Description className="h-3 w-3" />
-											<span>
-												{product.files ? product.files.length : 0} Files
-											</span>
+											<span>{product.files ? product.files.length : 0} Files</span>
 										</p>
 									</div>
 								</CardContent>
 								<div className="px-6 pb-4 pt-0">
 									<div className="flex space-x-2">
 										<Button asChild variant="outline" size="sm" className="flex-1">
-											<Link href={`/${product.category.slug}/${product.slug}`} className="flex items-center justify-center">
+											<Link
+												href={`/${product.category.slug}/${product.slug}`}
+												className="flex items-center justify-center"
+											>
 												<Icons.ExternalLink className="h-4 w-4 mr-2" />
 												View Product
 											</Link>
@@ -181,12 +178,7 @@ export default async function FilesPage(props: PageProps) {
 
 					{/* Pagination */}
 					{totalPages > 1 && (
-						<Pagination
-							pageCount={totalPages}
-							currentPage={page}
-							baseUrl="/files"
-							searchParams={searchParams}
-						/>
+						<Pagination pageCount={totalPages} currentPage={page} baseUrl="/files" searchParams={searchParams} />
 					)}
 				</>
 			)}

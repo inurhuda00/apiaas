@@ -9,6 +9,8 @@ import {
 	signRefreshToken,
 	ACCESS_TOKEN_EXPIRY,
 	REFRESH_TOKEN_EXPIRY,
+	ACCESS_TOKEN_NAME,
+	REFRESH_TOKEN_NAME,
 } from "@apiaas/auth";
 import { cookies } from "next/headers";
 import { env } from "@/env";
@@ -18,9 +20,6 @@ import {
 	getRefreshToken as getRefreshTokenFromDb,
 } from "@/lib/db/queries/token";
 import { getUserById } from "@/lib/db/queries/user";
-
-const ACCESS_TOKEN_NAME = "session";
-const REFRESH_TOKEN_NAME = "refresh";
 
 const AUTH_SECRET = env.AUTH_SECRET;
 
@@ -140,6 +139,7 @@ export async function setAccessToken(accessToken: string) {
 		httpOnly: true,
 		secure: true,
 		sameSite: "lax",
+		domain: env.SESSION_DOMAIN,
 	});
 }
 
@@ -149,6 +149,7 @@ export async function setRefreshToken(refreshToken: string) {
 		httpOnly: true,
 		secure: true,
 		sameSite: "lax",
+		domain: env.SESSION_DOMAIN,
 	});
 }
 

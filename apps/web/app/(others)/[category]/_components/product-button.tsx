@@ -39,7 +39,9 @@ const productService = {
 	},
 };
 
-export default function ProductButton({ product }: { product: Pick<Product, 'id' | 'locked'> & { files: { name: string }[] } }) {
+export default function ProductButton({
+	product,
+}: { product: Pick<Product, "id" | "locked"> & { files: { name: string }[] } }) {
 	const { userPromise } = useUser();
 	const { sessionPromise } = useSession();
 	const user = use(userPromise);

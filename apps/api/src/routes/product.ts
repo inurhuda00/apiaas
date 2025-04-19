@@ -19,8 +19,8 @@ import { deleteBucketObject, getBucketObject, uploadToBucket, deleteBucketProduc
 import { listBucketObjects } from "../helpers/bucket";
 import { verifyToken } from "@apiaas/auth";
 
-function getAssetUrl(c: { env: Env }, type: 'media' | 'files', productId: string, filename: string): string {
-	const assetDomain = c.env.ASSET_DOMAIN || 'assets.mondive.xyz';
+function getAssetUrl(c: { env: Env }, type: "media" | "files", productId: string, filename: string): string {
+	const assetDomain = c.env.ASSET_DOMAIN || "assets.mondive.xyz";
 	return `https://${assetDomain}/products/${productId}/${type}/${filename}`;
 }
 
@@ -120,17 +120,17 @@ productRoute.post(
 
 			if (product.locked) {
 				const token = extractBearerToken(c);
-				
+				console.log("TOKEN", token);
+
 				if (!token) {
 					return c.json({ success: false, error: "Authentication required" }, 401);
 				}
-				
-				const isValid = await verifyToken(c.env.AUTH_SECRET, token);
-				
+
+				const isValid = await verifyToken(token, c.env.AUTH_SECRET);
+
 				if (!isValid) {
 					return c.json({ success: false, error: "Invalid token" }, 401);
 				}
-				
 			}
 
 			const file = await getBucketObject(c, productId, "files", filename);
@@ -208,7 +208,7 @@ productRoute.post("/media", createValidator(mediaUploadSchema, "form"), async (c
 			sort: sort.toString(),
 		});
 
-		const publicUrl = getAssetUrl(c, 'media', productId, uniqueFilename);
+		const publicUrl = getAssetUrl(c, "media", productId, uniqueFilename);
 
 		// Save image metadata to database
 		const db = database(c.env.DATABASE_URL);
@@ -245,11 +245,11 @@ productRoute.post("/files", createValidator(fileUploadSchema, "form"), async (c)
 			productId: productId.toString(),
 		});
 
-		const publicUrl = getAssetUrl(c, 'files', productId, uniqueFilename);
-		
+		const publicUrl = getAssetUrl(c, "files", productId, uniqueFilename);
+
 		// Extract file extension
-		const extension = file.name.split('.').pop() || '';
-		
+		const extension = file.name.split(".").pop() || "";
+
 		// Save file metadata to database
 		const db = database(c.env.DATABASE_URL);
 		const newFile = await createFile(db, {
@@ -262,7 +262,7 @@ productRoute.post("/files", createValidator(fileUploadSchema, "form"), async (c)
 			url: publicUrl,
 			fileType: getFileType(file.type),
 			// Add image dimensions if it's an image
-			...(file.type.startsWith('image/') ? { width: 0, height: 0 } : {}),
+			...(file.type.startsWith("image/") ? { width: 0, height: 0 } : {}),
 		});
 
 		return c.json({
@@ -282,12 +282,12 @@ productRoute.post("/files", createValidator(fileUploadSchema, "form"), async (c)
 
 // Helper function to determine file type from mime type
 function getFileType(mimeType: string): string {
-	if (mimeType.startsWith('image/')) return 'image';
-	if (mimeType.startsWith('video/')) return 'video';
-	if (mimeType.startsWith('audio/')) return 'audio';
-	if (mimeType.includes('pdf')) return 'pdf';
-	if (mimeType.includes('zip') || mimeType.includes('compressed')) return 'archive';
-	return 'other';
+	if (mimeType.startsWith("image/")) return "image";
+	if (mimeType.startsWith("video/")) return "video";
+	if (mimeType.startsWith("audio/")) return "audio";
+	if (mimeType.includes("pdf")) return "pdf";
+	if (mimeType.includes("zip") || mimeType.includes("compressed")) return "archive";
+	return "other";
 }
 
 productRoute.get("/media/:productId", async (c) => {
@@ -306,10 +306,10 @@ productRoute.get("/media/:productId", async (c) => {
 		// Get images from database
 		const db = database(c.env.DATABASE_URL);
 		const dbImages = await getProductImages(db, Number(productId));
-		
+
 		// Also get objects from bucket for backward compatibility
 		const objects = await listBucketObjects(c, productId, "media");
-		
+
 		interface BucketItem {
 			filename: string;
 			url: string;
@@ -318,7 +318,7 @@ productRoute.get("/media/:productId", async (c) => {
 			sort: number;
 			metadata?: Record<string, string>;
 		}
-		
+
 		const bucketItems: BucketItem[] = [];
 
 		if (objects) {
@@ -329,35 +329,37 @@ productRoute.get("/media/:productId", async (c) => {
 				customMetadata?: Record<string, string>;
 			}
 
-			bucketItems.push(...objects.objects.map((obj: BucketObject) => {
-				const prefix = `products/${productId}/media/`;
-				const filename = obj.key.replace(prefix, "");
-				return {
-					filename,
-					url: getAssetUrl(c, 'media', productId, filename),
-					size: obj.size,
-					uploadedAt: obj.uploaded,
-					sort: Number.parseInt(obj.customMetadata?.sort || "0"),
-					metadata: obj.customMetadata,
-				};
-			}));
+			bucketItems.push(
+				...objects.objects.map((obj: BucketObject) => {
+					const prefix = `products/${productId}/media/`;
+					const filename = obj.key.replace(prefix, "");
+					return {
+						filename,
+						url: getAssetUrl(c, "media", productId, filename),
+						size: obj.size,
+						uploadedAt: obj.uploaded,
+						sort: Number.parseInt(obj.customMetadata?.sort || "0"),
+						metadata: obj.customMetadata,
+					};
+				}),
+			);
 		}
 
 		// Create merged list with database images taking precedence
-		const dbUrls = new Set(dbImages.map(img => img.url));
-		
+		const dbUrls = new Set(dbImages.map((img) => img.url));
+
 		// Keep bucket items that aren't in the database
-		const bucketOnlyItems = bucketItems.filter(item => !dbUrls.has(item.url));
-		
+		const bucketOnlyItems = bucketItems.filter((item) => !dbUrls.has(item.url));
+
 		// Merge the lists and sort by sort order
 		const mediaItems = [
-			...dbImages.map(img => ({
+			...dbImages.map((img) => ({
 				id: img.id,
 				url: img.url,
 				sort: img.sort,
 				createdAt: img.createdAt,
 			})),
-			...bucketOnlyItems
+			...bucketOnlyItems,
 		].sort((a, b) => a.sort - b.sort);
 
 		return c.json({
@@ -388,10 +390,10 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 
 		// Get files from database
 		const dbFiles = await getProductFiles(db, Number(productId));
-		
+
 		// Also get objects from bucket for backward compatibility
 		const objects = await listBucketObjects(c, productId, "files");
-		
+
 		interface BucketItem {
 			filename: string;
 			originalName?: string;
@@ -400,7 +402,7 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 			metadata?: Record<string, string>;
 			url: string;
 		}
-		
+
 		const bucketItems: BucketItem[] = [];
 
 		if (objects) {
@@ -411,29 +413,31 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 				customMetadata?: Record<string, string>;
 			}
 
-			bucketItems.push(...objects.objects.map((obj: BucketObject) => {
-				const prefix = `products/${productId}/files/`;
-				const filename = obj.key.replace(prefix, "");
-				return {
-					filename,
-					originalName: obj.customMetadata?.originalName,
-					size: obj.size,
-					uploadedAt: obj.uploaded,
-					metadata: obj.customMetadata,
-					url: getAssetUrl(c, 'files', productId, filename)
-				};
-			}));
+			bucketItems.push(
+				...objects.objects.map((obj: BucketObject) => {
+					const prefix = `products/${productId}/files/`;
+					const filename = obj.key.replace(prefix, "");
+					return {
+						filename,
+						originalName: obj.customMetadata?.originalName,
+						size: obj.size,
+						uploadedAt: obj.uploaded,
+						metadata: obj.customMetadata,
+						url: getAssetUrl(c, "files", productId, filename),
+					};
+				}),
+			);
 		}
 
 		// Create merged list with database files taking precedence
-		const dbFileNames = new Set(dbFiles.map(file => file.fileName));
-		
+		const dbFileNames = new Set(dbFiles.map((file) => file.fileName));
+
 		// Keep bucket items that aren't in the database
-		const bucketOnlyItems = bucketItems.filter(item => !dbFileNames.has(item.filename));
-		
+		const bucketOnlyItems = bucketItems.filter((item) => !dbFileNames.has(item.filename));
+
 		// Merge the lists
 		const fileItems = [
-			...dbFiles.map(file => ({
+			...dbFiles.map((file) => ({
 				id: file.id,
 				filename: file.fileName,
 				originalName: file.name,
@@ -443,7 +447,7 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 				url: file.url,
 				createdAt: file.createdAt,
 			})),
-			...bucketOnlyItems
+			...bucketOnlyItems,
 		];
 
 		return c.json({
@@ -463,17 +467,17 @@ productRoute.delete(
 		try {
 			const productId = c.req.param("productId");
 			const filename = c.req.param("filename");
-			
+
 			// Delete from bucket
 			const bucketResult = await deleteBucketObject(c, productId, "media", filename);
-			
+
 			// Delete from database if file exists in bucket
 			if (bucketResult.status === 200) {
 				const db = database(c.env.DATABASE_URL);
-				const url = getAssetUrl(c, 'media', productId, filename);
+				const url = getAssetUrl(c, "media", productId, filename);
 				await deleteImageByUrl(db, url);
 			}
-			
+
 			return bucketResult;
 		} catch (error) {
 			return handleError(c, error, "Failed to delete media");
@@ -489,16 +493,16 @@ productRoute.delete(
 		try {
 			const productId = c.req.param("productId");
 			const filename = c.req.param("filename");
-			
+
 			// Delete from bucket
 			const bucketResult = await deleteBucketObject(c, productId, "files", filename);
-			
+
 			// Delete from database if file exists in bucket
 			if (bucketResult.status === 200) {
 				const db = database(c.env.DATABASE_URL);
 				await deleteFileByFileName(db, filename);
 			}
-			
+
 			return bucketResult;
 		} catch (error) {
 			return handleError(c, error, "Failed to delete file");

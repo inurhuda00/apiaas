@@ -12,6 +12,7 @@ export const env = createEnv({
 		PRODUCT_ID: z.string(),
 		AUTH_SECRET: z.string(),
 		BACKEND_URL: z.string(),
+		SESSION_DOMAIN: z.string(),
 	},
 	client: {
 		NEXT_PUBLIC_BACKEND_URL: z.string(),
@@ -28,6 +29,7 @@ export const env = createEnv({
 		PRODUCT_ID: process.env.PRODUCT_ID,
 		AUTH_SECRET: process.env.AUTH_SECRET,
 		BACKEND_URL: process.env.BACKEND_URL,
+		SESSION_DOMAIN: process.env.SESSION_DOMAIN,
 	},
 	skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

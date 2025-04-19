@@ -9,9 +9,7 @@ type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked"> & {
 
 export function ProductCard({ product }: { product: ProductWithRelations }) {
 	// Get the first image by sort order (lowest sort value)
-	const thumbnail = product.images.length > 0 
-		? [...product.images].sort((a, b) => a.sort - b.sort)[0]
-		: null;
+	const thumbnail = product.images.length > 0 ? [...product.images].sort((a, b) => a.sort - b.sort)[0] : null;
 
 	return (
 		<div className="group relative overflow-hidden border bg-card">

@@ -2,7 +2,15 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { eq, and, gt } from "drizzle-orm";
-import { signAccessToken, signRefreshToken, verifyToken, REFRESH_TOKEN_EXPIRY } from "@apiaas/auth";
+import {
+	signAccessToken,
+	signRefreshToken,
+	verifyToken,
+	REFRESH_TOKEN_EXPIRY,
+	ACCESS_TOKEN_EXPIRY,
+	REFRESH_TOKEN_NAME,
+	ACCESS_TOKEN_NAME,
+} from "@apiaas/auth";
 import { comparePasswords } from "@apiaas/auth";
 import { database } from "@apiaas/db";
 import { users, refreshTokens, type NewRefreshToken } from "@apiaas/db/schema";
@@ -87,12 +95,22 @@ authRoute.post(
 
 			await db.insert(refreshTokens).values(newRefreshToken);
 
-			setCookie(c, "refreshToken", refreshToken, {
+			setCookie(c, REFRESH_TOKEN_NAME, refreshToken, {
 				httpOnly: true,
 				expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
-				path: "/api/auth",
+				path: "/",
 				sameSite: "Lax",
 				secure: c.env.NODE_ENV === "production",
+				domain: ".mondive.xyz",
+			});
+
+			setCookie(c, ACCESS_TOKEN_NAME, accessToken, {
+				httpOnly: true,
+				expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRY),
+				path: "/",
+				sameSite: "Lax",
+				secure: c.env.NODE_ENV === "production",
+				domain: ".mondive.xyz",
 			});
 
 			return c.json({
@@ -122,7 +140,7 @@ authRoute.post(
 
 authRoute.post("/refresh", async (c) => {
 	try {
-		const currentRefreshToken = getCookie(c, "refreshToken");
+		const currentRefreshToken = getCookie(c, REFRESH_TOKEN_NAME);
 
 		if (!currentRefreshToken) {
 			return c.json({ success: false, error: "Refresh token not found" }, 401);
@@ -130,7 +148,7 @@ authRoute.post("/refresh", async (c) => {
 
 		const decodedPayload = await verifyToken(currentRefreshToken, c.env.AUTH_SECRET);
 		if (!decodedPayload || !decodedPayload.user?.id) {
-			deleteCookie(c, "refreshToken", { path: "/api/auth" });
+			deleteCookie(c, REFRESH_TOKEN_NAME, { path: "/" });
 			return c.json({ success: false, error: "Invalid refresh token" }, 401);
 		}
 
@@ -144,7 +162,7 @@ authRoute.post("/refresh", async (c) => {
 		});
 
 		if (!storedToken) {
-			deleteCookie(c, "refreshToken", { path: "/api/auth" });
+			deleteCookie(c, REFRESH_TOKEN_NAME, { path: "/" });
 			return c.json({ success: false, error: "Invalid or expired refresh token" }, 401);
 		}
 
@@ -161,12 +179,13 @@ authRoute.post("/refresh", async (c) => {
 			expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
 		});
 
-		setCookie(c, "refreshToken", newRefreshTokenValue, {
+		setCookie(c, REFRESH_TOKEN_NAME, newRefreshTokenValue, {
 			httpOnly: true,
 			expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
-			path: "/api/auth",
+			path: "/",
 			sameSite: "Lax",
 			secure: c.env.NODE_ENV === "production",
+			domain: ".mondive.xyz",
 		});
 
 		const newAccessToken = await signAccessToken(newSessionPayload, c.env.AUTH_SECRET);
@@ -174,7 +193,7 @@ authRoute.post("/refresh", async (c) => {
 		return c.json({ success: true, data: { accessToken: newAccessToken } });
 	} catch (error) {
 		console.error("Refresh token error:", error);
-		deleteCookie(c, "refreshToken", { path: "/api/auth" });
+		deleteCookie(c, REFRESH_TOKEN_NAME, { path: "/" });
 		return c.json(
 			{
 				success: false,
@@ -187,24 +206,25 @@ authRoute.post("/refresh", async (c) => {
 
 authRoute.post("/logout", async (c) => {
 	try {
-		const currentRefreshToken = getCookie(c, "refreshToken");
+		const currentRefreshToken = getCookie(c, REFRESH_TOKEN_NAME);
 
 		if (currentRefreshToken) {
 			const db = database(c.env.DATABASE_URL);
 			await db.delete(refreshTokens).where(eq(refreshTokens.token, currentRefreshToken));
 		}
 
-		deleteCookie(c, "refreshToken", {
+		deleteCookie(c, REFRESH_TOKEN_NAME, {
 			httpOnly: true,
-			path: "/api/auth",
+			path: "/",
 			sameSite: "Lax",
 			secure: c.env.NODE_ENV === "production",
+			domain: ".mondive.xyz",
 		});
 
 		return c.json({ success: true, message: "Logged out successfully" });
 	} catch (error) {
 		console.error("Logout error:", error);
-		deleteCookie(c, "refreshToken", { path: "/api/auth" });
+		deleteCookie(c, REFRESH_TOKEN_NAME, { path: "/" });
 		return c.json(
 			{
 				success: false,

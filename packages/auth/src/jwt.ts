@@ -1,8 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import type { SessionData } from "./types";
-
-export const ACCESS_TOKEN_EXPIRY = 15 * 60 * 1000;
-export const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000;
+import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "./constants";
 
 export async function signAccessToken(payload: SessionData, secret: string) {
 	const key = new TextEncoder().encode(secret);

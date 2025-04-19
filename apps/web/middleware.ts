@@ -3,8 +3,9 @@ import type { NextRequest } from "next/server";
 import { ACCESS_TOKEN_EXPIRY, type SessionData, signAccessToken, verifyToken } from "@apiaas/auth";
 import { env } from "./env";
 
-const ACCESS_TOKEN_NAME = "session";
-const REFRESH_TOKEN_NAME = "refresh";
+const ACCESS_TOKEN_NAME = "session_token";
+const REFRESH_TOKEN_NAME = "refresh_token";
+
 const AUTH_SECRET = env.AUTH_SECRET;
 
 const protectedRoutes = new Set([

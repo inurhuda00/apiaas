@@ -276,27 +276,26 @@ export async function getProductsByCategory(categorySlug: string) {
 }
 
 export async function getProductBySlug(categorySlug: string, productSlug: string) {
-	const result = await db.query.products
-		.findFirst({
-			columns: {
-				id: true,
-				slug: true,
-				name: true,
-				description: true,
-				locked: true,
-				updatedAt: true,
-			},
-			where: and(
-				eq(products.slug, productSlug),
-				exists(
-					db
-						.select()
-						.from(categories)
-						.where(and(eq(categories.slug, categorySlug), eq(categories.id, products.categoryId))),
-				),
+	const result = await db.query.products.findFirst({
+		columns: {
+			id: true,
+			slug: true,
+			name: true,
+			description: true,
+			locked: true,
+			updatedAt: true,
+		},
+		where: and(
+			eq(products.slug, productSlug),
+			exists(
+				db
+					.select()
+					.from(categories)
+					.where(and(eq(categories.slug, categorySlug), eq(categories.id, products.categoryId))),
 			),
-			extras: {
-				tags: sql<{ id: number; name: string; slug: string }[]>`
+		),
+		extras: {
+			tags: sql<{ id: number; name: string; slug: string }[]>`
 			COALESCE(
 			  (
 				SELECT json_agg(json_build_object(
@@ -311,30 +310,30 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 			  '[]'::json
 			)
 		  `.as("tags"),
-			},
-			with: {
-				files: {
-					columns: {
-						name: true,
-						extension: true,
-					},
-				},
-				images: {
-					columns: {
-						id: true,
-						sort: true,
-						url: true,
-					},
-				},
-				category: {
-					columns: {
-						id: true,
-						slug: true,
-						name: true,
-					},
+		},
+		with: {
+			files: {
+				columns: {
+					name: true,
+					extension: true,
 				},
 			},
-		});
+			images: {
+				columns: {
+					id: true,
+					sort: true,
+					url: true,
+				},
+			},
+			category: {
+				columns: {
+					id: true,
+					slug: true,
+					name: true,
+				},
+			},
+		},
+	});
 	return result;
 }
 

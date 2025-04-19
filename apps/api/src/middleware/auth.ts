@@ -1,13 +1,20 @@
-import { verifyToken } from "@apiaas/auth";
+import { ACCESS_TOKEN_NAME, verifyToken } from "@apiaas/auth";
 import type { Context, Next } from "hono";
 import type { Env, Variables } from "@/types";
+import { getCookie } from "hono/cookie";
 
 export const extractBearerToken = (c: Context): string | null => {
 	const authHeader = c.req.header("Authorization");
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-		return null;
+	if (authHeader?.startsWith("Bearer ")) {
+		return authHeader.replace("Bearer ", "");
 	}
-	return authHeader.replace("Bearer ", "");
+
+	const cookieToken = getCookie(c, ACCESS_TOKEN_NAME);
+	if (cookieToken) {
+		return cookieToken;
+	}
+
+	return null;
 };
 
 export function AuthMiddleware() {
