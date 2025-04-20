@@ -1,9 +1,9 @@
 # Next.js SaaS Starter
 
 [x] token store
-[] upload cleanup handle saat refresh
-[] on action create product remove image
-[] kalau gagal upload hapus gambar di fe
+[x] upload cleanup handle saat refresh
+[x] on action create product remove image
+[x] kalau gagal upload hapus gambar di fe
 [] Api Upload Product
     - tagging
     - embeding vector
