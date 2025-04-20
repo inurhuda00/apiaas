@@ -262,7 +262,7 @@ export function UploadImageForm() {
 			uploadStateRef.current.pendingUploads.add(file.name);
 			uploadStateRef.current.progresses[file.name] = 0;
 			setIsUploading(true);
-			
+
 			try {
 				const productId = await createTemporaryProduct();
 
@@ -301,7 +301,7 @@ export function UploadImageForm() {
 				handleFileChange(updatedFiles, type);
 			} finally {
 				uploadStateRef.current.pendingUploads.delete(file.name);
-				
+
 				// Check if there are any pending uploads left
 				if (uploadStateRef.current.pendingUploads.size === 0) {
 					setIsUploading(false);
@@ -368,13 +368,9 @@ export function UploadImageForm() {
 							<div>
 								<Label htmlFor="locked" className="flex items-center gap-2">
 									<Switch id="locked" name="locked" className="w-9 h-4" />
-									<span>
-										Locked
-									</span>
+									<span>Locked</span>
 								</Label>
-								<p className="text-sm text-muted-foreground mt-1">
-									Free or Pro product.
-								</p>
+								<p className="text-sm text-muted-foreground mt-1">Free or Pro product.</p>
 							</div>
 						</div>
 					</AccordionContent>

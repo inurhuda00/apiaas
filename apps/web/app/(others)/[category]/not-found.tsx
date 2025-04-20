@@ -14,9 +14,7 @@ export default function NotFound() {
 					The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
 				</p>
 				<Button variant="outline" asChild className="max-w-48 mx-auto">
-					<Link href="/">
-						Back to Home
-					</Link>
+					<Link href="/">Back to Home</Link>
 				</Button>
 			</div>
 		</div>

@@ -129,18 +129,18 @@ export async function deleteSession() {
 	}
 
 	const cookieStore = await cookies();
-	
+
 	// Delete session cookies properly
 	// Setting maxAge to 0 expires cookies immediately
-	cookieStore.set(ACCESS_TOKEN_NAME, '', {
-		domain: env.SESSION_DOMAIN,
-		path: "/", 
-		maxAge: 0
-	});
-	cookieStore.set(REFRESH_TOKEN_NAME, '', {
+	cookieStore.set(ACCESS_TOKEN_NAME, "", {
 		domain: env.SESSION_DOMAIN,
 		path: "/",
-		maxAge: 0
+		maxAge: 0,
+	});
+	cookieStore.set(REFRESH_TOKEN_NAME, "", {
+		domain: env.SESSION_DOMAIN,
+		path: "/",
+		maxAge: 0,
 	});
 }
 

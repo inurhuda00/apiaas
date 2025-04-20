@@ -59,17 +59,17 @@ export const deleteProduct = validatedActionWithUser(DeleteProductSchema, async 
 
 	try {
 		const response = await fetch(`${env.BACKEND_URL}/v1/product/${productId}/cleanup`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ _authorization: token }),
 		});
-		
+
 		const result = await response.json();
-		
+
 		if (result.success) {
 			return { success: "Product and associated files deleted successfully" };
 		}
-		
+
 		console.error("API error response:", result.error);
 		return { error: result.error || "Failed to delete product" };
 	} catch (error) {

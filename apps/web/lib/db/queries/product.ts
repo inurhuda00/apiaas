@@ -360,9 +360,9 @@ export async function getRelatedProducts(categoryId: number, currentProductId: n
 		.from(products)
 		.where(
 			and(
-				eq(products.categoryId, sql.placeholder("categoryId")), 
+				eq(products.categoryId, sql.placeholder("categoryId")),
 				ne(products.id, sql.placeholder("currentProductId")),
-				isNull(products.deletedAt)
+				isNull(products.deletedAt),
 			),
 		)
 		.leftJoin(images, and(eq(images.productId, products.id), eq(images.sort, 0)))
@@ -392,9 +392,7 @@ function getColumnType(column: unknown): string | null {
 
 export async function getProductById(productId: number) {
 	const product = await db.query.products.findFirst({
-		where: and(
-			eq(products.id, productId),
-		),
+		where: and(eq(products.id, productId)),
 	});
 	return product;
 }

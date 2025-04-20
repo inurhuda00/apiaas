@@ -19,9 +19,9 @@ export default function ProductButton({
 
 	const loggedIn = user !== null;
 	const isPro = loggedIn && ["pro", "admin"].includes(user.role);
-	
+
 	const canDownload = !product.locked || isPro;
-	
+
 	const showUpgrade = loggedIn && product.locked && !isPro;
 
 	return (
@@ -33,10 +33,7 @@ export default function ProductButton({
 							href={`${API_BASE_URL}/v1/product/files/download/${product.id}/${product.files[0]?.fileName}`}
 							target="_blank"
 							rel="noopener noreferrer"
-							className={cn(
-								buttonVariants({ variant: "default" }),
-								"w-full text-sm md:text-base",
-							)}
+							className={cn(buttonVariants({ variant: "default" }), "w-full text-sm md:text-base")}
 						>
 							<Icons.Download className="mr-2" />
 							Download {isPro ? "Premium" : "Free"} Asset

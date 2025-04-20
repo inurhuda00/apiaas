@@ -65,13 +65,13 @@ export async function generateProductSlug(db: Database, name: string) {
 export async function deleteProduct(db: Database, productId: string) {
 	try {
 		const productIdNum = Number(productId);
-		
+
 		await db.delete(images).where(eq(images.productId, productIdNum));
-		
+
 		await db.delete(files).where(eq(files.productId, productIdNum));
-		
+
 		await db.delete(productTags).where(eq(productTags.productId, productIdNum));
-		
+
 		const [deletedProduct] = await db
 			.delete(products)
 			.where(eq(products.id, productIdNum))

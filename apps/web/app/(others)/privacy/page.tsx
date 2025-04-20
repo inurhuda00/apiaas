@@ -8,10 +8,10 @@ export default async function PrivacyPage() {
 			<MaxWidthWrapper className="max-w-4xl">
 				<h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
 
-				<div className="prose max-w-none">
+				<div className="prose max-w-none dark:prose-invert">
 					<p className="text-lg mb-6">
-						At Funnnit, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect
-						your personal information when you use our website.
+						At Mondive, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect
+						your personal information when you use our website and services.
 					</p>
 
 					<h2 className="text-2xl font-bold mt-8 mb-4">Information We Collect</h2>
@@ -54,9 +54,9 @@ export default async function PrivacyPage() {
 
 					<h2 className="text-2xl font-bold mt-8 mb-4">Third-Party Services</h2>
 					<p className="mb-4">
-						Our website may contain links to third-party websites or services that are not owned or controlled by
-						Funnnit. We have no control over and assume no responsibility for the content, privacy policies, or
-						practices of any third-party websites or services.
+						Our website may contain links to third-party websites. These links are provided solely as a convenience to
+						you and do not imply endorsement of or association with the linked site by Mondive. We have no control over and assume no responsibility for the content, privacy policies, or
+						practices of any third-party websites.
 					</p>
 
 					<h2 className="text-2xl font-bold mt-8 mb-4">Changes to This Policy</h2>

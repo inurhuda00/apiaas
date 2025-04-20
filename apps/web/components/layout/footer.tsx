@@ -15,7 +15,7 @@ export function Footer() {
 						<div className="space-y-4">
 							<Link href="/" className="flex items-center gap-2">
 								<Icons.LogoIcon className="h-6 w-6 text-foreground" />
-								<span className="font-bold text-lg text-foreground">Funnnit</span>
+								<span className="font-bold text-lg text-foreground">Mondive</span>
 							</Link>
 							<p className="text-muted-foreground">Exploring art for Fun</p>
 						</div>

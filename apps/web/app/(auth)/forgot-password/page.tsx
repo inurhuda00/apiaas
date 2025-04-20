@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
 					<div className="mb-8">
 						<Link href="/" className="flex items-center gap-2">
 							<Icons.LogoIcon className="h-8 w-8 text-orange-500" />
-							<span className="text-xl font-bold">Funnnit</span>
+							<span className="text-xl font-bold">Mondive</span>
 						</Link>
 					</div>
 					<AuthCard title="Reset Password" subtitle="Enter your email to receive a password reset link">

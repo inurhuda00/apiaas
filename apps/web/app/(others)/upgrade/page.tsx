@@ -10,11 +10,11 @@ import { env } from "@/env";
 
 const features = [
 	{
-		title: "Access to all premium assets",
+		title: "Access to 1000+ AI backgrounds",
 		icon: <Icons.Download className="h-5 w-5 text-primary" />,
 	},
 	{
-		title: "Weekly new releases",
+		title: "Weekly new AI designs",
 		icon: <Icons.CalendarMonth className="h-5 w-5 text-primary" />,
 	},
 	{
@@ -30,11 +30,11 @@ const features = [
 		icon: <Icons.Check className="h-5 w-5 text-primary" />,
 	},
 	{
-		title: "Early access to collections",
+		title: "Stand out from competitors",
 		icon: <Icons.Check className="h-5 w-5 text-primary" />,
 	},
 	{
-		title: "Premium support",
+		title: "Multi-platform compatibility",
 		icon: <Icons.Check className="h-5 w-5 text-primary" />,
 	},
 	{
@@ -47,12 +47,12 @@ const faqs = [
 	{
 		question: "What's included in the premium access?",
 		answer:
-			"Premium access includes all current and future assets, commercial usage rights, source files, and lifetime updates.",
+			"Premium access includes all current and future AI-generated backgrounds, commercial usage rights, high-resolution files in multiple formats, and lifetime updates.",
 	},
 	{
 		question: "What are the usage terms?",
 		answer:
-			"You can use all assets in unlimited personal and commercial projects. No attribution required. Reselling or redistributing the raw assets is not permitted.",
+			"You can use all AI backgrounds in unlimited personal and commercial projects. No attribution required. Reselling or redistributing the raw assets is not permitted.",
 	},
 	{
 		question: "Do you offer refunds?",
@@ -60,9 +60,9 @@ const faqs = [
 			"Yes, we offer a 30-day satisfaction guarantee. If you're not happy with your purchase, we'll provide a full refund.",
 	},
 	{
-		question: "How do I access the assets?",
+		question: "How do I access the backgrounds?",
 		answer:
-			"After purchase, you'll get immediate access to all premium assets through your dashboard. Download them individually or in collections.",
+			"After purchase, you'll get immediate access to all 1000+ AI backgrounds through your dashboard. Download them individually or in collections.",
 	},
 	{
 		question: "Can I use these for client work?",
@@ -70,9 +70,9 @@ const faqs = [
 			"Yes! Your license covers both personal and client projects. There's no limit on the number of projects you can use them in.",
 	},
 	{
-		question: "How often do you add new assets?",
+		question: "How often do you add new backgrounds?",
 		answer:
-			"We release new assets weekly, ensuring our collection stays fresh and relevant. All new releases are included in your premium access.",
+			"We release new AI backgrounds weekly, ensuring our collection stays fresh and relevant. All new releases are included in your premium access.",
 	},
 ];
 
@@ -81,16 +81,16 @@ export default async function UpgradePage() {
 		<div className="flex-grow py-12 bg-background">
 			<MaxWidthWrapper>
 				<div className="text-center mb-12">
-					<h1 className="text-4xl font-bold mb-4 text-foreground">Premium Access</h1>
+					<h1 className="text-4xl font-bold mb-4 text-foreground">Unlimited AI Backgrounds</h1>
 					<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-						Get unlimited access to our entire collection with a lifetime license
+						Get instant access to 1000+ premium AI-generated backgrounds that make your content stand out
 					</p>
 				</div>
 
 				<div className="grid md:grid-cols-5 gap-8 mb-16">
 					{/* Features column */}
 					<div className="md:col-span-3 bg-card text-card-foreground border rounded-lg p-8">
-						<h2 className="text-2xl font-bold mb-8">Everything You Need</h2>
+						<h2 className="text-2xl font-bold mb-8">Transform Your Digital Presence</h2>
 
 						<div className="grid md:grid-cols-2 gap-6">
 							{features.map((feature, index) => (
@@ -140,8 +140,8 @@ export default async function UpgradePage() {
 									</div>
 								</div>
 								<div>
-									<div className="font-medium">Join our creator community</div>
-									<div className="text-sm text-muted-foreground">Get inspired by fellow creators</div>
+									<div className="font-medium">Join 500+ creators worldwide</div>
+									<div className="text-sm text-muted-foreground">Getting 2-3X higher engagement</div>
 								</div>
 							</div>
 						</div>
@@ -152,33 +152,58 @@ export default async function UpgradePage() {
 						<div className="space-y-6">
 							<div>
 								<div className="inline-block bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded mb-3">
-									BEST VALUE
+									LIMITED TIME OFFER
 								</div>
-								<h3 className="text-xl font-bold">Lifetime Premium</h3>
+								<h3 className="text-2xl font-bold">Lifetime Premium Access</h3>
 								<div className="flex items-end mt-2">
 									<span className="text-5xl font-bold">$24</span>
 									<span className="text-muted-foreground ml-2 mb-1">.99</span>
+									<span className="line-through text-muted-foreground ml-3 mb-1">$50</span>
+									<span className="bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded ml-3 mb-1">50% OFF</span>
 								</div>
-								<p className="text-sm text-muted-foreground mt-1">One-time payment, lifetime access</p>
+								<p className="text-sm text-muted-foreground mt-1">One-time payment, instant access to 1000+ AI backgrounds</p>
 							</div>
 							<div>
 								<Link
 									href={`/api/checkout?productId=${env.PRODUCT_ID}`}
 									className={cn(buttonVariants(), "w-full bg-primary hover:bg-primary/90 h-12 text-base")}
 								>
-									Get Premium Access
+									Claim Your Access Now
 								</Link>
-								<p className="text-xs text-center mt-3 text-muted-foreground">Secure payment powered by Polar.sh</p>
+								<p className="text-xs text-center mt-3 text-muted-foreground">Secure payment with 100% money-back guarantee</p>
 							</div>
-
 							<div className="pt-4 border-t mt-6">
 								<div className="flex items-center">
 									<Icons.Info className="h-5 w-5 text-muted-foreground mr-2" />
-									<h4 className="font-medium text-sm">100% Satisfaction Guaranteed</h4>
+									<h4 className="font-medium text-sm">Price Increases With Each Update!</h4>
 								</div>
 								<p className="text-xs text-muted-foreground mt-1">
-									Try risk-free with our 30-day money-back guarantee. No questions asked.
+									Lock in today's price before it goes up. New backgrounds added weekly.
 								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{/* Library size indicator */}
+				<div className="bg-card p-6 rounded-lg border mb-12">
+					<div className="flex flex-col md:flex-row items-center gap-4 justify-between">
+						<div>
+							<h3 className="text-lg font-medium mb-2">Our growing background library</h3>
+							<p className="text-sm text-muted-foreground">Access our entire collection of premium AI backgrounds with one subscription</p>
+						</div>
+						<div className="flex gap-3">
+							<div className="text-center">
+								<div className="text-2xl font-bold">1000+</div>
+								<div className="text-xs text-muted-foreground">Backgrounds</div>
+							</div>
+							<div className="text-center">
+								<div className="text-2xl font-bold">12</div>
+								<div className="text-xs text-muted-foreground">Categories</div>
+							</div>
+							<div className="text-center">
+								<div className="text-2xl font-bold">Weekly</div>
+								<div className="text-xs text-muted-foreground">Updates</div>
 							</div>
 						</div>
 					</div>
@@ -200,7 +225,7 @@ export default async function UpgradePage() {
 				<div className="text-center">
 					<p className="text-sm text-muted-foreground">
 						Have more questions?{" "}
-						<a href="mailto:support@funnnit.com" className="text-primary hover:text-primary/80">
+						<a href="mailto:support@mondive.xyz" className="text-primary hover:text-primary/80">
 							Contact our support team
 						</a>
 					</p>

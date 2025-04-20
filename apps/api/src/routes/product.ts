@@ -63,7 +63,7 @@ productRoute.post(
 
 			const [mediaDeleted, filesDeleted] = await Promise.all([
 				deleteBucketProductFiles(c, productId, "media"),
-				deleteBucketProductFiles(c, productId, "files")
+				deleteBucketProductFiles(c, productId, "files"),
 			]);
 
 			const productDeleted = await deleteProduct(db, productId);
@@ -272,7 +272,7 @@ productRoute.get("/media/:productId", async (c) => {
 		const objects = await listBucketObjects(c, productId, "media");
 
 		const dbUrls = new Set(dbImages.map((img) => img.url));
-		
+
 		const bucketItems = [];
 		if (objects) {
 			bucketItems.push(
@@ -327,7 +327,7 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 		const objects = await listBucketObjects(c, productId, "files");
 
 		const dbFileNames = new Set(dbFiles.map((file) => file.fileName));
-		
+
 		const bucketItems = [];
 		if (objects) {
 			bucketItems.push(
@@ -422,7 +422,8 @@ productRoute.post("/temp/cleanup", AuthRoleMiddleware(["admin"]), async (c) => {
 	try {
 		const db = database(c.env.DATABASE_URL);
 
-		const temporaryProducts = await db.select({ id: products.id })
+		const temporaryProducts = await db
+			.select({ id: products.id })
 			.from(products)
 			.where(not(isNull(products.deletedAt)));
 
@@ -430,19 +431,19 @@ productRoute.post("/temp/cleanup", AuthRoleMiddleware(["admin"]), async (c) => {
 			return c.json({
 				success: true,
 				data: { cleaned: 0, ids: [] },
-				message: "No temporary products to clean up"
+				message: "No temporary products to clean up",
 			});
 		}
 
 		const cleanedProductIds = [];
-		
+
 		for (const product of temporaryProducts) {
 			try {
 				const productId = String(product.id);
 
 				const [mediaDeleted, filesDeleted] = await Promise.all([
 					deleteBucketProductFiles(c, productId, "media"),
-					deleteBucketProductFiles(c, productId, "files")
+					deleteBucketProductFiles(c, productId, "files"),
 				]);
 
 				if (mediaDeleted && filesDeleted) {
@@ -460,9 +461,9 @@ productRoute.post("/temp/cleanup", AuthRoleMiddleware(["admin"]), async (c) => {
 			success: true,
 			data: {
 				cleaned: cleanedProductIds.length,
-				ids: cleanedProductIds
+				ids: cleanedProductIds,
 			},
-			message: `Cleaned up ${cleanedProductIds.length} temporary products`
+			message: `Cleaned up ${cleanedProductIds.length} temporary products`,
 		});
 	} catch (error) {
 		return handleError(c, error, "Failed to clean up temporary products");
