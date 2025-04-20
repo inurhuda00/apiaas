@@ -1,6 +1,5 @@
 export function slugify(text: string) {
-	return text
-		.toString()
+	return String(text)
 		.normalize("NFD") // Normalize to decomposed form for handling accents
 		.replace(/\p{Diacritic}/gu, "") // Remove diacritics/accents
 		.toLowerCase()

@@ -18,6 +18,16 @@ import { handleError } from "../helpers/error";
 import { deleteBucketObject, getBucketObject, uploadToBucket, deleteBucketProductFiles } from "../helpers/bucket";
 import { listBucketObjects } from "../helpers/bucket";
 import { verifyToken } from "@apiaas/auth";
+import { eq, not, isNull } from "drizzle-orm";
+import { products } from "@apiaas/db/schema";
+
+// Define BucketObject interface
+interface BucketObject {
+	key: string;
+	size: number;
+	uploaded: string;
+	customMetadata?: Record<string, string>;
+}
 
 function getAssetUrl(c: { env: Env }, type: "media" | "files", productId: string, filename: string): string {
 	const assetDomain = c.env.ASSET_DOMAIN || "assets.mondive.xyz";
@@ -35,20 +45,11 @@ productRoute.post(
 			const productId = c.req.param("productId");
 			const { _authorization } = c.req.valid("json");
 
-			const token = _authorization;
-
-			if (!token) {
-				return c.json(
-					{
-						success: false,
-						error: "Unauthorized",
-					},
-					401,
-				);
+			if (!_authorization) {
+				return c.json({ success: false, error: "Unauthorized" }, 401);
 			}
 
-			const session = await verifyToken(token, c.env.AUTH_SECRET);
-
+			const session = await verifyToken(_authorization, c.env.AUTH_SECRET);
 			if (!session) {
 				return c.json({ success: false, error: "Invalid token" }, 401);
 			}
@@ -57,32 +58,17 @@ productRoute.post(
 			const product = await getProduct(db, productId);
 
 			if (!product) {
-				return c.json(
-					{
-						success: false,
-						error: "Product not found",
-					},
-					404,
-				);
+				return c.json({ success: false, error: "Product not found" }, 404);
 			}
 
-			// Delete all media files from bucket
-			const mediaDeleted = await deleteBucketProductFiles(c, productId, "media");
+			const [mediaDeleted, filesDeleted] = await Promise.all([
+				deleteBucketProductFiles(c, productId, "media"),
+				deleteBucketProductFiles(c, productId, "files")
+			]);
 
-			// Delete all files from bucket
-			const filesDeleted = await deleteBucketProductFiles(c, productId, "files");
-
-			// Delete the product from database
 			const productDeleted = await deleteProduct(db, productId);
-
 			if (!productDeleted) {
-				return c.json(
-					{
-						success: false,
-						error: "Failed to delete product from database",
-					},
-					500,
-				);
+				return c.json({ success: false, error: "Failed to delete product from database" }, 500);
 			}
 
 			return c.json({
@@ -113,27 +99,24 @@ productRoute.get(
 			const product = await getProduct(db, productId);
 
 			if (!product) {
-				throw new Error("Product not found");
+				return c.json({ success: false, error: "Product not found" }, 404);
 			}
 
 			if (product.locked) {
 				const token = extractBearerToken(c);
-
 				if (!token) {
 					return c.json({ success: false, error: "Authentication required" }, 401);
 				}
 
 				const isValid = await verifyToken(token, c.env.AUTH_SECRET);
-
 				if (!isValid) {
 					return c.json({ success: false, error: "Invalid token" }, 401);
 				}
 			}
 
 			const file = await getBucketObject(c, productId, "files", filename);
-
 			if (!file) {
-				throw new Error("File not found");
+				return c.json({ success: false, error: "File not found" }, 404);
 			}
 
 			const headers = new Headers();
@@ -141,15 +124,13 @@ productRoute.get(
 			headers.set("etag", file.httpEtag);
 			headers.set("Content-Type", file.httpMetadata?.contentType || "application/octet-stream");
 			headers.set("Content-Disposition", `attachment; filename="${filename}"`);
-			headers.set("Content-Length", file.size.toString());
+			headers.set("Content-Length", String(file.size));
 			headers.set("Content-Transfer-Encoding", "binary");
 			headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
 			headers.set("Pragma", "no-cache");
 			headers.set("Expires", "0");
 
-			return new Response(file.body, {
-				headers,
-			});
+			return new Response(file.body, { headers });
 		} catch (error) {
 			return handleError(c, error, "Failed to download file");
 		}
@@ -176,7 +157,7 @@ productRoute.post("/create", createValidator(productSchema), async (c) => {
 		});
 
 		if (!newProduct) {
-			throw new Error("Failed to create product");
+			return c.json({ success: false, error: "Failed to create product" }, 500);
 		}
 
 		return c.json({
@@ -195,19 +176,17 @@ productRoute.post("/create", createValidator(productSchema), async (c) => {
 
 productRoute.post("/media", createValidator(mediaUploadSchema, "form"), async (c) => {
 	try {
-		const data = c.req.valid("form");
-		const { file, productId, sort } = data;
+		const { file, productId, sort } = c.req.valid("form");
 		const user = c.get("user");
 
 		const uniqueFilename = await uploadToBucket(c, file, productId, "media", {
-			userId: user.id.toString(),
-			productId: productId.toString(),
-			sort: sort.toString(),
+			userId: String(user.id),
+			productId: String(productId),
+			sort: String(sort),
 		});
 
 		const publicUrl = getAssetUrl(c, "media", productId, uniqueFilename);
 
-		// Save image metadata to database
 		const db = database(c.env.DATABASE_URL);
 		const newImage = await createImage(db, {
 			productId: Number(productId),
@@ -233,21 +212,17 @@ productRoute.post("/media", createValidator(mediaUploadSchema, "form"), async (c
 
 productRoute.post("/files", createValidator(fileUploadSchema, "form"), async (c) => {
 	try {
-		const data = await c.req.valid("form");
-		const { file, productId } = data;
+		const { file, productId } = await c.req.valid("form");
 		const user = c.get("user");
 
 		const uniqueFilename = await uploadToBucket(c, file, productId, "files", {
-			userId: user.id.toString(),
-			productId: productId.toString(),
+			userId: String(user.id),
+			productId: String(productId),
 		});
 
 		const publicUrl = getAssetUrl(c, "files", productId, uniqueFilename);
-
-		// Extract file extension
 		const extension = file.name.split(".").pop() || "";
 
-		// Save file metadata to database
 		const db = database(c.env.DATABASE_URL);
 		const newFile = await createFile(db, {
 			productId: Number(productId),
@@ -258,7 +233,6 @@ productRoute.post("/files", createValidator(fileUploadSchema, "form"), async (c)
 			mimeType: file.type,
 			url: publicUrl,
 			fileType: getFileType(file.type),
-			// Add image dimensions if it's an image
 			...(file.type.startsWith("image/") ? { width: 0, height: 0 } : {}),
 		});
 
@@ -277,7 +251,6 @@ productRoute.post("/files", createValidator(fileUploadSchema, "form"), async (c)
 	}
 });
 
-// Helper function to determine file type from mime type
 function getFileType(mimeType: string): string {
 	if (mimeType.startsWith("image/")) return "image";
 	if (mimeType.startsWith("video/")) return "video";
@@ -291,41 +264,17 @@ productRoute.get("/media/:productId", async (c) => {
 	try {
 		const productId = c.req.param("productId");
 		if (!productId) {
-			return c.json(
-				{
-					success: false,
-					error: "Product ID is required",
-				},
-				400,
-			);
+			return c.json({ success: false, error: "Product ID is required" }, 400);
 		}
 
-		// Get images from database
 		const db = database(c.env.DATABASE_URL);
 		const dbImages = await getProductImages(db, Number(productId));
-
-		// Also get objects from bucket for backward compatibility
 		const objects = await listBucketObjects(c, productId, "media");
 
-		interface BucketItem {
-			filename: string;
-			url: string;
-			size: number;
-			uploadedAt: string;
-			sort: number;
-			metadata?: Record<string, string>;
-		}
-
-		const bucketItems: BucketItem[] = [];
-
+		const dbUrls = new Set(dbImages.map((img) => img.url));
+		
+		const bucketItems = [];
 		if (objects) {
-			interface BucketObject {
-				key: string;
-				size: number;
-				uploaded: string;
-				customMetadata?: Record<string, string>;
-			}
-
 			bucketItems.push(
 				...objects.objects.map((obj: BucketObject) => {
 					const prefix = `products/${productId}/media/`;
@@ -342,13 +291,8 @@ productRoute.get("/media/:productId", async (c) => {
 			);
 		}
 
-		// Create merged list with database images taking precedence
-		const dbUrls = new Set(dbImages.map((img) => img.url));
-
-		// Keep bucket items that aren't in the database
 		const bucketOnlyItems = bucketItems.filter((item) => !dbUrls.has(item.url));
 
-		// Merge the lists and sort by sort order
 		const mediaItems = [
 			...dbImages.map((img) => ({
 				id: img.id,
@@ -376,42 +320,18 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 		const existingProduct = await getProduct(db, productId);
 
 		if (!existingProduct) {
-			return c.json(
-				{
-					success: false,
-					error: "Product not found",
-				},
-				404,
-			);
+			return c.json({ success: false, error: "Product not found" }, 404);
 		}
 
-		// Get files from database
 		const dbFiles = await getProductFiles(db, Number(productId));
-
-		// Also get objects from bucket for backward compatibility
 		const objects = await listBucketObjects(c, productId, "files");
 
-		interface BucketItem {
-			filename: string;
-			originalName?: string;
-			size: number;
-			uploadedAt: string;
-			metadata?: Record<string, string>;
-			url: string;
-		}
-
-		const bucketItems: BucketItem[] = [];
-
+		const dbFileNames = new Set(dbFiles.map((file) => file.fileName));
+		
+		const bucketItems = [];
 		if (objects) {
-			interface BucketObject {
-				key: string;
-				size: number;
-				uploaded: string;
-				customMetadata?: Record<string, string>;
-			}
-
 			bucketItems.push(
-				...objects.objects.map((obj: BucketObject) => {
+				...objects.objects.map((obj) => {
 					const prefix = `products/${productId}/files/`;
 					const filename = obj.key.replace(prefix, "");
 					return {
@@ -426,13 +346,8 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 			);
 		}
 
-		// Create merged list with database files taking precedence
-		const dbFileNames = new Set(dbFiles.map((file) => file.fileName));
-
-		// Keep bucket items that aren't in the database
 		const bucketOnlyItems = bucketItems.filter((item) => !dbFileNames.has(item.filename));
 
-		// Merge the lists
 		const fileItems = [
 			...dbFiles.map((file) => ({
 				id: file.id,
@@ -465,10 +380,8 @@ productRoute.delete(
 			const productId = c.req.param("productId");
 			const filename = c.req.param("filename");
 
-			// Delete from bucket
 			const bucketResult = await deleteBucketObject(c, productId, "media", filename);
 
-			// Delete from database if file exists in bucket
 			if (bucketResult.status === 200) {
 				const db = database(c.env.DATABASE_URL);
 				const url = getAssetUrl(c, "media", productId, filename);
@@ -491,10 +404,8 @@ productRoute.delete(
 			const productId = c.req.param("productId");
 			const filename = c.req.param("filename");
 
-			// Delete from bucket
 			const bucketResult = await deleteBucketObject(c, productId, "files", filename);
 
-			// Delete from database if file exists in bucket
 			if (bucketResult.status === 200) {
 				const db = database(c.env.DATABASE_URL);
 				await deleteFileByFileName(db, filename);
@@ -506,5 +417,56 @@ productRoute.delete(
 		}
 	},
 );
+
+productRoute.post("/temp/cleanup", AuthRoleMiddleware(["admin"]), async (c) => {
+	try {
+		const db = database(c.env.DATABASE_URL);
+
+		const temporaryProducts = await db.select({ id: products.id })
+			.from(products)
+			.where(not(isNull(products.deletedAt)));
+
+		if (!temporaryProducts || temporaryProducts.length === 0) {
+			return c.json({
+				success: true,
+				data: { cleaned: 0, ids: [] },
+				message: "No temporary products to clean up"
+			});
+		}
+
+		const cleanedProductIds = [];
+		
+		for (const product of temporaryProducts) {
+			try {
+				const productId = String(product.id);
+
+				const [mediaDeleted, filesDeleted] = await Promise.all([
+					deleteBucketProductFiles(c, productId, "media"),
+					deleteBucketProductFiles(c, productId, "files")
+				]);
+
+				if (mediaDeleted && filesDeleted) {
+					const deleted = await deleteProduct(db, productId);
+					if (deleted) {
+						cleanedProductIds.push(productId);
+					}
+				}
+			} catch (error) {
+				console.error(`Error cleaning up product ${product.id}:`, error);
+			}
+		}
+
+		return c.json({
+			success: true,
+			data: {
+				cleaned: cleanedProductIds.length,
+				ids: cleanedProductIds
+			},
+			message: `Cleaned up ${cleanedProductIds.length} temporary products`
+		});
+	} catch (error) {
+		return handleError(c, error, "Failed to clean up temporary products");
+	}
+});
 
 export default productRoute;

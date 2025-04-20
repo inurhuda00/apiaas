@@ -50,6 +50,6 @@ export function createUrl({
 		searchParams.set("name", name);
 	}
 
-	const queryString = searchParams.toString();
+	const queryString = String(searchParams);
 	return `${baseUrl}${queryString ? `?${queryString}` : ""}`;
 }

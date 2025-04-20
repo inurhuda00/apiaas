@@ -70,7 +70,7 @@ imageRoute.post(
 					contentType: file.type,
 				},
 				customMetadata: {
-					userId: user.id.toString(),
+					userId: String(user.id),
 					originalName: file.name,
 					uploadedAt: new Date().toISOString(),
 				},

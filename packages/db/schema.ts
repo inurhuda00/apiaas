@@ -48,6 +48,7 @@ export const products = pgTable("products", {
 		.references(() => categories.id),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	deletedAt: timestamp("deleted_at"),
 });
 
 export const images = pgTable("images", {

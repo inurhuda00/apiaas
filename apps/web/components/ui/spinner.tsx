@@ -11,7 +11,7 @@ export const Spinner = ({ size = 16 }) => {
 			>
 				<div className="spinner">
 					{bars.map((_, i) => (
-						<div className="loading-bar" key={`spinner-bar-${i.toString()}`} />
+						<div className="loading-bar" key={`spinner-bar-${String(i)}`} />
 					))}
 				</div>
 			</div>

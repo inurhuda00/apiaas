@@ -15,6 +15,7 @@ import type { ActionState } from "@/actions/middleware";
 import { updateProduct } from "@/actions/products";
 import { DynamicFileUploader } from "@/components/lazy-components";
 import { useUnsavedChangesGuard } from "@/lib/hooks/use-unsaved-changes-guard";
+import { Switch } from "@/components/ui/switch";
 
 const API_BASE_URL = env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -120,7 +121,7 @@ const productService = {
 		const formData = new FormData();
 		formData.append("productId", productId);
 		formData.append("file", file);
-		formData.append("sort", sort.toString());
+		formData.append("sort", String(sort));
 
 		return uploadWithProgress<MediaItem>("/v1/product/media", formData, onProgress, token);
 	},
@@ -155,6 +156,7 @@ export function UploadImageForm() {
 	const productIdRef = useRef<string>("");
 	const [progresses, setProgresses] = useState<Record<string, number>>({});
 	const [state, formAction, pending] = useActionState<ActionState, FormData>(updateProduct, {});
+	const [isUploading, setIsUploading] = useState(false);
 
 	// Add a ref for the uploadFile function to break the circular dependency
 	const uploadFileRef = useRef<(file: File, type: UploadItemType) => Promise<void>>(
@@ -240,6 +242,10 @@ export function UploadImageForm() {
 				(file) => !isItemAlreadyUploaded(file, type) && !uploadStateRef.current.pendingUploads.has(file.name),
 			);
 
+			if (filesToUpload.length > 0) {
+				setIsUploading(true);
+			}
+
 			// Use uploadFileRef.current instead of uploadFile
 			for (const file of filesToUpload) {
 				uploadFileRef.current?.(file, type);
@@ -255,6 +261,8 @@ export function UploadImageForm() {
 
 			uploadStateRef.current.pendingUploads.add(file.name);
 			uploadStateRef.current.progresses[file.name] = 0;
+			setIsUploading(true);
+			
 			try {
 				const productId = await createTemporaryProduct();
 
@@ -293,6 +301,11 @@ export function UploadImageForm() {
 				handleFileChange(updatedFiles, type);
 			} finally {
 				uploadStateRef.current.pendingUploads.delete(file.name);
+				
+				// Check if there are any pending uploads left
+				if (uploadStateRef.current.pendingUploads.size === 0) {
+					setIsUploading(false);
+				}
 			}
 		},
 		[createTemporaryProduct, isItemAlreadyUploaded, sessionToken, updateProgress, handleFileChange],
@@ -351,6 +364,17 @@ export function UploadImageForm() {
 									placeholder="Describe your product"
 								/>
 								<p className="text-sm text-muted-foreground mt-1">Give your product a short and clear description</p>
+							</div>
+							<div>
+								<Label htmlFor="locked" className="flex items-center gap-2">
+									<Switch id="locked" name="locked" className="w-9 h-4" />
+									<span>
+										Locked
+									</span>
+								</Label>
+								<p className="text-sm text-muted-foreground mt-1">
+									Free or Pro product.
+								</p>
 							</div>
 						</div>
 					</AccordionContent>
@@ -460,7 +484,9 @@ export function UploadImageForm() {
 			</Accordion>
 
 			<div className="flex justify-end">
-				<SubmitButton pending={pending}>Create Product</SubmitButton>
+				<SubmitButton pending={pending || isUploading}>
+					{isUploading ? "Uploading Files..." : "Create Product"}
+				</SubmitButton>
 			</div>
 
 			{(state.error || state.success) && (

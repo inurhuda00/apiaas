@@ -13,7 +13,7 @@ import {
 	type NewProduct,
 	files,
 } from "@apiaas/db/schema";
-import { and, eq, ilike, sql, asc, desc, exists, ne, type SQL } from "drizzle-orm";
+import { and, eq, ilike, sql, asc, desc, exists, ne, type SQL, isNull } from "drizzle-orm";
 import type { ExtendedColumnSort, ExtendedColumnFilter } from "@/lib/utils/parsers";
 import { slugify } from "@apiaas/utils";
 
@@ -83,6 +83,7 @@ export async function getProductsByCategoryWithFilters(
 	// 2. Build query conditions
 	const conditions: SQL<unknown>[] = [
 		exists(db.select({ id: files.id }).from(files).where(eq(files.productId, products.id))),
+		isNull(products.deletedAt),
 	];
 
 	// Add name filter (most common search case)
@@ -239,6 +240,7 @@ export async function getProductsByCategory(categorySlug: string) {
 				SELECT COUNT(*) 
 				FROM ${products} 
 				WHERE products.category_id = ${categories.id}
+				AND products.deleted_at IS NULL
 			)`.as("productCount"),
 			},
 			columns: {
@@ -255,6 +257,7 @@ export async function getProductsByCategory(categorySlug: string) {
 						slug: true,
 						locked: true,
 					},
+					where: isNull(products.deletedAt),
 					with: {
 						category: {
 							columns: {
@@ -293,6 +296,7 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 		},
 		where: and(
 			eq(products.slug, productSlug),
+			isNull(products.deletedAt),
 			exists(
 				db
 					.select({ id: categories.id })
@@ -355,7 +359,11 @@ export async function getRelatedProducts(categoryId: number, currentProductId: n
 		})
 		.from(products)
 		.where(
-			and(eq(products.categoryId, sql.placeholder("categoryId")), ne(products.id, sql.placeholder("currentProductId"))),
+			and(
+				eq(products.categoryId, sql.placeholder("categoryId")), 
+				ne(products.id, sql.placeholder("currentProductId")),
+				isNull(products.deletedAt)
+			),
 		)
 		.leftJoin(images, and(eq(images.productId, products.id), eq(images.sort, 0)))
 		.limit(sql.placeholder("limit"))
@@ -384,7 +392,9 @@ function getColumnType(column: unknown): string | null {
 
 export async function getProductById(productId: number) {
 	const product = await db.query.products.findFirst({
-		where: eq(products.id, productId),
+		where: and(
+			eq(products.id, productId),
+		),
 	});
 	return product;
 }
@@ -399,6 +409,7 @@ export async function syncProduct(productId: number, product: NewProduct) {
 			locked: product.locked,
 			description: product.description,
 			categoryId: product.categoryId,
+			deletedAt: null, // Restore the product (mark as non-temporary)
 		})
 		.where(eq(products.id, productId))
 		.returning({
@@ -409,6 +420,7 @@ export async function syncProduct(productId: number, product: NewProduct) {
 			locked: products.locked,
 			description: products.description,
 			categoryId: products.categoryId,
+			deletedAt: products.deletedAt,
 		});
 
 	return updatedProduct;

@@ -18,7 +18,7 @@ const DialogOverlay = React.forwardRef<
 	<DialogPrimitive.Overlay
 		ref={ref}
 		className={cn(
-			"fixed inset-0 z-50 bg-background/60 backdrop-blur-sm data-[state=closed]:animate-[dialog-overlay-hide_100ms] data-[state=open]:animate-[dialog-overlay-show_100ms]",
+			"fixed inset-0 z-50 bg-background/60 backdrop-blur-sm data-[state=closed]:animate-[dialog-overlay-hide_200ms_ease-out] data-[state=open]:animate-[dialog-overlay-show_250ms_ease-out]",
 			className,
 		)}
 		{...props}
@@ -37,7 +37,7 @@ const DialogContent = React.forwardRef<
 		<DialogPrimitive.Content
 			ref={ref}
 			className={cn(
-				"bg-background border-border border fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl dark:p-px text-primary z-50 data-[state=closed]:animate-[dialog-content-hide_100ms] data-[state=open]:animate-[dialog-content-show_100ms]",
+				"bg-background border-border border rounded-lg fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl dark:p-px text-primary z-50 shadow-lg data-[state=closed]:animate-[200ms_cubic-bezier(0.16,1,0.3,1)] data-[state=open]:animate-[300ms_cubic-bezier(0.16,1,0.3,1)]",
 				className,
 			)}
 			{...props}
@@ -64,7 +64,7 @@ const DialogContentFrameless = React.forwardRef<
 		<DialogPrimitive.Content
 			ref={ref}
 			className={cn(
-				"fixed bg-background top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl border dark:border-none dark:p-px text-primary z-50 data-[state=closed]:animate-[dialog-content-hide_100ms] data-[state=open]:animate-[dialog-content-show_100ms]",
+				"fixed bg-background rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl border dark:border-none dark:p-px text-primary z-50 shadow-lg data-[state=closed]:animate-[dialog-content-hide_200ms_cubic-bezier(0.16,1,0.3,1)] data-[state=open]:animate-[dialog-content-show_300ms_cubic-bezier(0.16,1,0.3,1)]",
 				className,
 			)}
 			{...props}

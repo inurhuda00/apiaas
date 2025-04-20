@@ -1,5 +1,5 @@
 import { eq, type Database } from "@apiaas/db";
-import { products } from "@apiaas/db/schema";
+import { files, images, products, productTags } from "@apiaas/db/schema";
 import type { NewProduct } from "@apiaas/db/schema";
 import { slugify } from "@apiaas/utils";
 
@@ -22,6 +22,7 @@ export async function createProduct(db: Database, product: NewProduct) {
 			ownerId: product.ownerId,
 			price: product.price,
 			locked: product.locked,
+			deletedAt: new Date(),
 		})
 		.returning({
 			id: products.id,
@@ -30,9 +31,22 @@ export async function createProduct(db: Database, product: NewProduct) {
 			description: products.description,
 			categoryId: products.categoryId,
 			ownerId: products.ownerId,
+			deletedAt: products.deletedAt,
 		});
 
 	return newProduct;
+}
+
+export async function restoreProduct(db: Database, productId: number) {
+	const [restoredProduct] = await db
+		.update(products)
+		.set({
+			deletedAt: null,
+		})
+		.where(eq(products.id, productId))
+		.returning({ id: products.id });
+
+	return !!restoredProduct;
 }
 
 export async function generateProductSlug(db: Database, name: string) {
@@ -48,20 +62,19 @@ export async function generateProductSlug(db: Database, name: string) {
 
 	return slug;
 }
-
-/**
- * Delete a product by ID
- *
- * @param db Database instance
- * @param productId Product ID to delete
- * @returns Boolean indicating if the deletion was successful
- */
 export async function deleteProduct(db: Database, productId: string) {
 	try {
-		// Delete product and return the deleted product
+		const productIdNum = Number(productId);
+		
+		await db.delete(images).where(eq(images.productId, productIdNum));
+		
+		await db.delete(files).where(eq(files.productId, productIdNum));
+		
+		await db.delete(productTags).where(eq(productTags.productId, productIdNum));
+		
 		const [deletedProduct] = await db
 			.delete(products)
-			.where(eq(products.id, Number(productId)))
+			.where(eq(products.id, productIdNum))
 			.returning({ id: products.id });
 
 		return !!deletedProduct;

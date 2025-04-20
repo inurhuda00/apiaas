@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { products, type Product } from "@apiaas/db/schema";
 import { desc, and, sql, type SQL } from "drizzle-orm";
-import { formatDistanceToNow } from "date-fns";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
 import Link from "next/link";
@@ -11,6 +10,7 @@ import { getAuthenticatedUser } from "@/lib/auth/session";
 import { Pagination } from "@/components/pagination";
 import { searchParamsCache } from "@/lib/utils/parsers";
 import type { SearchParams } from "next/dist/server/request/search-params";
+import { ProductsGrid } from "./_components/products-grid";
 
 export const metadata = {
 	title: "My Files",
@@ -86,8 +86,6 @@ export default async function FilesPage(props: PageProps) {
 
 	const totalPages = Math.ceil(pagination.total / perPage);
 
-	const isImage = (fileType: string) => fileType.startsWith("image/");
-
 	return (
 		<main>
 			<div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -127,54 +125,7 @@ export default async function FilesPage(props: PageProps) {
 				</Card>
 			) : (
 				<>
-					<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-						{userProducts.map((product) => (
-							<Card key={product.id} className="overflow-hidden flex flex-col">
-								<div className="aspect-square bg-muted relative">
-									{product.images && product.images.length > 0 ? (
-										<div className="w-full h-full relative overflow-hidden">
-											<img src={product.images[0].url} alt={product.name} className="w-full h-full object-contain" />
-										</div>
-									) : (
-										<div className="flex items-center justify-center h-full">
-											<Icons.Inventory className="h-16 w-16 text-muted-foreground opacity-30" />
-										</div>
-									)}
-								</div>
-								<CardHeader className="pb-2">
-									<CardTitle className="text-lg truncate" title={product.name}>
-										{product.name}
-									</CardTitle>
-									<CardDescription>
-										{formatDistanceToNow(new Date(product.createdAt), {
-											addSuffix: true,
-										})}
-									</CardDescription>
-								</CardHeader>
-								<CardContent className="pb-4 pt-0 flex-grow">
-									<div className="text-xs text-muted-foreground mt-auto">
-										<p className="flex items-center gap-1">
-											<Icons.Description className="h-3 w-3" />
-											<span>{product.files ? product.files.length : 0} Files</span>
-										</p>
-									</div>
-								</CardContent>
-								<div className="px-6 pb-4 pt-0">
-									<div className="flex space-x-2">
-										<Button asChild variant="outline" size="sm" className="flex-1">
-											<Link
-												href={`/${product.category.slug}/${product.slug}`}
-												className="flex items-center justify-center"
-											>
-												<Icons.ExternalLink className="h-4 w-4 mr-2" />
-												View Product
-											</Link>
-										</Button>
-									</div>
-								</div>
-							</Card>
-						))}
-					</div>
+					<ProductsGrid products={userProducts} />
 
 					{/* Pagination */}
 					{totalPages > 1 && (

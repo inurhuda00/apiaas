@@ -138,9 +138,9 @@ export function Paginate({ pageCount, currentPage, baseUrl, searchParams = {} }:
 		}
 
 		// Add the page parameter
-		params.set("page", page.toString());
+		params.set("page", String(page));
 
-		return `${baseUrl}?${params.toString()}`;
+		return `${baseUrl}?${String(params)}`;
 	};
 
 	// Generate array of page numbers to show
