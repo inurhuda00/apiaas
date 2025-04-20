@@ -12,7 +12,7 @@ interface AssetCardProps {
 
 const AssetCard: React.FC<AssetCardProps> = ({ imageUrl, title, category, locked, slug }) => {
 	return (
-		<div className="group relative overflow-hidden border bg-card">
+		<div className="group relative overflow-hidden border border-border bg-card rounded-lg transition-all hover:shadow-md">
 			<Link href={`/${category}/${slug}`}>
 				<div className="relative aspect-square w-full">
 					<Image
@@ -26,11 +26,11 @@ const AssetCard: React.FC<AssetCardProps> = ({ imageUrl, title, category, locked
 
 			{locked && (
 				<div className="absolute top-4 right-4">
-					<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1">PRO</span>
+					<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1 rounded">PRO</span>
 				</div>
 			)}
 
-			<div className="flex items-center justify-between p-4 border-t">
+			<div className="flex items-center justify-between p-4 border-t border-border">
 				<div className="w-full">
 					<h3 className="font-medium text-card-foreground text-sm truncate whitespace-nowrap">{title}</h3>
 				</div>

@@ -35,7 +35,9 @@ export function Header() {
 							<NavigationMenu className="-mr-3">
 								<NavigationMenuList>
 									<NavigationMenuItem>
-										<NavigationMenuTrigger className="border">Categories</NavigationMenuTrigger>
+										<NavigationMenuTrigger className="border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground">
+											Categories
+										</NavigationMenuTrigger>
 										<NavigationMenuContent>
 											<ul className="py-1">
 												<Link href="/3dx" className={buttonVariants({ variant: "link" })}>

@@ -12,7 +12,7 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
 	const thumbnail = product.images.length > 0 ? [...product.images].sort((a, b) => a.sort - b.sort)[0] : null;
 
 	return (
-		<div className="group relative overflow-hidden border bg-card">
+		<div className="group relative overflow-hidden border border-border bg-card rounded-lg transition-all hover:shadow-md">
 			<Link href={`${product.category.slug}/${product.slug}`}>
 				<div className="relative aspect-square w-full">
 					{thumbnail && (
@@ -28,11 +28,11 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
 
 			{product.locked && (
 				<div className="absolute top-4 right-4">
-					<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1">PRO</span>
+					<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1 rounded">PRO</span>
 				</div>
 			)}
 
-			<div className="flex items-center justify-between p-4 border-t">
+			<div className="flex items-center justify-between p-4 border-t border-border">
 				<div className="w-full">
 					<h3 className="font-medium text-card-foreground text-sm truncate whitespace-nowrap">{product.name}</h3>
 				</div>

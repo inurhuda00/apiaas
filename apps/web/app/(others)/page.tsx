@@ -13,9 +13,9 @@ export default async function HomePage() {
 
 	return (
 		<div className="flex-grow">
-			<section className="py-16 text-center">
+			<section className="py-16 text-center bg-background">
 				<MaxWidthWrapper className="max-w-5xl">
-					<div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-accent text-accent-foreground">
+					<div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-accent text-accent-foreground rounded-md">
 						<span>✨</span>
 						<span>Get 40% of each sale you bring!</span>
 						<span>✨</span>
@@ -31,16 +31,16 @@ export default async function HomePage() {
 
 					<div className="flex justify-center">
 						<div className="flex -space-x-2">
-							<div className="w-10 h-10 bg-primary/20 border-2 border-background flex items-center justify-center text-foreground text-xs overflow-hidden">
+							<div className="w-10 h-10 bg-primary/20 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
 								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=J" alt="Avatar J" width={40} height={40} />
 							</div>
-							<div className="w-10 h-10 bg-primary/30 border-2 border-background flex items-center justify-center text-foreground text-xs overflow-hidden">
+							<div className="w-10 h-10 bg-primary/30 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
 								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=K" alt="Avatar K" width={40} height={40} />
 							</div>
-							<div className="w-10 h-10 bg-primary/40 border-2 border-background flex items-center justify-center text-foreground text-xs overflow-hidden">
+							<div className="w-10 h-10 bg-primary/40 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
 								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=L" alt="Avatar L" width={40} height={40} />
 							</div>
-							<div className="w-10 h-10 bg-primary/50 border-2 border-background flex items-center justify-center text-foreground text-xs overflow-hidden">
+							<div className="w-10 h-10 bg-primary/50 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
 								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=M" alt="Avatar M" width={40} height={40} />
 							</div>
 						</div>
@@ -50,7 +50,7 @@ export default async function HomePage() {
 			</section>
 
 			{category ? (
-				<section className="py-8 bg-muted">
+				<section className="py-8 bg-muted/50">
 					<MaxWidthWrapper>
 						<div className="flex justify-between items-center mb-6">
 							<h2 className="text-xl font-medium text-foreground">{category.name}</h2>
@@ -82,7 +82,7 @@ export default async function HomePage() {
 
 			<section className="py-8">
 				<MaxWidthWrapper>
-					<div className="bg-card p-8 md:p-10 relative overflow-hidden border">
+					<div className="bg-card p-8 md:p-10 relative overflow-hidden border rounded-lg">
 						<div className="grid md:grid-cols-2 gap-8 items-center">
 							<div className="text-center md:text-left">
 								<h2 className="text-3xl font-bold text-card-foreground mb-2">Unlimited Access</h2>

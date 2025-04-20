@@ -36,10 +36,10 @@ export function SignUpForm() {
 			<div>
 				<Label htmlFor="password">Password</Label>
 				<Input id="password" name="password" type="password" autoComplete="new-password" className="mt-1" />
-				<p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+				<p className="mt-1 text-xs text-muted-foreground">Must be at least 8 characters</p>
 			</div>
 
-			{state.error && <div className="text-sm text-red-500 font-medium">{state.error}</div>}
+			{state.error && <div className="text-sm text-destructive font-medium">{state.error}</div>}
 
 			<SubmitButton pending={pending}>Create account</SubmitButton>
 		</Form>

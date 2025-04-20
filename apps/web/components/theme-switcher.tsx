@@ -15,22 +15,22 @@ export default function ThemeSwitcher() {
 	if (!mounted) {
 		return (
 			<div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-				<span>Light</span>
-				<div className="w-9 h-4.25 bg-muted" />
-				<span>Dark</span>
+				<span>☀️</span>
+				<div className="w-9 h-5 bg-muted rounded-full" />
+				<span>🌙</span>
 			</div>
 		);
 	}
 
 	return (
 		<div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-			<span>Light</span>
+			<span className={theme === "light" ? "text-primary" : ""}>☀️</span>
 			<Switch
 				checked={theme === "dark"}
 				onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-				className="w-9 h-4.25"
+				className="w-9 h-5"
 			/>
-			<span>Dark</span>
+			<span className={theme === "dark" ? "text-primary" : ""}>🌙</span>
 		</div>
 	);
 }

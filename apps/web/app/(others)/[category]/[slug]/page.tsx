@@ -31,21 +31,21 @@ export default async function ProductPage({ params }: PageProps) {
 			<MaxWidthWrapper>
 				{/* Breadcrumb Navigation */}
 				<div className="mb-4 md:mb-6 text-xs md:text-sm">
-					<Link href="/" className="text-gray-500 hover:text-gray-700">
+					<Link href="/" className="text-muted-foreground hover:text-foreground">
 						Home
 					</Link>
-					<span className="mx-2 text-gray-400">/</span>
-					<Link href={`/${product.category.slug}`} className="text-gray-500 hover:text-gray-700">
+					<span className="mx-2 text-muted-foreground/60">/</span>
+					<Link href={`/${product.category.slug}`} className="text-muted-foreground hover:text-foreground">
 						{product.category.name}
 					</Link>
-					<span className="mx-2 text-gray-400">/</span>
-					<span className="text-gray-700 truncate inline-block align-bottom">{product.name}</span>
+					<span className="mx-2 text-muted-foreground/60">/</span>
+					<span className="text-foreground truncate inline-block align-bottom">{product.name}</span>
 				</div>
 
 				<div className="flex flex-col lg:flex-row gap-6 md:gap-12">
 					{/* Left Column - Image */}
 					<div className="w-full lg:w-2/3">
-						<div className="bg-white  overflow-hidden border shadow-sm">
+						<div className="bg-card overflow-hidden border shadow-sm">
 							<div className="relative aspect-square">
 								{thumbnail ? (
 									<Image src={thumbnail.url} alt={product.name} fill priority className="object-contain p-6 md:p-8" />
@@ -61,7 +61,7 @@ export default async function ProductPage({ params }: PageProps) {
 									<Link
 										key={tag.id}
 										href={`/${category}?tag=${tag.slug}`}
-										className="px-2 md:px-3 py-1 bg-gray-100 text-gray-700 text-xs  hover:bg-gray-200"
+										className="px-2 md:px-3 py-1 bg-muted text-foreground text-xs hover:bg-muted/80"
 									>
 										{tag.name}
 									</Link>
@@ -76,7 +76,7 @@ export default async function ProductPage({ params }: PageProps) {
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
 									{relatedProducts.map((product) => (
 										<Link key={product.slug} href={`/${category}/${product.slug}`} className="block group">
-											<div className="relative aspect-square bg-white border  overflow-hidden">
+											<div className="relative aspect-square bg-card border overflow-hidden">
 												{product.thumbnail ? (
 													<Image
 														src={product.thumbnail}
@@ -104,21 +104,21 @@ export default async function ProductPage({ params }: PageProps) {
 						<div className="lg:sticky lg:top-4">
 							<h1 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">{product.name}</h1>
 							<div className="mb-4 md:mb-6">
-								<p className="text-gray-700 text-sm md:text-base">{product.description}</p>
+								<p className="text-muted-foreground text-sm md:text-base">{product.description}</p>
 							</div>
 
 							{/* Asset Info Cards */}
 							<div className="space-y-3 md:space-y-4 mb-4 md:mb-6">
-								<div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-gray-50 ">
+								<div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/50">
 									<Icons.Check size={16} className="text-green-500 mt-0.5 shrink-0" />
 									<div>
 										<h3 className="font-medium text-xs md:text-sm">Commercial Usage</h3>
-										<p className="text-xs text-gray-500">Use in any personal or commercial projects</p>
+										<p className="text-xs text-muted-foreground">Use in any personal or commercial projects</p>
 									</div>
 								</div>
 
-								<div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-gray-50 ">
-									<Icons.TimeCog className="text-blue-500 mt-0.5 shrink-0" />
+								<div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/50">
+									<Icons.TimeCog className="text-primary mt-0.5 shrink-0" />
 									<div>
 										<h3 className="font-medium text-xs md:text-sm">Available Formats</h3>
 										<div className="flex flex-wrap gap-1 md:gap-2 mt-1">
@@ -138,12 +138,12 @@ export default async function ProductPage({ params }: PageProps) {
 
 							<div className="mt-6 md:mt-8 border-t pt-4 md:pt-6">
 								<h2 className="font-medium mb-2 md:mb-3 text-xs md:text-sm">License Information</h2>
-								<p className="text-xs md:text-sm text-gray-600 mb-2">
+								<p className="text-xs md:text-sm text-muted-foreground mb-2">
 									{!product.locked
 										? "This free asset can be used in personal and commercial projects without attribution."
 										: "This premium asset requires an Unlimited Access license for use in personal and commercial projects."}
 								</p>
-								<Link href="/license" className="text-xs md:text-sm text-blue-600 hover:underline">
+								<Link href="/license" className="text-xs md:text-sm text-primary hover:underline">
 									View Full License Details
 								</Link>
 							</div>

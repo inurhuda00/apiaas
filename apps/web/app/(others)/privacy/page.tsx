@@ -68,12 +68,12 @@ export default async function PrivacyPage() {
 					<h2 className="text-2xl font-bold mt-8 mb-4">Contact Us</h2>
 					<p className="mb-4">
 						If you have any questions about this Privacy Policy, please contact us at:
-						<a href="mailto:asticosmo@gmail.com" className="text-blue-600 hover:underline ml-1">
+						<a href="mailto:asticosmo@gmail.com" className="text-primary hover:underline ml-1">
 							asticosmo@gmail.com
 						</a>
 					</p>
 
-					<div className="mt-8 text-sm text-gray-500">Last Updated: March 15, 2025</div>
+					<div className="mt-8 text-sm text-muted-foreground">Last Updated: March 15, 2025</div>
 				</div>
 			</MaxWidthWrapper>
 		</div>

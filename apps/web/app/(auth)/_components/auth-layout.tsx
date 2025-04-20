@@ -14,7 +14,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 				<div className="mx-auto w-full max-w-sm lg:w-96">
 					<div className="mb-8">
 						<Link href="/" className="flex items-center gap-2">
-							<Icons.LogoIcon className="h-8 w-8 text-orange-500" />
+							<Icons.LogoIcon className="h-8 w-8 text-primary" />
 							<span className="text-xl font-bold">Funnnit</span>
 						</Link>
 					</div>
@@ -24,7 +24,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
 			{/* Right side - Image */}
 			<div className="relative hidden w-0 flex-1 lg:block">
-				<div className="absolute inset-0 h-full w-full bg-gradient-to-br from-orange-100 to-orange-50">
+				<div className="absolute inset-0 h-full w-full bg-gradient-to-br from-accent to-background">
 					<div className="absolute inset-0 flex items-center justify-center p-12">
 						<div className="max-w-2xl">
 							<Image
@@ -36,8 +36,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 								priority
 							/>
 							<div className="mt-8 text-center">
-								<h2 className="text-2xl font-bold text-gray-900">Create with Funnnit</h2>
-								<p className="mt-2 text-gray-600">
+								<h2 className="text-2xl font-bold text-foreground">Create with Funnnit</h2>
+								<p className="mt-2 text-muted-foreground">
 									Access hundreds of unique illustrations and graphics for your projects
 								</p>
 							</div>

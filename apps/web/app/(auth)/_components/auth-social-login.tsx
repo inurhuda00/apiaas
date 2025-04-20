@@ -16,7 +16,7 @@ export function SocialLogin({ text = "Or continue with" }: SocialLoginProps) {
 					<Separator className="w-full" />
 				</div>
 				<div className="relative flex justify-center text-sm">
-					<span className="px-2 bg-white text-gray-500">{text}</span>
+					<span className="px-2 bg-background text-muted-foreground">{text}</span>
 				</div>
 			</div>
 

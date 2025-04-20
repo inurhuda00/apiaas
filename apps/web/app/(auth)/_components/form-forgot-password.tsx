@@ -27,7 +27,7 @@ export function ForgotPasswordForm() {
 				/>
 			</div>
 
-			{state.error && <div className="text-sm text-red-500 font-medium">{state.error}</div>}
+			{state.error && <div className="text-sm text-destructive font-medium">{state.error}</div>}
 
 			{state.success && !pending && (
 				<>

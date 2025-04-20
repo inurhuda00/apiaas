@@ -39,7 +39,7 @@ export function SignInForm() {
 			<div>
 				<div className="flex items-center justify-between">
 					<Label htmlFor="password">Password</Label>
-					<Link href="/forgot-password" className="text-xs font-medium text-orange-600 hover:text-orange-500">
+					<Link href="/forgot-password" className="text-xs font-medium text-primary hover:text-primary/90">
 						Forgot password?
 					</Link>
 				</div>
@@ -53,7 +53,7 @@ export function SignInForm() {
 				/>
 			</div>
 
-			{state.error && <div className="text-sm text-red-500 font-medium">{state.error}</div>}
+			{state.error && <div className="text-sm text-destructive font-medium">{state.error}</div>}
 
 			<SubmitButton pending={pending}>Sign in</SubmitButton>
 		</Form>

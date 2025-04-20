@@ -39,9 +39,9 @@ export function ProductGridSkeleton() {
 export function ProductCardSkeleton() {
 	return (
 		<div className="border bg-card">
-			<div className="relative aspect-square w-full bg-gray-200 animate-pulse" />
+			<div className="relative aspect-square w-full bg-muted animate-pulse" />
 			<div className="p-4 border-t">
-				<div className="h-4 w-2/3 bg-gray-200 rounded-md animate-pulse" />
+				<div className="h-4 w-2/3 bg-muted rounded-md animate-pulse" />
 			</div>
 		</div>
 	);

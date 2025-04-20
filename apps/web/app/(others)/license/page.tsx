@@ -2,6 +2,7 @@
 
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function LicensePage() {
 	return (
@@ -58,8 +59,8 @@ export default async function LicensePage() {
 						You can upgrade to an Unlimited Access license at any time to gain full access to all premium assets.
 					</p>
 					<div className="flex justify-center my-8">
-						<Link href="/upgrade" className="px-6 py-3 bg-black text-white  hover:bg-gray-800 transition-colors">
-							Upgrade to Unlimited Access
+						<Link href="/upgrade">
+							<Button>Upgrade to Unlimited Access</Button>
 						</Link>
 					</div>
 
@@ -73,12 +74,12 @@ export default async function LicensePage() {
 					<h2 className="text-2xl font-bold mt-8 mb-4">Contact</h2>
 					<p className="mb-4">
 						If you have any questions about this license, please contact us at:{" "}
-						<a href="mailto:asticosmo@gmail.com" className="text-blue-600 hover:underline">
+						<a href="mailto:asticosmo@gmail.com" className="text-primary hover:underline">
 							asticosmo@gmail.com
 						</a>
 					</p>
 
-					<div className="mt-8 text-sm text-gray-500">Last Updated: March 15, 2025</div>
+					<div className="mt-8 text-sm text-muted-foreground">Last Updated: March 15, 2025</div>
 				</div>
 			</MaxWidthWrapper>
 		</div>

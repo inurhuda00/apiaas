@@ -110,7 +110,7 @@ async function CategoryPage(props: PageProps) {
 				{/* Category Header */}
 				<div className="mb-8 md:mb-10">
 					<h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-3">{category.name}</h1>
-					<p className="text-gray-600 max-w-3xl text-sm md:text-base">{category.description}</p>
+					<p className="text-muted-foreground max-w-3xl text-sm md:text-base">{category.description}</p>
 				</div>
 
 				{/* Data Controls */}
@@ -152,19 +152,19 @@ function CategoryLoading() {
 			<MaxWidthWrapper>
 				{/* Category Header Skeleton */}
 				<div className="mb-8 md:mb-10">
-					<div className="h-10 w-48 bg-gray-200 rounded-md animate-pulse mb-2 md:mb-3" />
-					<div className="h-4 w-full max-w-3xl bg-gray-200 rounded-md animate-pulse" />
+					<div className="h-10 w-48 bg-muted rounded-md animate-pulse mb-2 md:mb-3" />
+					<div className="h-4 w-full max-w-3xl bg-muted rounded-md animate-pulse" />
 				</div>
 
 				{/* Data Controls Skeleton */}
 				<div className="mb-6 md:mb-8 pb-4 md:pb-6 border-b space-y-4">
 					<div className="flex flex-wrap gap-2 items-center">
-						<div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse" />
-						<div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse" />
-						<div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse" />
+						<div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
+						<div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
+						<div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
 					</div>
 					<div className="flex flex-wrap gap-2 items-center">
-						<div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse" />
+						<div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
 					</div>
 				</div>
 

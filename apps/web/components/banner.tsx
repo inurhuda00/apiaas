@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export function UnlimitedAccess() {
 	return (
-		<div className="bg-card p-8 md:p-10 relative overflow-hidden border">
+		<div className="bg-card p-8 md:p-10 relative overflow-hidden border border-border rounded-lg">
 			<div className="grid md:grid-cols-2 gap-8 items-center">
 				<div className="text-center md:text-left">
 					<h2 className="text-3xl font-bold text-card-foreground mb-2">Unlimited Access</h2>

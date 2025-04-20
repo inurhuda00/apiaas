@@ -18,9 +18,9 @@ export function AuthFooter({ text, linkText, linkHref, queryParams }: AuthFooter
 	const href = queryString ? `${linkHref}?${queryString}` : linkHref;
 
 	return (
-		<div className="mt-6 text-center text-sm text-gray-500">
+		<div className="mt-6 text-center text-sm text-muted-foreground">
 			{text}{" "}
-			<Link href={href} className="font-medium text-orange-600 hover:text-orange-500">
+			<Link href={href} className="font-medium text-primary hover:text-primary/90">
 				{linkText}
 			</Link>
 		</div>

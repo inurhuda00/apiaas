@@ -60,10 +60,10 @@ export function DataControls<T>({
 							Sort <Icons.ChevronDown className="h-4 w-4" />
 						</Button>
 						<div className="absolute right-0 z-10 w-56 origin-top-right">
-							<div className="py-2 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block mt-2">
+							<div className="py-2 bg-card text-card-foreground shadow-lg border border-border rounded-md focus:outline-none hidden group-hover:block mt-2">
 								{Object.entries(groupedSortOptions).map(([group, options]) => (
 									<div key={group}>
-										<div className="px-3 py-2 text-xs font-semibold text-gray-500">
+										<div className="px-3 py-2 text-xs font-semibold text-muted-foreground">
 											{group.charAt(0).toUpperCase() + group.slice(1)}
 										</div>
 										{options.map((option) => {
@@ -72,7 +72,7 @@ export function DataControls<T>({
 												<Link
 													key={option.key}
 													href={getSortUrl(option.column as keyof T, option.desc)}
-													className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 w-full text-left ${sortStates[option.key] ? "bg-gray-100 font-medium" : ""}`}
+													className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground w-full text-left ${sortStates[option.key] ? "bg-accent/50 font-medium" : ""}`}
 													scroll={false}
 													prefetch={true}
 												>
@@ -202,7 +202,7 @@ export function Paginate({ pageCount, currentPage, baseUrl, searchParams = {} }:
 				if (page === null) {
 					ellipsisCounter++;
 					return (
-						<span key={`ellipsis-${ellipsisCounter}`} className="px-1">
+						<span key={`ellipsis-${ellipsisCounter}`} className="px-1 text-muted-foreground">
 							<Icons.MoreHoriz className="h-4 w-4" />
 						</span>
 					);
