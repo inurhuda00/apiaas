@@ -349,31 +349,35 @@ export async function getProductBySlug(categorySlug: string, productSlug: string
 }
 
 export async function getRelatedProducts(categoryId: number, currentProductId: number, limit = 4) {
-	const relatedProductsQuery = db
-		.select({
-			id: products.id,
-			name: products.name,
-			slug: products.slug,
-			thumbnail: images.url,
-			locked: products.locked,
-		})
-		.from(products)
-		.where(
-			and(
-				eq(products.categoryId, sql.placeholder("categoryId")),
-				ne(products.id, sql.placeholder("currentProductId")),
-				isNull(products.deletedAt),
-			),
-		)
-		.leftJoin(images, and(eq(images.productId, products.id), eq(images.sort, 0)))
-		.limit(sql.placeholder("limit"))
-		.prepare("get_related_products");
-
-	return relatedProductsQuery.execute({
-		categoryId,
-		currentProductId,
-		limit,
+	const relatedProducts = await db.query.products.findMany({
+		columns: {
+			id: true,
+			name: true,
+			slug: true,
+			locked: true,
+		},
+		with: {
+			category: {
+				columns: {
+					id: true,
+					slug: true,
+					name: true,
+				},
+			},
+			images: {
+				columns: {
+					id: true,
+					url: true,
+					productId: true,
+					sort: true,
+				},
+			},
+		},
+		where: and(eq(products.categoryId, categoryId), ne(products.id, currentProductId), isNull(products.deletedAt)),
+		limit: limit,
 	});
+
+	return relatedProducts;
 }
 
 function getColumnType(column: unknown): string | null {

@@ -3,9 +3,9 @@ import Link from "next/link";
 import { getProductBySlug, getRelatedProducts } from "@/lib/db/queries/product";
 import { notFound } from "next/navigation";
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
-import { Badge } from "@/components/ui/badge";
 import { Icons } from "@/components/ui/icons";
 import ProductButton from "../_components/product-button";
+import { DynamicProductCard } from "@/components/lazy-components";
 
 interface PageProps {
 	params: Promise<{
@@ -73,26 +73,9 @@ export default async function ProductPage({ params }: PageProps) {
 						{relatedProducts.length > 0 && (
 							<div className="mt-8 md:mt-12">
 								<h3 className="text-base md:text-lg font-bold mb-3 md:mb-4">Related Assets</h3>
-								<div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+								<div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
 									{relatedProducts.map((product) => (
-										<Link key={product.slug} href={`/${category}/${product.slug}`} className="block group">
-											<div className="relative aspect-square bg-card border overflow-hidden">
-												{product.thumbnail ? (
-													<Image
-														src={product.thumbnail}
-														alt={product.name}
-														fill
-														className="object-contain p-2 md:p-3 transition-transform group-hover:scale-105"
-													/>
-												) : null}
-												{product.locked ? (
-													<Badge variant="tag" className="absolute top-1 right-1">
-														pro
-													</Badge>
-												) : null}
-											</div>
-											<h4 className="text-xs mt-1 truncate">{product.name}</h4>
-										</Link>
+										<DynamicProductCard key={product.id} product={product} />
 									))}
 								</div>
 							</div>
