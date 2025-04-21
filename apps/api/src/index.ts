@@ -8,6 +8,7 @@ import waitlistRoute from "./routes/waitlist";
 import imageRoute from "./routes/image";
 import authRoute from "./routes/auth";
 import productRoute from "./routes/product";
+import { searchRoute } from "./routes/search";
 import { rateLimiter } from "hono-rate-limiter";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -47,6 +48,7 @@ app.route("waitlist", waitlistRoute);
 app.route("v1/image", imageRoute);
 app.route("v1/auth", authRoute);
 app.route("v1/product", productRoute);
+app.route("v1/search", searchRoute);
 
 app.get("/up", (c) => {
 	return c.json({ status: "ok" });

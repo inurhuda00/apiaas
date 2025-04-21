@@ -17,6 +17,7 @@ import {
 	NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "../ui/sheet";
+import { CommandSearch } from "../command-search";
 
 export function Header() {
 	const { userPromise } = useUser();
@@ -77,13 +78,7 @@ export function Header() {
 					</div>
 
 					<div className="flex items-center gap-2 md:gap-4">
-						<button
-							type="button"
-							className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-							aria-label="Search"
-						>
-							<Icons.Search className="size-5" />
-						</button>
+						<CommandSearch />
 
 						{/* Desktop buttons */}
 						{user ? (
