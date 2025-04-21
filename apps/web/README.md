@@ -9,7 +9,7 @@
     - embeding vector
     - preview watermark
 [] search context cmd+K
-[] download feature
+[x] download feature
 [] related with vector cosine similarity
 [] worker every 7 day purge cache
 [] markdown version (license, privacy)

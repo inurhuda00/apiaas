@@ -99,74 +99,74 @@ export default async function HomePage() {
 
 			<section className="py-8 bg-muted/50">
 				<MaxWidthWrapper>
-				<div className="flex justify-between items-center mb-6">
-					<h2 className="text-xl font-semibold">Browse Collections</h2>
-					<Button variant="ghost" className="text-gray-400 hover:text-white">
-						See All
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							className="ml-1"
-							aria-hidden="true"
-						>
-							<path d="m9 18 6-6-6-6" />
-						</svg>
-					</Button>
-				</div>
+					<div className="flex justify-between items-center mb-6">
+						<h2 className="text-xl font-semibold">Browse Collections</h2>
+						<Button variant="ghost" className="text-gray-400 hover:text-white">
+							See All
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="ml-1"
+								aria-hidden="true"
+							>
+								<path d="m9 18 6-6-6-6" />
+							</svg>
+						</Button>
+					</div>
 
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-					{collections.map((collection) => (
-						<Link href={`/backgrounds/collections/${collection.id}`} key={collection.id}>
-							<Card className="group relative overflow-hidden bg-gray-900 border-0 rounded-lg h-48 transition-transform hover:-translate-y-1">
-								<div className="absolute inset-0">
-									<div className="relative h-full w-full">
-										<Image
-											src={collection.image}
-											alt={collection.title}
-											fill
-											sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-											className="object-cover"
-										/>
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+						{collections.map((collection) => (
+							<Link href={`/backgrounds/collections/${collection.id}`} key={collection.id}>
+								<Card className="group relative overflow-hidden bg-gray-900 border-0 rounded-lg h-48 transition-transform hover:-translate-y-1">
+									<div className="absolute inset-0">
+										<div className="relative h-full w-full">
+											<Image
+												src={collection.image}
+												alt={collection.title}
+												fill
+												sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+												className="object-cover"
+											/>
+										</div>
 									</div>
-								</div>
-								<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-								<div className="absolute bottom-4 left-4 z-10">
-									<h3 className="text-xl font-semibold text-white">{collection.title}</h3>
-									<p className="text-sm text-gray-300">{collection.count} backgrounds</p>
-								</div>
-								<div className="absolute bottom-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-									<Button
-										size="sm"
-										variant="ghost"
-										className="bg-white/10 backdrop-blur-sm text-white rounded-full h-8 w-8 p-0"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="16"
-											height="16"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											aria-hidden="true"
+									<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+									<div className="absolute bottom-4 left-4 z-10">
+										<h3 className="text-xl font-semibold text-white">{collection.title}</h3>
+										<p className="text-sm text-gray-300">{collection.count} backgrounds</p>
+									</div>
+									<div className="absolute bottom-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+										<Button
+											size="sm"
+											variant="ghost"
+											className="bg-white/10 backdrop-blur-sm text-white rounded-full h-8 w-8 p-0"
 										>
-											<path d="m9 18 6-6-6-6" />
-										</svg>
-									</Button>
-								</div>
-							</Card>
-						</Link>
-					))}
-				</div>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												aria-hidden="true"
+											>
+												<path d="m9 18 6-6-6-6" />
+											</svg>
+										</Button>
+									</div>
+								</Card>
+							</Link>
+						))}
+					</div>
 				</MaxWidthWrapper>
 			</section>
 
@@ -177,14 +177,10 @@ export default async function HomePage() {
 						<div>
 							<h2 className="text-xl font-medium text-foreground">Most Downloaded</h2>
 							<p className="text-sm text-muted-foreground mt-1">
-								<span className="font-medium">Popular backgrounds loved by creators</span> • Instant
-								access
+								<span className="font-medium">Popular backgrounds loved by creators</span> • Instant access
 							</p>
 						</div>
-						<Link
-							href="/backgrounds"
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-						>
+						<Link href="/backgrounds" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
 							view all backgrounds ›
 						</Link>
 					</div>

@@ -159,9 +159,13 @@ export default async function UpgradePage() {
 									<span className="text-5xl font-bold">$24</span>
 									<span className="text-muted-foreground ml-2 mb-1">.99</span>
 									<span className="line-through text-muted-foreground ml-3 mb-1">$50</span>
-									<span className="bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded ml-3 mb-1">50% OFF</span>
+									<span className="bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded ml-3 mb-1">
+										50% OFF
+									</span>
 								</div>
-								<p className="text-sm text-muted-foreground mt-1">One-time payment, instant access to 1000+ AI backgrounds</p>
+								<p className="text-sm text-muted-foreground mt-1">
+									One-time payment, instant access to 1000+ AI backgrounds
+								</p>
 							</div>
 							<div>
 								<Link
@@ -170,7 +174,9 @@ export default async function UpgradePage() {
 								>
 									Claim Your Access Now
 								</Link>
-								<p className="text-xs text-center mt-3 text-muted-foreground">Secure payment with 100% money-back guarantee</p>
+								<p className="text-xs text-center mt-3 text-muted-foreground">
+									Secure payment with 100% money-back guarantee
+								</p>
 							</div>
 							<div className="pt-4 border-t mt-6">
 								<div className="flex items-center">
@@ -190,7 +196,9 @@ export default async function UpgradePage() {
 					<div className="flex flex-col md:flex-row items-center gap-4 justify-between">
 						<div>
 							<h3 className="text-lg font-medium mb-2">Our growing background library</h3>
-							<p className="text-sm text-muted-foreground">Access our entire collection of premium AI backgrounds with one subscription</p>
+							<p className="text-sm text-muted-foreground">
+								Access our entire collection of premium AI backgrounds with one subscription
+							</p>
 						</div>
 						<div className="flex gap-3">
 							<div className="text-center">

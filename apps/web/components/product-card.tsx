@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Product, Category, Image as ImageType } from "@apiaas/db/schema";
+import { Icons } from "./ui/icons";
 
 type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked"> & {
 	category: Pick<Category, "id" | "slug" | "name">;
@@ -29,16 +30,20 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
 						)}
 					</div>
 				</div>
-				
+
 				{product.locked && (
 					<div className="absolute top-3 right-3 z-10">
 						<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1 rounded">PRO</span>
 					</div>
 				)}
-				
+
 				<div className="absolute top-3 left-3 z-10">
-					<Button size="sm" variant="ghost" className="bg-white/10 backdrop-blur-sm text-white rounded-full h-8 w-8 p-0">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"/></svg>
+					<Button
+						size="sm"
+						variant="ghost"
+						className="bg-white/10 backdrop-blur-sm text-white rounded-full h-8 w-8 p-0"
+					>
+						<Icons.Download />
 					</Button>
 				</div>
 			</Card>
