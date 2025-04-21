@@ -26,7 +26,7 @@ export function Header() {
 			<MaxWidthWrapper>
 				<div className="flex h-16 items-center justify-between">
 					<div className="flex items-center gap-8">
-						<Link href="/" className="flex items-center gap-2">
+						<Link href="/" className="flex items-center gap-1">
 							<Icons.LogoIcon className="h-8 w-8 text-primary" />
 							<span className="font-bold text-lg text-foreground">Mondive</span>
 						</Link>

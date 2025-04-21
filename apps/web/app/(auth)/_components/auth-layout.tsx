@@ -13,9 +13,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 			<div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
 				<div className="mx-auto w-full max-w-sm lg:w-96">
 					<div className="mb-8">
-						<Link href="/" className="flex items-center gap-2">
-							<Icons.LogoIcon className="h-8 w-8 text-orange-500" />
-							<span className="text-xl font-bold">Mondive</span>
+						<Link href="/" className="flex items-center gap-1">
+							<Icons.LogoIcon className="h-8 w-8 text-primary" />
+							<span className="font-bold text-lg text-foreground">Mondive</span>
 						</Link>
 					</div>
 					{children}

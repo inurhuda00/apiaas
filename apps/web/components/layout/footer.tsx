@@ -13,11 +13,11 @@ export function Footer() {
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 						{/* Brand Section */}
 						<div className="space-y-4">
-							<Link href="/" className="flex items-center gap-2">
-								<Icons.LogoIcon className="h-6 w-6 text-foreground" />
+							<Link href="/" className="flex items-center gap-1">
+								<Icons.LogoIcon className="h-8 w-8 text-primary" />
 								<span className="font-bold text-lg text-foreground">Mondive</span>
 							</Link>
-							<p className="text-muted-foreground">Exploring art for Fun</p>
+							<p className="text-muted-foreground">Exploring backgrounds for Fun</p>
 						</div>
 
 						{/* Info Section */}
