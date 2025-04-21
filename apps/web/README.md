@@ -4,6 +4,10 @@
 [x] upload cleanup handle saat refresh
 [x] on action create product remove image
 [x] kalau gagal upload hapus gambar di fe
+[] thumbnail
+[] polar happy flow
+[] request form page
+[] changelog blog page
 [] Api Upload Product
     - tagging
     - embeding vector
@@ -13,9 +17,6 @@
 [] related with vector cosine similarity
 [] worker every 7 day purge cache
 [] markdown version (license, privacy)
-[] polar happy flow
-[] request form page
-[] changelog blog page
 [] dark mode
 [] page transitions
 
