@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/command";
 import { Icons } from "@/components/ui/icons";
 import { Badge } from "@/components/ui/badge";
+import { env } from "@/env";
 
 type SearchResult = {
 	id: number;
@@ -64,7 +65,7 @@ export function CommandSearch() {
 			setIsLoading(true);
 			try {
 				const response = await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL}/v1/search/products?query=${encodeURIComponent(debouncedQuery)}`,
+					`${env.NEXT_PUBLIC_BACKEND_URL}/v1/search/products?query=${encodeURIComponent(debouncedQuery)}`,
 				);
 
 				if (!response.ok) {
