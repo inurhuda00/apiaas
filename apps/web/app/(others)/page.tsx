@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { getProductsByCategoryWithFilters } from "@/lib/db/queries/product";
 import { MaxWidthWrapper } from "@/components/max-width-wrapper";
 import { ProductCard } from "@/components/product-card";
+import { Card } from "@/components/ui/card";
 
 export default async function HomePage() {
 	const category = await getProductsByCategoryWithFilters("joydoodle", {
@@ -11,130 +12,83 @@ export default async function HomePage() {
 		perPage: 6,
 	});
 
+	const collections = [
+		{
+			id: "fusion",
+			title: "Fusion",
+			count: 12,
+			image: "/images/backgrounds/fusion.webp",
+		},
+		{
+			id: "aberrant",
+			title: "Aberrant",
+			count: 12,
+			image: "/images/backgrounds/aberrant.webp",
+		},
+		{
+			id: "ethereal",
+			title: "Ethereal",
+			count: 12,
+			image: "/images/backgrounds/ethereal.webp",
+		},
+		{
+			id: "dispersion",
+			title: "Dispersion",
+			count: 12,
+			image: "/images/backgrounds/dispersion.webp",
+		},
+		{
+			id: "gauze",
+			title: "Gauze",
+			count: 12,
+			image: "/images/backgrounds/gauze.webp",
+		},
+		{
+			id: "roseate",
+			title: "Roseate",
+			count: 12,
+			image: "/images/backgrounds/roseate.webp",
+		},
+	];
+
 	return (
 		<div className="flex-grow">
-			<section className="py-16 text-center bg-background">
+			<section className="py-16 mt-6 text-center bg-background">
 				<MaxWidthWrapper className="max-w-5xl">
-					<div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-accent text-accent-foreground rounded-md">
-						<span>🔥</span>
-						<span>Limited Time: 40% commission on all referrals!</span>
-						<span>🔥</span>
-					</div>
-
 					<h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-foreground">
 						<span className="text-primary">Instantly Convert</span> Viewers With Exclusive{" "}
 						<span className="text-primary">AI Backgrounds</span>
 					</h1>
 
-					<p className="text-lg text-muted-foreground mb-8">
-						🚀 Join 500+ pros getting 2-3X higher engagement with our designs
+					<p className="text-lg text-muted-foreground">
+						Browse our collection of breath-taking AI generated backgrounds, download in glorious 6K and access the
+						Midjourney prompts used to create them.
 					</p>
-
-					{/* Trust indicators */}
-					<div className="flex flex-col gap-4 mb-10">
-						<div className="flex flex-wrap justify-center gap-4">
-							<div className="bg-muted/70 px-4 py-2 rounded-lg flex items-center gap-2">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									className="text-primary"
-								>
-									<title>Security icon</title>
-									<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-								</svg>
-								<span className="font-medium">100% Money-Back Guarantee</span>
-							</div>
-							<div className="bg-muted/70 px-4 py-2 rounded-lg flex items-center gap-2">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									className="text-primary"
-								>
-									<title>Heart icon</title>
-									<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-								</svg>
-								<span className="font-medium">4.9/5 Customer Rating</span>
-							</div>
-							<div className="bg-muted/70 px-4 py-2 rounded-lg flex items-center gap-2">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									className="text-primary"
-								>
-									<title>Check icon</title>
-									<circle cx="12" cy="12" r="10" />
-									<path d="m9 12 2 2 4-4" />
-								</svg>
-								<span className="font-medium">Instant Download</span>
-							</div>
-						</div>
-					</div>
-
-					<div className="flex justify-center">
-						<div className="flex -space-x-2">
-							<div className="w-10 h-10 bg-primary/20 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
-								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=J" alt="Avatar J" width={40} height={40} />
-							</div>
-							<div className="w-10 h-10 bg-primary/30 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
-								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=K" alt="Avatar K" width={40} height={40} />
-							</div>
-							<div className="w-10 h-10 bg-primary/40 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
-								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=L" alt="Avatar L" width={40} height={40} />
-							</div>
-							<div className="w-10 h-10 bg-primary/50 border-2 border-background rounded-full flex items-center justify-center text-foreground text-xs overflow-hidden">
-								<Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=M" alt="Avatar M" width={40} height={40} />
-							</div>
-						</div>
-					</div>
-					<div className="mt-2 text-sm text-muted-foreground">
-						Trusted by <span className="font-medium text-primary">500+ creators</span> from 20+ countries worldwide
-					</div>
 				</MaxWidthWrapper>
 			</section>
 
-			<section>
+			<section className="py-8 bg-muted/50">
 				<MaxWidthWrapper>
 					{/* Library size indicator */}
-					<div className="mt-10 bg-card p-6 rounded-lg border">
+					<div className="mt-10 bg-card p-4 sm:p-6 rounded-lg border">
 						<div className="flex flex-col md:flex-row items-center gap-4 justify-between">
-							<div>
-								<h3 className="text-lg font-medium mb-2">Our growing background library</h3>
-								<p className="text-sm text-muted-foreground">
+							<div className="text-center md:text-left w-full md:w-auto">
+								<h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">Our growing background library</h3>
+								<p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto md:mx-0">
 									Access our entire collection of premium AI backgrounds with one subscription
 								</p>
 							</div>
-							<div className="flex gap-3">
-								<div className="text-center">
-									<div className="text-2xl font-bold">1000+</div>
+							<div className="flex flex-wrap justify-center md:flex-nowrap gap-3 sm:gap-4 mt-3 md:mt-0 w-full md:w-auto">
+								<div className="text-center px-2 sm:px-3">
+									<div className="text-xl sm:text-2xl font-bold">1000+</div>
 									<div className="text-xs text-muted-foreground">Backgrounds</div>
 								</div>
-								<div className="text-center">
-									<div className="text-2xl font-bold">12</div>
+								<div className="text-center px-2 sm:px-3">
+									<div className="text-xl sm:text-2xl font-bold">12</div>
 									<div className="text-xs text-muted-foreground">Categories</div>
 								</div>
-								<div className="text-center">
-									<div className="text-2xl font-bold">Weekly</div>
+								<div className="text-center px-2 sm:px-3">
+									<div className="text-xl sm:text-2xl font-bold">Weekly</div>
 									<div className="text-xs text-muted-foreground">Updates</div>
 								</div>
 							</div>
@@ -143,60 +97,105 @@ export default async function HomePage() {
 				</MaxWidthWrapper>
 			</section>
 
-			{category ? (
-				<section className="py-8 bg-muted/50">
-					<MaxWidthWrapper>
-						<div className="flex justify-between items-center mb-6">
-							<div>
-								<h2 className="text-xl font-medium text-foreground">{category.name}</h2>
-								<p className="text-sm text-muted-foreground mt-1">
-									<span className="font-medium">{category.productCount}+ ready-to-use backgrounds</span> • Instant
-									access
-								</p>
-							</div>
-							<Link
-								href={`/${category.slug}`}
-								className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-							>
-								view all backgrounds ›
-							</Link>
-						</div>
+			<section className="py-8 bg-muted/50">
+				<MaxWidthWrapper>
+				<div className="flex justify-between items-center mb-6">
+					<h2 className="text-xl font-semibold">Browse Collections</h2>
+					<Button variant="ghost" className="text-gray-400 hover:text-white">
+						See All
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							className="ml-1"
+							aria-hidden="true"
+						>
+							<path d="m9 18 6-6-6-6" />
+						</svg>
+					</Button>
+				</div>
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-							{category.products.map((product) => (
-								<ProductCard key={product.id} product={product} />
-							))}
-						</div>
-
-						<div className="flex justify-between items-center mt-6 text-sm text-muted-foreground border-t border-border pt-6">
-							<div>High-Resolution: SVG + PNG + JPG</div>
-							<div>
-								<Link
-									href={`/${category.slug}`}
-									className="hover:text-foreground transition-colors flex items-center gap-1"
-								>
-									<span>Browse all {category.productCount} backgrounds</span>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2"
-										strokeLinecap="round"
-										strokeLinejoin="round"
+				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+					{collections.map((collection) => (
+						<Link href={`/backgrounds/collections/${collection.id}`} key={collection.id}>
+							<Card className="group relative overflow-hidden bg-gray-900 border-0 rounded-lg h-48 transition-transform hover:-translate-y-1">
+								<div className="absolute inset-0">
+									<div className="relative h-full w-full">
+										<Image
+											src={collection.image}
+											alt={collection.title}
+											fill
+											sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+											className="object-cover"
+										/>
+									</div>
+								</div>
+								<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+								<div className="absolute bottom-4 left-4 z-10">
+									<h3 className="text-xl font-semibold text-white">{collection.title}</h3>
+									<p className="text-sm text-gray-300">{collection.count} backgrounds</p>
+								</div>
+								<div className="absolute bottom-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+									<Button
+										size="sm"
+										variant="ghost"
+										className="bg-white/10 backdrop-blur-sm text-white rounded-full h-8 w-8 p-0"
 									>
-										<title>Arrow right</title>
-										<path d="M5 12h14" />
-										<path d="m12 5 7 7-7 7" />
-									</svg>
-								</Link>
-							</div>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="16"
+											height="16"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											aria-hidden="true"
+										>
+											<path d="m9 18 6-6-6-6" />
+										</svg>
+									</Button>
+								</div>
+							</Card>
+						</Link>
+					))}
+				</div>
+				</MaxWidthWrapper>
+			</section>
+
+			{/* Most Downloaded Section */}
+			<section className="py-8 bg-muted/50">
+				<MaxWidthWrapper>
+					<div className="flex justify-between items-center mb-6">
+						<div>
+							<h2 className="text-xl font-medium text-foreground">Most Downloaded</h2>
+							<p className="text-sm text-muted-foreground mt-1">
+								<span className="font-medium">Popular backgrounds loved by creators</span> • Instant
+								access
+							</p>
 						</div>
-					</MaxWidthWrapper>
-				</section>
-			) : null}
+						<Link
+							href="/backgrounds"
+							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+						>
+							view all backgrounds ›
+						</Link>
+					</div>
+
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+						{category?.products.map((item) => (
+							<ProductCard key={item.id} product={item} />
+						))}
+					</div>
+				</MaxWidthWrapper>
+			</section>
 
 			<section className="py-12">
 				<MaxWidthWrapper>

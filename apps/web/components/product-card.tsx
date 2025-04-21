@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { Product, Category, Image as ImageType } from "@apiaas/db/schema";
 
 type ProductWithRelations = Pick<Product, "id" | "name" | "slug" | "locked"> & {
@@ -12,31 +14,34 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
 	const thumbnail = product.images.length > 0 ? [...product.images].sort((a, b) => a.sort - b.sort)[0] : null;
 
 	return (
-		<div className="group relative overflow-hidden border border-border bg-card rounded-lg transition-all hover:shadow-md">
-			<Link href={`${product.category.slug}/${product.slug}`}>
-				<div className="relative aspect-square w-full">
-					{thumbnail && (
-						<Image
-							src={thumbnail.url}
-							alt={product.name}
-							fill
-							className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
-						/>
-					)}
+		<Link href={`${product.category.slug}/${product.slug}`}>
+			<Card className="group relative overflow-hidden bg-gray-900 border-0 rounded-lg aspect-[1.7867/1] transition-transform hover:-translate-y-1">
+				<div className="absolute inset-0">
+					<div className="relative h-full w-full">
+						{thumbnail && (
+							<Image
+								src={thumbnail.url}
+								alt={product.name}
+								fill
+								sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+								className="object-cover"
+							/>
+						)}
+					</div>
 				</div>
-			</Link>
-
-			{product.locked && (
-				<div className="absolute top-4 right-4">
-					<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1 rounded">PRO</span>
+				
+				{product.locked && (
+					<div className="absolute top-3 right-3 z-10">
+						<span className="bg-primary/80 text-primary-foreground text-xs px-2 py-1 rounded">PRO</span>
+					</div>
+				)}
+				
+				<div className="absolute top-3 left-3 z-10">
+					<Button size="sm" variant="ghost" className="bg-white/10 backdrop-blur-sm text-white rounded-full h-8 w-8 p-0">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"/></svg>
+					</Button>
 				</div>
-			)}
-
-			<div className="flex items-center justify-between p-4 border-t border-border">
-				<div className="w-full">
-					<h3 className="font-medium text-card-foreground text-sm truncate whitespace-nowrap">{product.name}</h3>
-				</div>
-			</div>
-		</div>
+			</Card>
+		</Link>
 	);
 }
