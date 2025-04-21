@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useDebounce } from "use-debounce";
+import axios from "axios";
 
 import {
 	CommandDialog,
@@ -35,61 +36,49 @@ export function CommandSearch() {
 	const [debouncedQuery] = useDebounce(query, 300);
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-
-	// Detect if we're on a Mac for keyboard shortcut display
 	const [isMac, setIsMac] = useState(false);
 
 	useEffect(() => {
-		setIsMac(navigator.platform.toUpperCase().indexOf("MAC") >= 0);
+		setIsMac(navigator.platform.toUpperCase().includes("MAC"));
 	}, []);
 
 	useEffect(() => {
-		const down = (e: KeyboardEvent) => {
+		const handleKeyDown = (e: KeyboardEvent) => {
 			if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
 				e.preventDefault();
 				setOpen((open) => !open);
 			}
 		};
 
-		document.addEventListener("keydown", down);
-		return () => document.removeEventListener("keydown", down);
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
 	}, []);
 
-	useEffect(() => {
-		async function searchProducts() {
-			if (debouncedQuery.length < 2) {
-				setResults([]);
-				return;
-			}
-
-			setIsLoading(true);
-			try {
-				const response = await fetch(
-					`${env.NEXT_PUBLIC_BACKEND_URL}/v1/search/products?query=${encodeURIComponent(debouncedQuery)}`,
-				);
-
-				if (!response.ok) {
-					throw new Error("Failed to search products");
-				}
-
-				const data = await response.json();
-				if (data.success) {
-					setResults(data.data);
-				} else {
-					setResults([]);
-				}
-			} catch (error) {
-				console.error("Search error:", error);
-				setResults([]);
-			} finally {
-				setIsLoading(false);
-			}
+	const searchProducts = useCallback(async () => {
+		if (!open || debouncedQuery.length < 2) {
+			setResults([]);
+			return;
 		}
 
-		if (open) {
-			searchProducts();
+		setIsLoading(true);
+
+		try {
+			const { data } = await axios.get(`${env.NEXT_PUBLIC_BACKEND_URL}/v1/search/products`, {
+				params: { query: debouncedQuery },
+			});
+
+			setResults(data.success ? data.data : []);
+		} catch (error) {
+			console.error("Search error:", error);
+			setResults([]);
+		} finally {
+			setIsLoading(false);
 		}
 	}, [debouncedQuery, open]);
+
+	useEffect(() => {
+		searchProducts();
+	}, [searchProducts]);
 
 	const handleSelect = (result: SearchResult) => {
 		setOpen(false);
@@ -113,14 +102,16 @@ export function CommandSearch() {
 			</div>
 
 			<CommandDialog open={open} onOpenChange={setOpen}>
-				<CommandInput placeholder="Search for resources..." value={query} onValueChange={setQuery} />
+				<CommandInput placeholder="Search for resources..." value={query} onValueChange={setQuery} className="px-4" />
 				<CommandList>
-					{isLoading ? (
+					{isLoading && (
 						<div className="py-6 text-center text-sm">
 							<Icons.Spinner className="mr-2 h-4 w-4 animate-spin inline-block" />
 							Searching...
 						</div>
-					) : (
+					)}
+
+					{!isLoading && (
 						<>
 							<CommandEmpty>No results found.</CommandEmpty>
 							{results.length > 0 && (
