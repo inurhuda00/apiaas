@@ -17,9 +17,9 @@ import {
 import { handleError } from "../helpers/error";
 import { deleteBucketObject, getBucketObject, uploadToBucket, deleteBucketProductFiles } from "../helpers/bucket";
 import { listBucketObjects } from "../helpers/bucket";
-import { verifyToken } from "@apiaas/auth";
-import { eq, not, isNull } from "drizzle-orm";
+import { not, isNull } from "drizzle-orm";
 import { products } from "@apiaas/db/schema";
+import { getAuthenticatedUser } from "../helpers/session";
 
 // Define BucketObject interface
 interface BucketObject {
@@ -36,55 +36,45 @@ function getAssetUrl(c: { env: Env }, type: "media" | "files", productId: string
 
 const productRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-productRoute.post(
-	"/:productId/cleanup",
-	createValidator(productIdSchema, "param"),
-	createValidator(AuthorizationBeaconSchema, "json"),
-	async (c) => {
-		try {
-			const productId = c.req.param("productId");
-			const { _authorization } = c.req.valid("json");
+productRoute.post("/:productId/cleanup", createValidator(productIdSchema, "param"), async (c) => {
+	try {
+		const productId = c.req.param("productId");
+		const user = await getAuthenticatedUser(c);
 
-			if (!_authorization) {
-				return c.json({ success: false, error: "Unauthorized" }, 401);
-			}
-
-			const session = await verifyToken(_authorization, c.env.AUTH_SECRET);
-			if (!session) {
-				return c.json({ success: false, error: "Invalid token" }, 401);
-			}
-
-			const db = database(c.env.DATABASE_URL);
-			const product = await getProduct(db, productId);
-
-			if (!product) {
-				return c.json({ success: false, error: "Product not found" }, 404);
-			}
-
-			const [mediaDeleted, filesDeleted] = await Promise.all([
-				deleteBucketProductFiles(c, productId, "media"),
-				deleteBucketProductFiles(c, productId, "files"),
-			]);
-
-			const productDeleted = await deleteProduct(db, productId);
-			if (!productDeleted) {
-				return c.json({ success: false, error: "Failed to delete product from database" }, 500);
-			}
-
-			return c.json({
-				success: true,
-				data: {
-					id: productId,
-					mediaDeleted,
-					filesDeleted,
-				},
-				message: "Product and associated files deleted successfully",
-			});
-		} catch (error) {
-			return handleError(c, error, "Failed to delete product");
+		if (!user) {
+			return c.json({ success: false, error: "Unauthorized" }, 401);
 		}
-	},
-);
+
+		const db = database(c.env.DATABASE_URL);
+		const product = await getProduct(db, productId);
+
+		if (!product) {
+			return c.json({ success: false, error: "Product not found" }, 404);
+		}
+
+		const [mediaDeleted, filesDeleted] = await Promise.all([
+			deleteBucketProductFiles(c, productId, "media"),
+			deleteBucketProductFiles(c, productId, "files"),
+		]);
+
+		const productDeleted = await deleteProduct(db, productId);
+		if (!productDeleted) {
+			return c.json({ success: false, error: "Failed to delete product from database" }, 500);
+		}
+
+		return c.json({
+			success: true,
+			data: {
+				id: productId,
+				mediaDeleted,
+				filesDeleted,
+			},
+			message: "Product and associated files deleted successfully",
+		});
+	} catch (error) {
+		return handleError(c, error, "Failed to delete product");
+	}
+});
 
 productRoute.get(
 	"/files/download/:productId/:filename",
@@ -103,14 +93,9 @@ productRoute.get(
 			}
 
 			if (product.locked) {
-				const token = extractBearerToken(c);
-				if (!token) {
+				const user = await getAuthenticatedUser(c);
+				if (!user) {
 					return c.json({ success: false, error: "Authentication required" }, 401);
-				}
-
-				const isValid = await verifyToken(token, c.env.AUTH_SECRET);
-				if (!isValid) {
-					return c.json({ success: false, error: "Invalid token" }, 401);
 				}
 			}
 
@@ -331,7 +316,7 @@ productRoute.get("/files/:productId", createValidator(productIdSchema), async (c
 		const bucketItems = [];
 		if (objects) {
 			bucketItems.push(
-				...objects.objects.map((obj) => {
+				...objects.objects.map((obj: BucketObject) => {
 					const prefix = `products/${productId}/files/`;
 					const filename = obj.key.replace(prefix, "");
 					return {
