@@ -17,6 +17,7 @@ export function ActivateForm() {
 		success: "",
 		email: "",
 	});
+
 	return (
 		<Form action={formAction} className="text-left space-y-4">
 			<div>
@@ -38,7 +39,7 @@ export function ActivateForm() {
 					type="text"
 					autoComplete="licenseKey"
 					className="font-mono mt-1"
-					defaultValue={token || ""}
+					value={token || ""}
 				/>
 			</div>
 
