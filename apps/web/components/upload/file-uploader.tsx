@@ -97,6 +97,14 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
 	 * @example disabled
 	 */
 	scrollableArea?: boolean;
+
+	/**
+	 * Custom name for the input element.
+	 * @type string
+	 * @default "images"
+	 * @example name="attachment"
+	 */
+	name?: string;
 }
 
 export function FileUploader(props: FileUploaderProps) {
@@ -111,6 +119,7 @@ export function FileUploader(props: FileUploaderProps) {
 		multiple = false,
 		disabled = false,
 		scrollableArea = false,
+		name = "images",
 		className,
 		...dropzoneProps
 	} = props;
@@ -218,7 +227,7 @@ export function FileUploader(props: FileUploaderProps) {
 						)}
 						{...dropzoneProps}
 					>
-						<input name="images" {...getInputProps()} />
+						<input name={name} {...getInputProps()} />
 						{isDragActive ? (
 							<div className="flex flex-col items-center justify-center gap-4 sm:px-5">
 								<div className="rounded-full border border-dashed p-3">

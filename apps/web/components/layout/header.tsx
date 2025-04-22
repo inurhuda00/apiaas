@@ -28,7 +28,7 @@ export function Header() {
 		{ href: "/3dx", label: "3DX" },
 		{ href: "/joydoodle", label: "Joydoodle" },
 		{ href: "/3dx", label: "Affiliate", badge: "40%" },
-		{ href: "/3dx", label: "Request" },
+		{ href: "/request", label: "Request" },
 		{ href: "/3dx", label: "Changelog" },
 	];
 
@@ -68,7 +68,7 @@ export function Header() {
 									40%
 								</Badge>
 							</Link>
-							<Link href="/3dx" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
+							<Link href="/request" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
 								Request
 							</Link>
 							<Link href="/3dx" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
