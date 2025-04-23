@@ -20,7 +20,7 @@ import {
 	updateUserAccount,
 } from "@/lib/db/queries/user";
 
-export const signIn = validatedAction(signInSchema, async (data, _) => {
+export const signIn = validatedAction(signInSchema, async (data, _formData) => {
 	const { email, password } = data;
 
 	const loggedUser = await getUserByEmail(email);
@@ -48,7 +48,7 @@ export const signIn = validatedAction(signInSchema, async (data, _) => {
 	redirect("/overview");
 });
 
-export const signUp = validatedAction(signUpSchema, async (data, formData) => {
+export const signUp = validatedAction(signUpSchema, async (data, _formData) => {
 	const { email, password, licenseKey } = data;
 
 	const existingUser = await getUserByEmail(email);
@@ -78,7 +78,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 	}
 });
 
-export const forgotPassword = validatedAction(forgotPasswordSchema, async (data, formData) => {
+export const forgotPassword = validatedAction(forgotPasswordSchema, async (data, _formData) => {
 	const { email } = data;
 
 	const loggedUser = await getUserByEmail(email);
@@ -96,12 +96,12 @@ export const forgotPassword = validatedAction(forgotPasswordSchema, async (data,
 	};
 });
 
-export const signOut = validatedActionWithUser(signOutSchema, async () => {
+export const signOut = validatedActionWithUser(signOutSchema, async (_data, _formData, _user) => {
 	await deleteSession();
 	redirect("/");
 });
 
-export const updatePassword = validatedActionWithUser(updatePasswordSchema, async (data, _, { email }) => {
+export const updatePassword = validatedActionWithUser(updatePasswordSchema, async (data, _formData, { email }) => {
 	const { currentPassword, newPassword } = data;
 
 	const user = await getUserByEmail(email);
@@ -128,7 +128,7 @@ export const updatePassword = validatedActionWithUser(updatePasswordSchema, asyn
 	return { success: "Password updated successfully." };
 });
 
-export const deleteAccount = validatedActionWithUser(deleteAccountSchema, async (data, _, { email }) => {
+export const deleteAccount = validatedActionWithUser(deleteAccountSchema, async (data, _formData, { email }) => {
 	const { password } = data;
 
 	const user = await getUserByEmail(email);
@@ -147,7 +147,7 @@ export const deleteAccount = validatedActionWithUser(deleteAccountSchema, async 
 	redirect("/sign-in");
 });
 
-export const updateAccount = validatedActionWithUser(updateAccountSchema, async (data, _, user) => {
+export const updateAccount = validatedActionWithUser(updateAccountSchema, async (data, _formData, user) => {
 	const { name } = data;
 	await updateUserAccount(user.id, { name });
 	return { success: "Account updated successfully." };

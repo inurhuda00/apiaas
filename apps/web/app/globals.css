@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @plugin 'tailwindcss-animate';
+@plugin "@tailwindcss/typography";
 
 @variant dark (&:is(.dark *));
 

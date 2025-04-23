@@ -39,7 +39,7 @@ export function ActivateForm() {
 					type="text"
 					autoComplete="licenseKey"
 					className="font-mono mt-1"
-					value={token || ""}
+					defaultValue={token || ""}
 				/>
 			</div>
 

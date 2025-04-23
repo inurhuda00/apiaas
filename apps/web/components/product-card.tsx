@@ -15,7 +15,7 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
 	const thumbnail = product.images.length > 0 ? [...product.images].sort((a, b) => a.sort - b.sort)[0] : null;
 
 	return (
-		<Link href={`${product.category.slug}/${product.slug}`}>
+		<Link href={`/${product.category.slug}/${product.slug}`}>
 			<Card className="group relative overflow-hidden bg-gray-900 border-0 rounded-lg aspect-[1.7867/1] transition-transform hover:-translate-y-1">
 				<div className="absolute inset-0">
 					<div className="relative h-full w-full">

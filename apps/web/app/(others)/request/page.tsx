@@ -8,14 +8,18 @@ export const metadata = {
 
 export default function RequestPage() {
 	return (
-		<div className="py-12 md:py-16">
+		<div className="py-8 sm:py-10 md:py-12 lg:py-16">
 			<MaxWidthWrapper>
-				<div className="max-w-3xl mx-auto">
-					<div className="mb-8 space-y-2">
-						<h1 className="text-3xl md:text-4xl font-bold">You request new assets & themes, we deliver.</h1>
-						<p className="text-muted-foreground text-lg">Fill out the form below to request new assets or themes.</p>
+				<div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
+					<div className="mb-4 sm:mb-6 md:mb-8 space-y-2 sm:space-y-3 col-span-full md:col-span-5 lg:col-span-5">
+						<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">You request new assets & themes, we deliver.</h1>
+						<p className="text-muted-foreground text-base sm:text-lg">
+							Fill out the form to request custom backgrounds or themes for your content.
+						</p>
 					</div>
-					<RequestForm />
+					<div className="col-span-full md:col-span-7 lg:col-span-7">
+						<RequestForm />
+					</div>
 				</div>
 			</MaxWidthWrapper>
 		</div>

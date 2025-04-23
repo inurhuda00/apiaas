@@ -6,7 +6,7 @@ export default function NotFound() {
 		<div className="flex items-center justify-center min-h-[100dvh]">
 			<div className="max-w-md space-y-8 p-4 text-center">
 				<Link href="/" className="flex items-center gap-1">
-					<Icons.LogoIcon className="h-8 w-8 text-primary" />
+					<Icons.LogoIcon className="h-8 w-8 -mr-3 text-primary" />
 					<span className="font-bold text-lg text-foreground">Mondive</span>
 				</Link>
 				<h1 className="text-4xl font-bold text-gray-900 tracking-tight">Page Not Found</h1>
