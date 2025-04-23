@@ -10,6 +10,7 @@ import authRoute from "./routes/auth";
 import productRoute from "./routes/product";
 import { searchRoute } from "./routes/search";
 import { rateLimiter } from "hono-rate-limiter";
+import testRoute from "./routes/test";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -20,6 +21,7 @@ app.use(
 	"*",
 	cors({
 		origin: [
+			"http://127.0.0.1:5500",
 			"http://localhost:8787",
 			"http://localhost:3000",
 			"https://mondive.xyz",
@@ -49,6 +51,7 @@ app.route("v1/image", imageRoute);
 app.route("v1/auth", authRoute);
 app.route("v1/product", productRoute);
 app.route("v1/search", searchRoute);
+app.route("/test", testRoute);
 
 app.get("/up", (c) => {
 	return c.json({ status: "ok" });

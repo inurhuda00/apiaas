@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Watermark Tester</title>
+  <!-- Include Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <div class="container max-w-3xl mx-auto px-4 py-8">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Image Watermark Tester</h1>
+      <p class="text-gray-600">Upload an image to add a watermark</p>
+    </header>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <form id="uploadForm" class="space-y-4">
+        <div class="space-y-2">
+          <label for="imageInput" class="block text-sm font-medium text-gray-700">
+            Select Image
+          </label>
+          <input type="file" id="imageInput" name="image" accept="image/*" required class="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100 cursor-pointer" />
+        </div>
+
+        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Apply Watermark
+        </button>
+      </form>
+    </div>
+
+    <!-- Original Image Preview -->
+    <div id="originalPreview" class="hidden bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Original Image</h2>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <img id="originalImg" src="" alt="Original" class="w-full h-auto" />
+      </div>
+    </div>
+
+    <!-- Processing State -->
+    <div id="processingState" class="hidden bg-blue-50 rounded-lg p-6 mb-8 text-center">
+      <div class="animate-pulse flex flex-col items-center">
+        <div class="h-12 w-12 rounded-full bg-blue-200 mb-4"></div>
+        <p class="text-blue-700 font-medium">Processing your image...</p>
+        <p class="text-blue-500 text-sm mt-2">This may take a few moments</p>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="hidden bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Watermarked Image</h2>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <img id="resultImg" src="" alt="Watermarked" class="w-full h-auto" />
+      </div>
+      <div class="mt-4 flex justify-end">
+        <a id="downloadLink" href="#" download="watermarked.svg" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+          Download Watermarked Image
+        </a>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="hidden bg-red-50 text-red-700 p-4 rounded-lg mt-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium">Error</h3>
+          <div id="errorText" class="mt-2 text-sm"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const originalImg = document.getElementById('originalImg');
+    const originalPreview = document.getElementById('originalPreview');
+    const processingState = document.getElementById('processingState');
+    const result = document.getElementById('result');
+    const resultImg = document.getElementById('resultImg');
+    const downloadLink = document.getElementById('downloadLink');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+
+    // Preview the selected image
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          originalImg.src = e.target.result;
+          originalPreview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Handle form submission
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Hide previous results and show processing state
+      result.classList.add('hidden');
+      errorMessage.classList.add('hidden');
+      processingState.classList.remove('hidden');
+
+      const form = e.target;
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('http://127.0.0.1:8787/test/watermark', {
+          method: 'POST',
+          body: formData
+        });
+
+        // Hide processing state
+        processingState.classList.add('hidden');
+
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        const blob = await response.blob();
+        const imgUrl = URL.createObjectURL(blob);
+
+        // Get original filename from the input
+        const filename = imageInput.files[0].name;
+        const extension = contentType.includes('svg') ? 'svg' :
+          contentType.includes('jpeg') ? 'jpg' :
+          contentType.includes('png') ? 'png' : 'image';
+
+        // Show result image
+        resultImg.src = imgUrl;
+        downloadLink.href = imgUrl;
+        downloadLink.setAttribute('download', `watermarked-${filename}.${extension}`);
+        result.classList.remove('hidden');
+      } catch (error) {
+        // Show error message
+        errorText.textContent = error.message;
+        errorMessage.classList.remove('hidden');
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+
+</html>
