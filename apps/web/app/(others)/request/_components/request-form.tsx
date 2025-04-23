@@ -9,6 +9,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Icons } from "@/components/ui/icons";
 import { submitAssetRequest } from "@/actions/request";
 import { DynamicFileUploader } from "@/components/lazy-components";
+import Form from "next/form";
 
 type ActionState = {
 	error?: string;
@@ -49,7 +50,7 @@ export function RequestForm() {
 	return (
 		<Card className="border-border bg-background">
 			<CardContent className="pt-6 px-6 pb-8">
-				<form className="space-y-5" action={formAction}>
+				<Form className="space-y-4" action={formAction}>
 					<div>
 						<Label htmlFor="email" className="mb-1.5 block">
 							Your Email <span className="text-destructive">*</span>
@@ -99,7 +100,7 @@ export function RequestForm() {
 							and when completed it will be available only to plus users.
 						</p>
 					</div>
-				</form>
+				</Form>
 			</CardContent>
 		</Card>
 	);
